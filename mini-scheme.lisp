@@ -38,8 +38,16 @@
         (gethash op table)))))
 
 ;----------------------------------------------------------------
+(define-condition scheme-parse-error (error)
+  ((expr :initarg :expr :reader expr) 
+   (env :initarg :env :reader env))
+  (:report (lambda (condition stream)
+             (progn
+               (format *error-output* 
+                       "Error !!:<~s>~%" (expr condition))))))
+
 (defun error-exit (expr env)
-  (format *error-output* "error:~s~%" expr))
+   (error 'scheme-parse-error :expr expr :env env))
 
 ;----------------------------------------------------------------
 ; primitive

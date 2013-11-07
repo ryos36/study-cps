@@ -7,15 +7,16 @@
          (env ,env))
      ,@body))
 
-(defun +-two (expr env) (+ 
-                          (parse-mini-scheme (cadr expr) env)
-                          (parse-mini-scheme (caddr expr) env)))
 
 #|
 (defun --two (expr env) (- 
                           (parse-mini-scheme (cadr expr) env)
                           (parse-mini-scheme (caddr expr) env)))
 |#
+
+(defun +-two (expr env)
+  (primitive-2 expr env 
+               (+ arg0 arg1)))
 
 (defun --two (expr env)
   (primitive-2 expr env 
