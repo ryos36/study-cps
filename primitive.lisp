@@ -56,19 +56,18 @@
   (primitive-2 expr env
                (if (= arg0 arg1) :#t :#f)))
 
-; heap-record is '(:heap 1 2 3 ... )
+; heap-record is '(1 2 3 ... )
 (defun heap (expr env)
-  (copy-list expr))
+  (copy-list (cdr expr)))
 
 (defun record-ref (expr env)
-  (let ((heap-record (cadr expr))
-        (pos (caddr expr)))
-    (incf pos)
+  (let ((heap-record (parse-mini-scheme (cadr expr) env))
+        (pos (parse-mini-scheme (caddr expr) env)))
     (nth pos heap-record)))
 
 (defun record-set! (expr env)
-  (let ((heap-record (cadr expr))
-        (pos (caddr expr))
-        (value (caddr expr)))
-    (incf pos)
-    (setf (nth pos heap-record) value)))
+  (let ((heap-record (parse-mini-scheme (cadr expr) env))
+        (pos (parse-mini-scheme (caddr expr) env))
+        (value (parse-mini-scheme (cadddr expr) env)))
+    (setf (nth pos heap-record) value)
+    heap-record))

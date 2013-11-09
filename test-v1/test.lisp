@@ -1,5 +1,6 @@
 (load "../mini-scheme.lisp")
 (setf test-files '( "test0" "test1"))
+(setf test-files '( "test0" "test1" "test2"))
 
 (defun read-file (name)
   (if (probe-file name)
@@ -32,19 +33,19 @@
                   (format str "~a:~a~%" i 
                           (parse-mini-scheme i *env*)))))
 
-
         #|
         (if result-txt 
          (setf result-txt (string-right-trim trim-string result-txt)))
         (setf result (string-right-trim trim-string result))
-        (setf result (string-concat result (string #\return)))
-        (do ((i 1 (incf i))) ((= 26 i))
+        (setf result (string-concat result (string #\Newline)))
+        (do ((i 1 (incf i))) ((= (min (length result) (length result-txt)) i))
               (let ((s0 (substring result i (+ i 1)))
                     (s1 (substring result-txt i (+ i 1))))
                 (format t "<~a:~s:~s:~a>~%" i
                         (char s0 0)
                         (char s1 0)
                         (string= s0 s1))))
+        (format t "Length ~a:~a~s~%" (length result) (length result-txt) result-txt)
         |#
 
         (if result-txt
@@ -56,7 +57,11 @@
           (progn
             (with-open-file (out result-file :if-does-not-exist :create :direction :output)
               (format out "~a" result))
-            (format t "~a:Saved~%" name)))
+
+            (format t "~a:Saved~%" name)
+            (format t  "--------------Result:-----------~%")
+            (format t "~a~%" result)
+            (format t  "--------------------------------~%")))
         ))
   test-files)
 

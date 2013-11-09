@@ -9,21 +9,23 @@
 
 ;----------------------------------------------------------------
 (defun lookup-symbol (key env)
-  (if (null env) nil
+  (if (null env) :not-found
     (let ((table (cdr env)))
       (if (null table)
         (lookup-symbol key (car env))
-        (let ((result (gethash key table)))
-          (if (null result)
+        (multiple-value-bind
+          (result exist) (gethash key table)
+          (if (null exist)
             (lookup-symbol key (car env))
             result))))))
 
 (defun parse-expr-terminal (expr env)
   (if (symbolp expr)
-      (let ((result (lookup-symbol expr env)))
-                   (if (null result) (cps-error-exit expr env)
-                     result))
-      expr))
+    (let ((result (lookup-symbol expr env))) 
+      (if (eq result :not-found)
+        (cps-error-exit expr env)
+        result))
+    expr))
 
 (defun make-new-env (env)
   (cons env (make-hash-table)))
@@ -33,7 +35,8 @@
     (setf (gethash key table) value)))
 ;----------------------------------------------------------------
 ; primitive
-;(load "cps-primitive.lisp")
+(load "cps-primitive.lisp")
+#|
 (defmacro cps-two (expr env &rest body)
   `(let ((args (cadr ,expr))
          (rv (caaddr ,expr))
@@ -58,6 +61,7 @@
 
 (defun cps-- (expr env)
   (cps-two expr env (- arg0 arg1)))
+|#
 
 (defun cps-record-ref (expr)
   )
@@ -67,7 +71,6 @@
   (let ((htable (make-hash-table))
         (primitives `((:+  . ,#'cps-+)
                       (:-  . ,#'cps--)
-                      #|
                       (:>> . ,#'cps->>)
                       (:<< . ,#'cps-<<)
                       (:<  . ,#'cps-<)
@@ -75,6 +78,7 @@
                       (:>= . ,#'cps->=)
                       (:<= . ,#'cps-<=)
                       (:=  . ,#'cps-=)
+                      #|
                       (:heap . ,#'cps-heap)
                       (:stack . ,#'cps-stack)
                       (:pop . ,#'cps-pop)
@@ -102,7 +106,7 @@
   (:report (lambda (condition stream)
              (progn
                (format *error-output* 
-                       "CPS Error !!:<~s>~%" (expr condition))))))
+                       "CPS Error !!:~s~%" (expr condition))))))
 
 (defun cps-error-exit (expr env)
    (error 'cps-parse-error :expr expr :env env))
@@ -146,10 +150,10 @@
   result))
         
 ;----------------------------------------------------------------
-(defparameter *debug-mode* nil)
+(defparameter *debug-mode* t)
 
 ;----------------------------------------------------------------
-(defun parse-cps (expr env &optional)
+(defun parse-cps (expr env)
   (if *debug-mode*
     (format t "expr:~s~%" expr))
 
