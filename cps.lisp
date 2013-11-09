@@ -37,7 +37,6 @@
 ; primitive
 (load "cps-primitive.lisp")
 
-
 ;----------------------------------------------------------------
 (defun make-init-primitive-table ()
   (let ((htable (make-hash-table))
@@ -51,12 +50,10 @@
                       (:<= . ,#'cps-<=)
                       (:=  . ,#'cps-=)
                       (:heap . ,#'cps-heap)
-                      #|
-                      (:stack . ,#'cps-stack)
-                      (:pop . ,#'cps-pop)
                       (:record-set! . ,#'cps-record-set!)
-                      |#
-                      (:record-ref . ,#'cps-record-ref))))
+                      (:record-ref . ,#'cps-record-ref)
+                      (:stack . ,#'cps-stack)
+                      (:pop . ,#'cps-pop))))
 
       (dolist (src-i (list primitives))
         (mapcar #'(lambda (pair)
@@ -123,6 +120,7 @@
         
 ;----------------------------------------------------------------
 (defparameter *debug-mode* t)
+(defparameter *cps-stack* nil)
 
 ;----------------------------------------------------------------
 (defun parse-cps (expr env)

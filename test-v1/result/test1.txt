@@ -1,2 +1,2 @@
-(DEFINE (F A B) (+-TWO A B)):((A B) (+-TWO A B))
+(DEFINE (F A B) (+ A B)):((A B) (+ A B))
 (F 3 5):8

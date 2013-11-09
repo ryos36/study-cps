@@ -1,3 +1,3 @@
-((:define (f a b) (:+-two a b))
+((:define (f a b) (:+ a b))
  (f 3 5))
  
