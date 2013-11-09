@@ -8,25 +8,46 @@
       (numberp expr)))
 
 ;----------------------------------------------------------------
-(defparameter *cps-symbol* (make-hash-table))
+(defun lookup-symbol (key env)
+  (if (null env) nil
+    (let ((table (cdr env)))
+      (if (null table)
+        (lookup-symbol key (car env))
+        (let ((result (gethash key table)))
+          (if (null result)
+            (lookup-symbol key (car env))
+            result))))))
 
-(defun lookup-symbol (key)
-  (gethash table-key *cps-symbol*))
-
-(defun parse-expr-terminal (expr)
+(defun parse-expr-terminal (expr env)
   (if (symbolp expr)
-    (lookup-symbol expr)
-    expr))
+      (let ((result (lookup-symbol expr env)))
+                   (if (null result) (cps-error-exit expr env)
+                     result))
+      (progn
+        (format t "parse-expr-terminal ~a~%" expr)
+      expr)))
 
+(defun make-new-env (env)
+  (cons env (make-hash-table)))
+
+(defun set-key-value (key value env)
+  (let ((table (cdr env)))
+    (setf (gethash key table) value)))
 ;----------------------------------------------------------------
 ; primitive
 ;(load "cps-primitive.lisp")
-(defun cps-+ (expr)
-  (let ((ops (cadr expr))
-        (ids (caddr expr))
+(defun cps-+ (expr env)
+  (let ((args (cadr expr))
+        (rv (caddr expr))
         (next-expr (cadddr expr)))
 
-  ))
+    (format t "~a~%" args)
+
+    (let ((arg0 (parse-expr-terminal (car args) env))
+          (arg1 (parse-expr-terminal (cadr args) env))
+          (new-env (make-new-env env)))
+      (set-key-value rv (+ arg0 arg1) new-env)
+      (parse-cps next-expr new-env))))
 
 (defun cps-record-ref (expr)
   )
@@ -61,43 +82,79 @@
 
 (defparameter *primitive-table* (make-init-primitive-table))
 
-(defun lookup-primitive (op table-key)
-  (gethash table-key *primitive-table*))
+(defun lookup-primitive (op)
+  (gethash op *primitive-table*))
 
 ;----------------------------------------------------------------
 (define-condition cps-parse-error (error)
-  ((expr :initarg :expr :reader expr) )
+  ((expr :initarg :expr :reader expr) 
+   (env :initarg :env :reader env))
   (:report (lambda (condition stream)
              (progn
                (format *error-output* 
-                       "Error !!:<~s>~%" (expr condition))))))
+                       "CPS Error !!:<~s>~%" (expr condition))))))
 
-(defun error-exit (expr)
-   (error 'cps-parse-error :expr expr))
-
-
-;----------------------------------------------------------------
-(defun cps-fix (expr)
-  )
+(defun cps-error-exit (expr env)
+   (error 'cps-parse-error :expr expr :env env))
 
 ;----------------------------------------------------------------
-(defun cps-app (expr)
-  )
+(defun make-env ()
+  (let* ((env (make-new-env nil))
+         (table (cdr env)))
+    (setf (gethash :exit table) '(:exit))
+    env))
+
+;----------------------------------------------------------------
+(defun cps-fix (expr env)
+  (let ((bind-func-body (cadr expr))
+        (next-expr (caddr expr))
+        (new-env (make-new-env env)))
+    (let ((func-name (car bind-func-body)))
+      (set-key-value func-name bind-func-body new-env)
+      (format t "cps-fix:~a = ~a~%" func-name bind-func-body)
+      (format t "   next-expr:~a~%" next-expr)
+      (format t "   my-func:~a~%" (lookup-symbol func-name new-env))
+      (format t "   FIX my-func:~a~%" (lookup-symbol 'f new-env))
+      (parse-cps next-expr new-env))))
+
+;----------------------------------------------------------------
+(defun cps-app (expr env)
+  (format t "   APP my-func:~a~%" (lookup-symbol 'f env))
+  (let ((func-name (cadr expr))
+        (args (caddr expr))
+        (new-env (make-new-env env)))
+    (let* ((bind-func-body (lookup-symbol func-name env))
+           (arg-syms (cadr bind-func-body))
+           (next-expr (caddr bind-func-body)))
+      (map nil #'(lambda (key arg) 
+                   (format t "set-key-value ~a ~a ~a~%" key arg
+                           (parse-expr-terminal arg env)
+                           )
+                   (let ((value (parse-expr-terminal arg env)))
+                     (set-key-value key value new-env))) 
+           arg-syms args)
+      (format t "new-env ~a a:~a b:~a~%"
+              arg-syms
+              (lookup-symbol 'a new-env)
+              (lookup-symbol 'b new-env))
+
+      (parse-cps next-expr new-env))))
+
 
 ;----------------------------------------------------------------
 (defparameter *debug-mode* nil)
 
 ;----------------------------------------------------------------
-(defun parse-cps (expr &optional (debug-mode *debug-mode*))
-  (if debug-mode
+(defun parse-cps (expr env &optional)
+  (if *debug-mode*
     (format t "expr:~s~%" expr))
 
-  (if (terminal-p expr)
-    (parse-expr-terminal expr)
-    (let ((op (car expr)))
-      (case op
-        (:fix (cps-fix expr))
-        (:app (cps-app expr))
-        (otherwise (let ((primitive-cps (lookup-primitive op)))
-                     (funcall primitive-cps expr)))))))
+  (let ((op (car expr)))
+    (case op
+      (:fix (cps-fix expr env))
+      (:app (cps-app expr env))
+      (:exit t)
+      (otherwise (let ((primitive-cps (lookup-primitive op)))
+                   ;(format t "primitive-cps:~a ~s~%" op primitive-cps)
+                   (funcall primitive-cps expr env))))))
 
