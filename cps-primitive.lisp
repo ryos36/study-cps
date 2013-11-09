@@ -98,7 +98,19 @@
         (next-expr (cadddr expr)))
 
     (let ((new-env (make-new-env env)))
-
+      (set-key-value rv 
+                     (mapcar #'(lambda (x) (parse-expr-terminal x env)) args))
+      (push :delimitor *cps-stack*)
+      (setf *cps-stack* (nconc rv *cps-stack*))
       (parse-cps next-expr new-env))))
 
-(defun cps-pop (expr env))
+(defun cps-pop (expr env)
+  (let ((pop-n (caadr expr))
+        (next-expr (cadddr expr)))
+    (if (null *cps-stack)
+      (cps-error-exit expr env))
+    (let ((new-stack (nthcdr pop-n *cps-stack*)))
+      (if (not (eq :delimitor (pop new-stack)))
+        (cps-error-exit expr env)))
+    (parse-cps next-expr env)))
+  
