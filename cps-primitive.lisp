@@ -62,3 +62,29 @@
 
 (defun cps-= (expr env)
   (cps-primitive2 expr env (= arg0 arg1)))
+
+(defun cps-heap (expr env)
+  (let ((args (cadr expr))
+        (rv (caaddr expr))
+        (next-expr (cadddr expr)))
+
+    (let ((new-env (make-new-env env)))
+      (set-key-value rv 
+                     (mapcar #'(lambda (x) (parse-expr-terminal x env)) args)
+                     new-env)
+      (parse-cps next-expr new-env))))
+
+(defun cps-record-set (expr env)
+  (let ((args (cadr expr))
+        (rv (caaddr expr))
+        (next-expr (cadddr expr)))
+
+    (let ((pos (parse-expr-terminal (car args) env))
+          (list (parse-expr-terminal (cadr args) env))
+          (value (parse-expr-terminal (caddr args) env)))
+
+      (setf (nth pos list) value)
+      (parse-cps next-expr env))))
+
+(defun cps-record-ref (expr env)
+  (cps-primitive2 expr env (nth arg0 arg1)))

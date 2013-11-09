@@ -58,7 +58,7 @@
 
 ; heap-record is '(1 2 3 ... )
 (defun heap (expr env)
-  (copy-list (cdr expr)))
+  (mapcar #'(lambda (x) (parse-mini-scheme x env)) (cdr expr)))
 
 (defun record-ref (expr env)
   (let ((heap-record (parse-mini-scheme (cadr expr) env))

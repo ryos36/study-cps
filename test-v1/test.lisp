@@ -1,6 +1,6 @@
 (load "../mini-scheme.lisp")
 (setf test-files '( "test0" "test1"))
-(setf test-files '( "test0" "test1" "test2"))
+(setf test-files '( "test0" "test1" "test2" "test3"))
 
 (defun read-file (name)
   (if (probe-file name)

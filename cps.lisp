@@ -36,35 +36,7 @@
 ;----------------------------------------------------------------
 ; primitive
 (load "cps-primitive.lisp")
-#|
-(defmacro cps-two (expr env &rest body)
-  `(let ((args (cadr ,expr))
-         (rv (caaddr ,expr))
-         (next-expr (cadddr ,expr)))
 
-     (let ((arg0 (parse-expr-terminal (car args) ,env))
-           (arg1 (parse-expr-terminal (cadr args) ,env))
-           (new-env (make-new-env ,env)))
-       (set-key-value rv ,@body new-env)
-       (parse-cps next-expr new-env))))
-
-(defun cps-+ (expr env)
-  (let ((args (cadr expr))
-        (rv (caaddr expr))
-        (next-expr (cadddr expr)))
-
-    (let ((arg0 (parse-expr-terminal (car args) env))
-          (arg1 (parse-expr-terminal (cadr args) env))
-          (new-env (make-new-env env)))
-      (set-key-value rv (+ arg0 arg1) new-env)
-      (parse-cps next-expr new-env))))
-
-(defun cps-- (expr env)
-  (cps-two expr env (- arg0 arg1)))
-|#
-
-(defun cps-record-ref (expr)
-  )
 
 ;----------------------------------------------------------------
 (defun make-init-primitive-table ()
@@ -78,8 +50,8 @@
                       (:>= . ,#'cps->=)
                       (:<= . ,#'cps-<=)
                       (:=  . ,#'cps-=)
-                      #|
                       (:heap . ,#'cps-heap)
+                      #|
                       (:stack . ,#'cps-stack)
                       (:pop . ,#'cps-pop)
                       (:record-set! . ,#'cps-record-set!)
