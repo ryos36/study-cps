@@ -89,6 +89,9 @@
             (htable (cdr env))
             value)
 
+        (if (not (= (length args) (length values)))
+          (lisp-error-exit expr env))
+
         (map nil #'(lambda (arg value)
                      (if (not (symbolp arg))
                        (lisp-error-exit expr env))

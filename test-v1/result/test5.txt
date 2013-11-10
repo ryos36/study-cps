@@ -1,8 +1,8 @@
-Ç«Ç§Ç»ÇÒÇ≈ÇµÇÂÇ§ÅH
+(DEFINE V0 5963):5963
 (DEFINE F
  (LET ((V0 129))
   (DEFINE (F0 A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
-  F0)):NIL
-(F #F):NIL
-(DEFINE G (F #T)):NIL
-(LET ((V0 1103)) (G)):NIL
+  F0)):((A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
+(F #F):6063
+(DEFINE G (F #T)):((X) (+ V0 11))
+(LET ((V0 1103)) (G 55)):1114

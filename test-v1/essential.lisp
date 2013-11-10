@@ -21,9 +21,12 @@
         (if (not (symbolp sym))
           (lisp-error-exit sym env))
         (setf (gethash sym htable) (parse-mini-lisp value-expr env))))
-    (let ((new-env (list env htable)))
+    (let ((new-env (list env htable))
+          result)
       (dolist (body-expr body-expr-list)
-        (parse-mini-lisp body-expr new-env)))))
+        (setf result
+              (parse-mini-lisp body-expr new-env)))
+      result)))
 
 (defun lisp-fix (expr env)
   (let ((fbinds (cadr expr))
