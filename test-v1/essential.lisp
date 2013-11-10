@@ -19,7 +19,7 @@
       (let ((sym (car arg-pair))
             (value-expr (cadr arg-pair)))
         (if (not (symbolp sym))
-          (error-exit sym env))
+          (lisp-error-exit sym env))
         (setf (gethash sym htable) (parse-mini-lisp value-expr env))))
     (let ((new-env (list env htable)))
       (dolist (body-expr body-expr-list)
@@ -33,7 +33,7 @@
       (let ((sym (car func-pair))
             (fix-expr (copy-tree (cdr func-pair))))
         (if (not (symbolp sym))
-          (error-exit sym env))
+          (lisp-error-exit sym env))
         (setf (gethash sym htable) fix-expr)))
     (let ((new-env (list env htable)))
       (parse-mini-lisp body-expr new-env))))
@@ -49,7 +49,7 @@
             (func-body-expr (cddr expr)))
 
         (if (not (symbolp func-name))
-          (error-exit func-name env))
+          (lisp-error-exit func-name env))
 
         (setf (gethash func-name table) 
               (cons (copy-tree func-args) (copy-tree func-body-expr))))
@@ -60,7 +60,7 @@
          (value-expr (caddr expr)))
 
         (if (not (symbolp sym))
-          (error-exit sym env))
+          (lisp-error-exit sym env))
 
         (let ((value (parse-mini-lisp value-expr env)))
           (setf (gethash sym table) value)

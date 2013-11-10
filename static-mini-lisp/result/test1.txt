@@ -1,0 +1,2 @@
+(DEFINE (F A B) (+ A B)):NIL
+(F 3 5):8
