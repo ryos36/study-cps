@@ -1,5 +1,5 @@
 (load "mini-lisp.lisp")
-(setf test-files '( "test0" "test1" "test2" "test3" "test4"))
+(setf test-files '( "test0" "test1" "test2" "test3" "test4" "test5"))
 
 (defun read-file (name)
   (if (probe-file name)
