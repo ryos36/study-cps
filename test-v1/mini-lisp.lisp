@@ -27,9 +27,10 @@
     (case expr
       (:#t :#t)   ; simulate scheme style #t
       (:#f :#f) ; simulate scheme style #f
-      (otherwise (let ((result (parse-mini-lisp (lookup-symbol expr env))))
-                   (if (eq result :not-found) (lisp-error-exit expr env)
-                     result))))
+      (otherwise (let ((result (lookup-symbol expr env)))
+                   (if (symbolp result) (parse-expr-terminal result env)
+                     (if (eq result :not-found) (lisp-error-exit expr env)
+                       result)))))
     expr))
 
 ;----------------------------------------------------------------

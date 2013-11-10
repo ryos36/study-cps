@@ -1,6 +1,6 @@
 (DEFINE X 3):3
 X:3
-(DEFINE (F A B) (- (+ A B) X)):((A B) (- (+ A B) X))
+(DEFINE (F A B) (- (+ A B) X)):NIL
 (F 4 5):6
-(DEFINE (G X Y) (+ X (F X Y))):((X Y) (+ X (F X Y)))
-(G 7 8):15
+(DEFINE (G X Y) (+ X (F X Y))):NIL
+(G 7 8):19
