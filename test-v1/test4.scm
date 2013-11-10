@@ -1,3 +1,6 @@
+;
+; Dynamic Scope Test
+;
 ((:define x 3)
  x
  (:define (f a b) (:- (:+ a b) x))

@@ -1,4 +1,4 @@
-(load "../mini-scheme.lisp")
+(load "../mini-lisp.lisp")
 (setf test-files '( "test0" "test1"))
 (setf test-files '( "test0" "test1" "test2" "test3" "test4"))
 
@@ -16,22 +16,22 @@
   #'(lambda (name)
       (let 
         ((scm-file (string-concat name ".scm"))
-         scheme-test-list
+         lisp-test-list
          result
          (result-file (string-concat "result/" name ".txt"))
          result-txt
          )
 
-        (setf scheme-test-list
+        (setf lisp-test-list
               (with-open-file (in scm-file)
                 (read in)))
         (setf result-txt (read-file result-file))
 
         (setf result
               (with-output-to-string (str)
-                (dolist (i scheme-test-list)
+                (dolist (i lisp-test-list)
                   (format str "~a:~a~%" i 
-                          (parse-mini-scheme i *env*)))))
+                          (parse-mini-lisp i *env*)))))
 
         #|
         (if result-txt 

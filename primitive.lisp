@@ -2,16 +2,16 @@
 ; primitive
 
 (defmacro primitive-2 (expr env &rest body)
-  `(let ((arg0 (parse-mini-scheme (cadr ,expr) ,env))
-         (arg1 (parse-mini-scheme (caddr ,expr) ,env))
+  `(let ((arg0 (parse-mini-lisp (cadr ,expr) ,env))
+         (arg1 (parse-mini-lisp (caddr ,expr) ,env))
          (env ,env))
      ,@body))
 
 
 #|
 (defun --two (expr env) (- 
-                          (parse-mini-scheme (cadr expr) env)
-                          (parse-mini-scheme (caddr expr) env)))
+                          (parse-mini-lisp (cadr expr) env)
+                          (parse-mini-lisp (caddr expr) env)))
 |#
 
 (defun +-two (expr env)
@@ -58,16 +58,16 @@
 
 ; heap-record is '(1 2 3 ... )
 (defun heap (expr env)
-  (mapcar #'(lambda (x) (parse-mini-scheme x env)) (cdr expr)))
+  (mapcar #'(lambda (x) (parse-mini-lisp x env)) (cdr expr)))
 
 (defun record-ref (expr env)
-  (let ((heap-record (parse-mini-scheme (cadr expr) env))
-        (pos (parse-mini-scheme (caddr expr) env)))
+  (let ((heap-record (parse-mini-lisp (cadr expr) env))
+        (pos (parse-mini-lisp (caddr expr) env)))
     (nth pos heap-record)))
 
 (defun record-set! (expr env)
-  (let ((heap-record (parse-mini-scheme (cadr expr) env))
-        (pos (parse-mini-scheme (caddr expr) env))
-        (value (parse-mini-scheme (cadddr expr) env)))
+  (let ((heap-record (parse-mini-lisp (cadr expr) env))
+        (pos (parse-mini-lisp (caddr expr) env))
+        (value (parse-mini-lisp (cadddr expr) env)))
     (setf (nth pos heap-record) value)
     heap-record))

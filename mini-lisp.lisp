@@ -1,6 +1,6 @@
 ;----------------------------------------------------------------
 (defun l ()
-  (load "mini-scheme.lisp"))
+  (load "mini-lisp.lisp"))
 
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
@@ -25,10 +25,10 @@
 (defun parse-expr-terminal (expr env)
   (if (symbolp expr)
     (case expr
-      (:#t :#t)   ; simulate scheme #t
-      (:#f :#f) ; simulate scheme #f
+      (:#t :#t)   ; simulate scheme style #t
+      (:#f :#f) ; simulate scheme style #f
       (otherwise (let ((result (lookup-symbol expr env)))
-                   (if (eq result :not-found) (scheme-error-exit expr env)
+                   (if (eq result :not-found) (lisp-error-exit expr env)
                      result))))
     expr))
 
@@ -41,7 +41,7 @@
         (gethash op table)))))
 
 ;----------------------------------------------------------------
-(define-condition scheme-parse-error (error)
+(define-condition lisp-parse-error (error)
   ((expr :initarg :expr :reader expr) 
    (env :initarg :env :reader env))
   (:report (lambda (condition stream)
@@ -49,8 +49,8 @@
                (format *error-output* 
                        "Error !!:<~s>~%" (expr condition))))))
 
-(defun scheme-error-exit (expr env)
-   (error 'scheme-parse-error :expr expr :env env))
+(defun lisp-error-exit (expr env)
+   (error 'lisp-parse-error :expr expr :env env))
 
 ;----------------------------------------------------------------
 ; primitive
@@ -68,7 +68,7 @@
     (if (symbolp func-define)
       (setf func-define (lookup-symbol func-define env)))
     (if (eq func-define :not-found)
-      (scheme-error-exit expr env))
+      (lisp-error-exit expr env))
     (let ((args (car func-define))
           (body-expr-list (cdr func-define))
           (htable (make-hash-table))
@@ -77,13 +77,13 @@
         (setf value (car values))
         (setf values (cdr values))
         (if (not (symbolp arg))
-          (scheme-error-exit sym env))
-        (setf (gethash arg htable) (parse-mini-scheme value env)))
+          (lisp-error-exit sym env))
+        (setf (gethash arg htable) (parse-mini-lisp value env)))
 
       (let ((new-env (list env htable)) r)
         (dolist (body-expr body-expr-list)
           (setf result
-                (parse-mini-scheme body-expr new-env))
+                (parse-mini-lisp body-expr new-env))
           )))
     result))
 
@@ -94,10 +94,10 @@
       (setf htable (make-hash-table)))
 
     (let ((expr-parse-table (make-hash-table))
-          (essntials  `((:define . ,#'scheme-define)
-                        (:if . ,#'scheme-if)
-                        (:let . ,#'scheme-let)
-                        (:fix . ,#'scheme-fix)))
+          (essntials  `((:define . ,#'lisp-define)
+                        (:if . ,#'lisp-if)
+                        (:let . ,#'lisp-let)
+                        (:fix . ,#'lisp-fix)))
           (primitives `((:+  . ,#'+-two)
                         (:-  . ,#'--two)
                         (:>> . ,#'>>-two)
@@ -130,7 +130,7 @@
 (defparameter *debug-mode* nil)
 
 ;----------------------------------------------------------------
-(defun parse-mini-scheme (expr env)
+(defun parse-mini-lisp (expr env)
   (if *debug-mode*
     (format t "expr:~s~%" expr))
   (if (terminal-p expr)
@@ -139,7 +139,7 @@
            (expander (lookup-parser op :syntax-sugar-table env)))
       ;(format t "op:~s~%" op)
       (if expander
-        (parse-mini-scheme (funcall expander expr env) env)
+        (parse-mini-lisp (funcall expander expr env) env)
         (let ((parser (lookup-parser op :expr-parse-table env)))
           ;(format t "<~s> ~%" parser)
           (if parser

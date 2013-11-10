@@ -1,17 +1,17 @@
 ;----------------------------------------------------------------
 ; essential
 
-(defun scheme-if (expr env)
+(defun lisp-if (expr env)
   (let ((condition-s (cadr expr))
         (true-clouse (caddr expr))
         (false-clouse (cadddr expr)))
-    (let ((cond-result (parse-mini-scheme condition-s env)))
+    (let ((cond-result (parse-mini-lisp condition-s env)))
       (if (not (eq :#f cond-result))
-        (parse-mini-scheme true-clouse env)
+        (parse-mini-lisp true-clouse env)
         (if false-clouse 
-          (parse-mini-scheme false-clouse env))))))
+          (parse-mini-lisp false-clouse env))))))
 
-(defun scheme-let (expr env)
+(defun lisp-let (expr env)
   (let ((binds (cadr expr))
         (body-expr-list (cddr expr))
         (htable (make-hash-table)))
@@ -20,12 +20,12 @@
             (value-expr (cadr arg-pair)))
         (if (not (symbolp sym))
           (error-exit sym env))
-        (setf (gethash sym htable) (parse-mini-scheme value-expr env))))
+        (setf (gethash sym htable) (parse-mini-lisp value-expr env))))
     (let ((new-env (list env htable)))
       (dolist (body-expr body-expr-list)
-        (parse-mini-scheme body-expr new-env)))))
+        (parse-mini-lisp body-expr new-env)))))
 
-(defun scheme-fix (expr env)
+(defun lisp-fix (expr env)
   (let ((fbinds (cadr expr))
         (body-expr (caddr expr))
         (htable (make-hash-table)))
@@ -36,9 +36,9 @@
           (error-exit sym env))
         (setf (gethash sym htable) fix-expr)))
     (let ((new-env (list env htable)))
-      (parse-mini-scheme body-expr new-env))))
+      (parse-mini-lisp body-expr new-env))))
 
-(defun scheme-define (expr env)
+(defun lisp-define (expr env)
   (let ((sym-or-func (cadr expr))
         (table (cadr env)))
     (if (listp sym-or-func)
@@ -62,6 +62,6 @@
         (if (not (symbolp sym))
           (error-exit sym env))
 
-        (let ((value (parse-mini-scheme value-expr env)))
+        (let ((value (parse-mini-lisp value-expr env)))
           (setf (gethash sym table) value)
           value )))))
