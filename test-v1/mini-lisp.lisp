@@ -28,8 +28,8 @@
       (:#t :#t)   ; simulate scheme style #t
       (:#f :#f) ; simulate scheme style #f
       (otherwise (let ((result (lookup-symbol expr env)))
-                   (if (symbolp result) (parse-expr-terminal result env)
-                     (if (eq result :not-found) (lisp-error-exit expr env)
+                   (if (eq result :not-found) (lisp-error-exit expr env)
+                     (if (symbolp result) (parse-expr-terminal result env)
                        result)))))
     expr))
 
