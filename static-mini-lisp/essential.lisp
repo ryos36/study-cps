@@ -29,7 +29,8 @@
 
       (let* 
         ((func-define (make-func-define :function args body-expr-list))
-         (func-closure (make-func-closure func-define (make-new-env env)))
+         (new-env (make-new-env env))
+         (func-closure (make-func-closure func-define new-env))
          (func-app (make-app-function func-closure values)))
 
         (parse-mini-lisp func-app new-env)))))

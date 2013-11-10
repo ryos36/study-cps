@@ -1,0 +1,302 @@
+(DEFINE F
+ (LET ((V0 129))
+  (DEFINE (F0 A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
+  F0)):
+#1=((F0 (A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
+    (#2=(NIL .
+         #S(HASH-TABLE TEST FASTHASH-EQL
+            (G .
+             ((G (X Y) (+ X (F X Y))) #2# .
+              #S(HASH-TABLE TEST FASTHASH-EQL (Y . 8) (X . 7))))
+            (Y . (9 10 11)) (X . 3) (F . #1#) (A . 15)
+            (EXPR-PARSE-TABLE .
+             #S(HASH-TABLE TEST FASTHASH-EQL
+                (RECORD-REF .
+                 #<FUNCTION RECORD-REF (EXPR ENV)
+                   (DECLARE (IN-DEFUN RECORD-REF))
+                   (BLOCK RECORD-REF
+                    (LET
+                     ((HEAP-RECORD (PARSE-MINI-LISP (CADR EXPR) ENV))
+                      (POS (PARSE-MINI-LISP (CADDR EXPR) ENV)))
+                     (NTH POS HEAP-RECORD)))>)
+                (RECORD-SET! .
+                 #<FUNCTION RECORD-SET! (EXPR ENV)
+                   (DECLARE (IN-DEFUN RECORD-SET!))
+                   (BLOCK RECORD-SET!
+                    (LET
+                     ((HEAP-RECORD (PARSE-MINI-LISP (CADR EXPR) ENV))
+                      (POS (PARSE-MINI-LISP (CADDR EXPR) ENV))
+                      (VALUE (PARSE-MINI-LISP (CADDDR EXPR) ENV)))
+                     (SETF (NTH POS HEAP-RECORD) VALUE) HEAP-RECORD))>)
+                (HEAP .
+                 #<FUNCTION HEAP (EXPR ENV) (DECLARE (IN-DEFUN HEAP))
+                   (BLOCK HEAP
+                    (MAPCAR #'(LAMBDA (X) (PARSE-MINI-LISP X ENV))
+                     (CDR EXPR)))>)
+                (= .
+                 #<FUNCTION =-TWO (EXPR ENV) (DECLARE (IN-DEFUN =-TWO))
+                   (BLOCK =-TWO
+                    (PRIMITIVE-2 EXPR ENV (IF (= ARG0 ARG1) #T #F)))>)
+                (<= .
+                 #<FUNCTION <=-TWO (EXPR ENV) (DECLARE (IN-DEFUN <=-TWO))
+                   (BLOCK <=-TWO
+                    (PRIMITIVE-2 EXPR ENV (IF (<= ARG0 ARG1) #T #F)))>)
+                (>= .
+                 #<FUNCTION >=-TWO (EXPR ENV) (DECLARE (IN-DEFUN >=-TWO))
+                   (BLOCK >=-TWO
+                    (PRIMITIVE-2 EXPR ENV (IF (>= ARG0 ARG1) #T #F)))>)
+                (> .
+                 #<FUNCTION >-TWO (EXPR ENV) (DECLARE (IN-DEFUN >-TWO))
+                   (BLOCK >-TWO
+                    (PRIMITIVE-2 EXPR ENV (IF (> ARG0 ARG1) #T #F)))>)
+                (< .
+                 #<FUNCTION <-TWO (EXPR ENV) (DECLARE (IN-DEFUN <-TWO))
+                   (BLOCK <-TWO
+                    (PRIMITIVE-2 EXPR ENV (IF (< ARG0 ARG1) #T #F)))>)
+                (<< .
+                 #<FUNCTION <<-TWO (EXPR ENV) (DECLARE (IN-DEFUN <<-TWO))
+                   (BLOCK <<-TWO
+                    (PRIMITIVE-2 EXPR ENV
+                     (LABELS ((<< (X R) (IF (= R 0) X (<< (* X 2) (- R 1)))))
+                      (<< ARG0 ARG1))))>)
+                (>> .
+                 #<FUNCTION >>-TWO (EXPR ENV) (DECLARE (IN-DEFUN >>-TWO))
+                   (BLOCK >>-TWO
+                    (PRIMITIVE-2 EXPR ENV
+                     (LABELS
+                      ((>> (X R) (IF (= R 0) X (>> (FLOOR (/ X 2)) (- R 1)))))
+                      (>> ARG0 ARG1))))>)
+                (- .
+                 #<FUNCTION --TWO (EXPR ENV) (DECLARE (IN-DEFUN --TWO))
+                   (BLOCK --TWO (PRIMITIVE-2 EXPR ENV (- ARG0 ARG1)))>)
+                (+ .
+                 #<FUNCTION +-TWO (EXPR ENV) (DECLARE (IN-DEFUN +-TWO))
+                   (BLOCK +-TWO (PRIMITIVE-2 EXPR ENV (+ ARG0 ARG1)))>)
+                (FIX .
+                 #<FUNCTION LISP-FIX (EXPR ENV) (DECLARE (IN-DEFUN LISP-FIX))
+                   (BLOCK LISP-FIX
+                    (LET
+                     ((FBINDS (CADR EXPR)) (BODY-EXPR (CADDR EXPR))
+                      (NEW-ENV (MAKE-NEW-ENV ENV)))
+                     (DOLIST (FIX-FUNC-DEFINE FBINDS)
+                      (LET ((SYM (CAR FIX-FUNC-DEFINE)))
+                       (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT EXPR ENV))
+                       (SET-KEY-VALUE SYM
+                        (MAKE-FUNC-CLOSURE (COPY-TREE FIX-FUNC-DEFINE)
+                         NEW-ENV))))
+                     (LET*
+                      ((FIX-MAIN-FUNC-DEFINE
+                        (MAKE-FUNC-DEFINE FUNCTION 'NIL BODY-EXPR))
+                       (FIX-MAIN-FUNC-CLOSURE
+                        (MAKE-FUNC-CLOSURE FIX-MAIN-FUNC-DEFINE NEW-ENV))
+                       (FIX-MAIN-FUNC-APP
+                        (MAKE-APP-FUNCTION FIX-MAIN-FUNC-CLOSURE 'NIL)))
+                      (PARSE-MINI-LISP FIX-MAIN-FUNC-APP NEW-ENV))))>)
+                (LET .
+                 #<FUNCTION LISP-LET (EXPR ENV) (DECLARE (IN-DEFUN LISP-LET))
+                   (BLOCK LISP-LET
+                    (LET ((BINDS (CADR EXPR)) (BODY-EXPR-LIST (CDDR EXPR)))
+                     (LET (ARGS VALUES)
+                      (MAPCAR
+                       #'(LAMBDA (A)
+                          (LET ((ARG (CAR A)) (VALUE (CADR A)))
+                           (IF (NOT (SYMBOLP ARG)) (LISP-ERROR-EXIT EXPR ENV))
+                           (PUSH ARG ARGS)
+                           (PUSH (PARSE-MINI-LISP VALUE ENV) VALUES)))
+                       BINDS)
+                      (SETF ARGS (NREVERSE ARGS))
+                      (SETF VALUES (NREVERSE VALUES))
+                      (LET*
+                       ((FUNC-DEFINE
+                         (MAKE-FUNC-DEFINE FUNCTION ARGS BODY-EXPR-LIST))
+                        (NEW-ENV (MAKE-NEW-ENV ENV))
+                        (FUNC-CLOSURE (MAKE-FUNC-CLOSURE FUNC-DEFINE NEW-ENV))
+                        (FUNC-APP (MAKE-APP-FUNCTION FUNC-CLOSURE VALUES)))
+                       (PARSE-MINI-LISP FUNC-APP NEW-ENV)))))>)
+                (IF .
+                 #<FUNCTION LISP-IF (EXPR ENV) (DECLARE (IN-DEFUN LISP-IF))
+                   (BLOCK LISP-IF
+                    (LET
+                     ((CONDITION-S (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
+                      (FALSE-CLOUSE (CADDDR EXPR)))
+                     (LET ((COND-RESULT (PARSE-MINI-LISP CONDITION-S ENV)))
+                      (IF (NOT (EQ #F COND-RESULT))
+                       (PARSE-MINI-LISP TRUE-CLOUSE ENV)
+                       (IF FALSE-CLOUSE
+                        (PARSE-MINI-LISP FALSE-CLOUSE ENV))))))>)
+                (DEFINE .
+                 #<FUNCTION LISP-DEFINE (EXPR ENV)
+                   (DECLARE (IN-DEFUN LISP-DEFINE))
+                   (BLOCK LISP-DEFINE
+                    (LET ((SYM-OR-FUNC (CADR EXPR)) (TABLE (CDR ENV)))
+                     (IF (LISTP SYM-OR-FUNC)
+                      (LET*
+                       ((FUNC-NAME (CAR SYM-OR-FUNC))
+                        (FUNC-ARGS (CDR SYM-OR-FUNC)) (FUNC-BODY (CDDR EXPR))
+                        (FUNC-DEFINE
+                         (MAKE-FUNC-DEFINE FUNC-NAME FUNC-ARGS FUNC-BODY))
+                        (FUNC-CLOSURE
+                         (MAKE-FUNC-CLOSURE FUNC-DEFINE (MAKE-NEW-ENV ENV))))
+                       (SET-KEY-VALUE FUNC-NAME FUNC-CLOSURE ENV)
+                       (IF (NOT (SYMBOLP FUNC-NAME))
+                        (LISP-ERROR-EXIT FUNC-NAME ENV)))
+                      (LET ((SYM SYM-OR-FUNC) (VALUE-EXPR (CADDR EXPR)))
+                       (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT SYM ENV))
+                       (LET ((VALUE (PARSE-MINI-LISP VALUE-EXPR ENV)))
+                        (SETF (GETHASH SYM TABLE) VALUE) VALUE)))))>)))))
+     . #S(HASH-TABLE TEST FASTHASH-EQL (F0 . #1#) (V0 . 129)))
+    . #S(HASH-TABLE TEST FASTHASH-EQL))
+(F #F):229
+(DEFINE G (F #T)):
+#1=((G (X) (+ V0 11))
+    (#2=(((NIL .
+           #S(HASH-TABLE TEST FASTHASH-EQL (G . #1#) (Y . (9 10 11)) (X . 3)
+              (F .
+               #3=((F0 (A)
+                    (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G)
+                     (+ V0 100)))
+                   . #2#))
+              (A . 15)
+              (EXPR-PARSE-TABLE .
+               #S(HASH-TABLE TEST FASTHASH-EQL
+                  (RECORD-REF .
+                   #<FUNCTION RECORD-REF (EXPR ENV)
+                     (DECLARE (IN-DEFUN RECORD-REF))
+                     (BLOCK RECORD-REF
+                      (LET
+                       ((HEAP-RECORD (PARSE-MINI-LISP (CADR EXPR) ENV))
+                        (POS (PARSE-MINI-LISP (CADDR EXPR) ENV)))
+                       (NTH POS HEAP-RECORD)))>)
+                  (RECORD-SET! .
+                   #<FUNCTION RECORD-SET! (EXPR ENV)
+                     (DECLARE (IN-DEFUN RECORD-SET!))
+                     (BLOCK RECORD-SET!
+                      (LET
+                       ((HEAP-RECORD (PARSE-MINI-LISP (CADR EXPR) ENV))
+                        (POS (PARSE-MINI-LISP (CADDR EXPR) ENV))
+                        (VALUE (PARSE-MINI-LISP (CADDDR EXPR) ENV)))
+                       (SETF (NTH POS HEAP-RECORD) VALUE) HEAP-RECORD))>)
+                  (HEAP .
+                   #<FUNCTION HEAP (EXPR ENV) (DECLARE (IN-DEFUN HEAP))
+                     (BLOCK HEAP
+                      (MAPCAR #'(LAMBDA (X) (PARSE-MINI-LISP X ENV))
+                       (CDR EXPR)))>)
+                  (= .
+                   #<FUNCTION =-TWO (EXPR ENV) (DECLARE (IN-DEFUN =-TWO))
+                     (BLOCK =-TWO
+                      (PRIMITIVE-2 EXPR ENV (IF (= ARG0 ARG1) #T #F)))>)
+                  (<= .
+                   #<FUNCTION <=-TWO (EXPR ENV) (DECLARE (IN-DEFUN <=-TWO))
+                     (BLOCK <=-TWO
+                      (PRIMITIVE-2 EXPR ENV (IF (<= ARG0 ARG1) #T #F)))>)
+                  (>= .
+                   #<FUNCTION >=-TWO (EXPR ENV) (DECLARE (IN-DEFUN >=-TWO))
+                     (BLOCK >=-TWO
+                      (PRIMITIVE-2 EXPR ENV (IF (>= ARG0 ARG1) #T #F)))>)
+                  (> .
+                   #<FUNCTION >-TWO (EXPR ENV) (DECLARE (IN-DEFUN >-TWO))
+                     (BLOCK >-TWO
+                      (PRIMITIVE-2 EXPR ENV (IF (> ARG0 ARG1) #T #F)))>)
+                  (< .
+                   #<FUNCTION <-TWO (EXPR ENV) (DECLARE (IN-DEFUN <-TWO))
+                     (BLOCK <-TWO
+                      (PRIMITIVE-2 EXPR ENV (IF (< ARG0 ARG1) #T #F)))>)
+                  (<< .
+                   #<FUNCTION <<-TWO (EXPR ENV) (DECLARE (IN-DEFUN <<-TWO))
+                     (BLOCK <<-TWO
+                      (PRIMITIVE-2 EXPR ENV
+                       (LABELS ((<< (X R) (IF (= R 0) X (<< (* X 2) (- R 1)))))
+                        (<< ARG0 ARG1))))>)
+                  (>> .
+                   #<FUNCTION >>-TWO (EXPR ENV) (DECLARE (IN-DEFUN >>-TWO))
+                     (BLOCK >>-TWO
+                      (PRIMITIVE-2 EXPR ENV
+                       (LABELS
+                        ((>> (X R)
+                          (IF (= R 0) X (>> (FLOOR (/ X 2)) (- R 1)))))
+                        (>> ARG0 ARG1))))>)
+                  (- .
+                   #<FUNCTION --TWO (EXPR ENV) (DECLARE (IN-DEFUN --TWO))
+                     (BLOCK --TWO (PRIMITIVE-2 EXPR ENV (- ARG0 ARG1)))>)
+                  (+ .
+                   #<FUNCTION +-TWO (EXPR ENV) (DECLARE (IN-DEFUN +-TWO))
+                     (BLOCK +-TWO (PRIMITIVE-2 EXPR ENV (+ ARG0 ARG1)))>)
+                  (FIX .
+                   #<FUNCTION LISP-FIX (EXPR ENV) (DECLARE (IN-DEFUN LISP-FIX))
+                     (BLOCK LISP-FIX
+                      (LET
+                       ((FBINDS (CADR EXPR)) (BODY-EXPR (CADDR EXPR))
+                        (NEW-ENV (MAKE-NEW-ENV ENV)))
+                       (DOLIST (FIX-FUNC-DEFINE FBINDS)
+                        (LET ((SYM (CAR FIX-FUNC-DEFINE)))
+                         (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT EXPR ENV))
+                         (SET-KEY-VALUE SYM
+                          (MAKE-FUNC-CLOSURE (COPY-TREE FIX-FUNC-DEFINE)
+                           NEW-ENV))))
+                       (LET*
+                        ((FIX-MAIN-FUNC-DEFINE
+                          (MAKE-FUNC-DEFINE FUNCTION 'NIL BODY-EXPR))
+                         (FIX-MAIN-FUNC-CLOSURE
+                          (MAKE-FUNC-CLOSURE FIX-MAIN-FUNC-DEFINE NEW-ENV))
+                         (FIX-MAIN-FUNC-APP
+                          (MAKE-APP-FUNCTION FIX-MAIN-FUNC-CLOSURE 'NIL)))
+                        (PARSE-MINI-LISP FIX-MAIN-FUNC-APP NEW-ENV))))>)
+                  (LET .
+                   #<FUNCTION LISP-LET (EXPR ENV) (DECLARE (IN-DEFUN LISP-LET))
+                     (BLOCK LISP-LET
+                      (LET ((BINDS (CADR EXPR)) (BODY-EXPR-LIST (CDDR EXPR)))
+                       (LET (ARGS VALUES)
+                        (MAPCAR
+                         #'(LAMBDA (A)
+                            (LET ((ARG (CAR A)) (VALUE (CADR A)))
+                             (IF (NOT (SYMBOLP ARG))
+                              (LISP-ERROR-EXIT EXPR ENV))
+                             (PUSH ARG ARGS)
+                             (PUSH (PARSE-MINI-LISP VALUE ENV) VALUES)))
+                         BINDS)
+                        (SETF ARGS (NREVERSE ARGS))
+                        (SETF VALUES (NREVERSE VALUES))
+                        (LET*
+                         ((FUNC-DEFINE
+                           (MAKE-FUNC-DEFINE FUNCTION ARGS BODY-EXPR-LIST))
+                          (NEW-ENV (MAKE-NEW-ENV ENV))
+                          (FUNC-CLOSURE
+                           (MAKE-FUNC-CLOSURE FUNC-DEFINE NEW-ENV))
+                          (FUNC-APP (MAKE-APP-FUNCTION FUNC-CLOSURE VALUES)))
+                         (PARSE-MINI-LISP FUNC-APP NEW-ENV)))))>)
+                  (IF .
+                   #<FUNCTION LISP-IF (EXPR ENV) (DECLARE (IN-DEFUN LISP-IF))
+                     (BLOCK LISP-IF
+                      (LET
+                       ((CONDITION-S (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
+                        (FALSE-CLOUSE (CADDDR EXPR)))
+                       (LET ((COND-RESULT (PARSE-MINI-LISP CONDITION-S ENV)))
+                        (IF (NOT (EQ #F COND-RESULT))
+                         (PARSE-MINI-LISP TRUE-CLOUSE ENV)
+                         (IF FALSE-CLOUSE
+                          (PARSE-MINI-LISP FALSE-CLOUSE ENV))))))>)
+                  (DEFINE .
+                   #<FUNCTION LISP-DEFINE (EXPR ENV)
+                     (DECLARE (IN-DEFUN LISP-DEFINE))
+                     (BLOCK LISP-DEFINE
+                      (LET ((SYM-OR-FUNC (CADR EXPR)) (TABLE (CDR ENV)))
+                       (IF (LISTP SYM-OR-FUNC)
+                        (LET*
+                         ((FUNC-NAME (CAR SYM-OR-FUNC))
+                          (FUNC-ARGS (CDR SYM-OR-FUNC)) (FUNC-BODY (CDDR EXPR))
+                          (FUNC-DEFINE
+                           (MAKE-FUNC-DEFINE FUNC-NAME FUNC-ARGS FUNC-BODY))
+                          (FUNC-CLOSURE
+                           (MAKE-FUNC-CLOSURE FUNC-DEFINE (MAKE-NEW-ENV ENV))))
+                         (SET-KEY-VALUE FUNC-NAME FUNC-CLOSURE ENV)
+                         (IF (NOT (SYMBOLP FUNC-NAME))
+                          (LISP-ERROR-EXIT FUNC-NAME ENV)))
+                        (LET ((SYM SYM-OR-FUNC) (VALUE-EXPR (CADDR EXPR)))
+                         (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT SYM ENV))
+                         (LET ((VALUE (PARSE-MINI-LISP VALUE-EXPR ENV)))
+                          (SETF (GETHASH SYM TABLE) VALUE) VALUE)))))>)))))
+          . #S(HASH-TABLE TEST FASTHASH-EQL (F0 . #3#) (V0 . 129)))
+         . #S(HASH-TABLE TEST FASTHASH-EQL (A . #T)))
+     . #S(HASH-TABLE TEST FASTHASH-EQL (G . #1#) (TEMP . 0)))
+    . #S(HASH-TABLE TEST FASTHASH-EQL))
+(LET ((V0 1103)) (G)):140
