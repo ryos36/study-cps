@@ -87,29 +87,41 @@
     (setf (gethash :exit table) '(:exit))
     env))
 
+
+;----------------------------------------------------------------
+(defun make-cps-closure (bind new-env)
+  (cons bind new-env))
+
 ;----------------------------------------------------------------
 (defun cps-fix (expr env)
-  (let ((bind-func-body (cadr expr))
+  (let ((binds (cadr expr))
         (next-expr (caddr expr))
         (new-env (make-new-env env)))
-    (let ((func-name (car bind-func-body)))
-      (set-key-value func-name bind-func-body new-env)
-      (parse-cps next-expr new-env))))
+
+    (map nil #'(lambda (func-define)
+                 (let ((func-name (car func-define))
+                       (cps-closure (make-cps-closure func-define new-env)))
+
+                   (set-key-value func-name cps-closure new-env)))
+         binds)
+    (parse-cps next-expr new-env)))
 
 ;----------------------------------------------------------------
 (defun cps-app (expr env)
-  (let ((func-name (cadr expr))
-        (args (caddr expr))
-        (new-env (make-new-env env)))
-    (let* ((bind-func-body (lookup-symbol func-name env))
-           (arg-syms (cadr bind-func-body))
-           (next-expr (caddr bind-func-body)))
-      (map nil #'(lambda (key arg) 
-                   (let ((value (parse-expr-terminal arg env)))
-                     (set-key-value key value new-env))) 
-           arg-syms args)
+  (let* ((func-name (cadr expr))
+         (args (caddr expr))
+         (cps-closure (lookup-symbol func-name env))
+         (func-define (car cps-closure))
+         (func-env (cdr cps-closure))
+         (arg-syms (cadr func-define))
+         (next-expr (caddr func-define)))
 
-      (parse-cps next-expr new-env))))
+    (map nil #'(lambda (key arg) 
+                 (let ((value (parse-expr-terminal arg env)))
+                   (set-key-value key value func-env)))
+         arg-syms args)
+
+    (parse-cps next-expr func-env)))
 
 
 ;----------------------------------------------------------------
