@@ -127,12 +127,14 @@
 ;----------------------------------------------------------------
 (defun cps-exit (expr env)
   (let ((result (parse-expr-terminal (cadr expr) env)))
-  (format t "cps-exit:~a~%" result)
+  (format *cps-exit-output* "cps-exit:~a~%" result)
   result))
         
 ;----------------------------------------------------------------
-(defparameter *debug-mode* t)
+(defparameter *debug-mode* nil)
 (defparameter *cps-stack* nil)
+(defparameter *env* (make-new-env nil))
+(defparameter *cps-exit-output* nil)
 
 ;----------------------------------------------------------------
 (defun parse-cps (expr env)
