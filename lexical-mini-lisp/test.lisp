@@ -1,5 +1,5 @@
 (load "mini-lisp.lisp")
-(setf test-files '( "test0" "test1" "test2" "test3" "test4" "test5"))
+(setf test-files '( "test0" "test1" "test2" "test3" "test4" "test5" "test6"))
 
 (defun read-file (name)
   (if (probe-file name)
@@ -14,7 +14,7 @@
 (mapcar 
   #'(lambda (name)
       (let 
-        ((scm-file (string-concat "script/" name ".scm"))
+        ((scm-file (string-concat "../scm-script/" name ".scm"))
          lisp-test-list
          result
          (result-file (string-concat "result/" name ".txt"))

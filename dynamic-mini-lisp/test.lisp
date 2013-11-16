@@ -14,7 +14,7 @@
 (mapcar 
   #'(lambda (name)
       (let 
-        ((scm-file (string-concat "script/" name ".scm"))
+        ((scm-file (string-concat "../scm-script/" name ".scm"))
          lisp-test-list
          result
          (result-file (string-concat "result/" name ".txt"))

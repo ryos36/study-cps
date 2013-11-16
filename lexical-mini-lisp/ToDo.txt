@@ -1,2 +1,1 @@
-すべての
-make-func-define が通るところ
+すべての make-func-define が通るところのテストが足りない。
