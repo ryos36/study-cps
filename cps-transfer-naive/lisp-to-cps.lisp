@@ -31,7 +31,7 @@
 ;----------------------------------------------------------------
 (defun make-exit-continuous ()
   (let ((r (cps-gensym)))
-    (copy-tree `(,r (:exit,r)))))
+    (copy-tree `(,r . (:exit,r)))))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr env)

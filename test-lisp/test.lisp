@@ -69,18 +69,18 @@
           |#
 
           (if result-txt
-            (format t "~a:~a~%" name
+            (format t "~s:~s~%" name
                     (if (string= 
                           (string-right-trim trim-string result)
                           (string-right-trim trim-string result-txt))
                       "Passed" "Failed"))
             (progn
               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
-                (format out "~a" result))
+                (format out "~s" result))
 
-              (format t "~a:Saved~%" name)
+              (format t "~s:Saved~%" name)
               (format t  "--------------Result:-----------~%")
-              (format t "~a~%" result)
+              (format t "~s~%" result)
               (format t  "--------------------------------~%")))
           ))
     *test-files*))
