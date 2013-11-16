@@ -4,15 +4,20 @@
 (defparameter *test-files* nil)
 (defparameter *test-parse-func* nil)
 
-(defun set-test-files (max-no)
-  (incf max-no)
+(defun set-test-files (max-no-or-no-list)
   (setf *test-files* 
-       (nreverse 
-         (let (test-files)
-           (do ((x 0 (+ x 1)))
-             ((= x max-no))
-             (push (format nil "test~a" x ) test-files))
-           test-files))))
+        (if (listp max-no-or-no-list)
+          (let ((no-list max-no-or-no-list))
+            (mapcar #'(lambda (no) (format nil "test~a" no)) no-list))
+
+          (let ((max-no max-no-or-no-list))
+            (incf max-no)
+            (nreverse 
+              (let (test-files)
+                (do ((x 0 (+ x 1)))
+                  ((= x max-no))
+                  (push (format nil "test~a" x ) test-files))
+                test-files))))))
 
 ;(setf test-files (mapcar #'(lambda (no) (format nil "test~a" no)) *test-no*))
 

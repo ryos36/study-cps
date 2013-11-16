@@ -18,7 +18,7 @@
 (defmacro cps-primitive2 (expr env &rest body)
   `(let ((args (cadr ,expr))
          (rv (caaddr ,expr))
-         (next-expr (cadddr ,expr)))
+         (next-expr (caadddr ,expr)))
 
      (let ((arg0 (parse-expr-terminal (car args) ,env))
            (arg1 (parse-expr-terminal (cadr args) ,env))

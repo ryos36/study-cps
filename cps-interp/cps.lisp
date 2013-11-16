@@ -3,6 +3,10 @@
   (load "cps.lisp"))
 
 ;----------------------------------------------------------------
+(defun caadddr (tree)
+         (car (cadddr tree)))
+
+;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (symbolp expr)
       (numberp expr)))
@@ -107,6 +111,16 @@
     (parse-cps next-expr new-env)))
 
 ;----------------------------------------------------------------
+(defun cps-id (expr env)
+  (let* ((arg0 (caadr expr))
+         (result (caaddr expr))
+         (next-expr (caadddr expr))
+         (new-env (make-new-env env)))
+
+    (set-key-value result arg0 new-env)
+    (parse-cps next-expr new-env)))
+
+;----------------------------------------------------------------
 (defun cps-app (expr env)
   (let* ((func-name (cadr expr))
          (args (caddr expr))
@@ -145,6 +159,7 @@
     (case op
       (:fix (cps-fix expr env))
       (:app (cps-app expr env))
+      (:id (cps-id expr env))
       (:exit (cps-exit expr env))
       (otherwise (let ((primitive-cps (lookup-primitive op)))
                    ;(format t "primitive-cps:~a ~s~%" op primitive-cps)
