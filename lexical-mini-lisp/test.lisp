@@ -5,5 +5,5 @@
 (defparameter *test-ext* ".scm")
 (defparameter *test-parse-func* #'parse-mini-lisp)
 
-(set-test-files 6)
+(set-test-files 8)
 (do-test)
