@@ -2,6 +2,7 @@
 (defparameter *env* nil)
 (defparameter *debug-mode* nil)
 (defparameter *transfer-table* nil)
+(defparameter *cps-gensym-debug* t)
 
 ;----------------------------------------------------------------
 (defun l ()
@@ -14,16 +15,27 @@
       (numberp expr)))
 
 ;----------------------------------------------------------------
+  
 (defun terminal-transfer (expr env)
-  (let ((arg0 expr)
+  (labels ((scheme-to-lisp-symbol (expr)
+                                 (case expr
+                                   (:#f nil)
+                                   (:#t t)
+                                   (otherwise expr))))
 
-        (result-sym (car env))
-        (continuation (cdr env)))
+    (let ((arg0 expr)
 
-    (copy-tree `(:id (,arg0) (,result-sym) (,continuation)))))
+          (result-sym (car env))
+          (continuation (cdr env)))
+
+      (copy-tree `(:id (,arg0) (,result-sym) (,continuation))))))
 
 ;----------------------------------------------------------------
-(defun cps-gensym () (gensym))
+(let ((no 0))
+ (defun cps-gensym () 
+   (if *cps-gensym-debug*
+     (intern (format nil "sym~a" (incf no)))
+     (gensym))))
 
 ;----------------------------------------------------------------
 (load "primitive.lisp")
@@ -31,7 +43,7 @@
 ;----------------------------------------------------------------
 (defun make-exit-continuous ()
   (let ((r (cps-gensym)))
-    (copy-tree `(,r . (:exit,r)))))
+    (copy-tree `(,r . (:exit ,r)))))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr env)
@@ -39,7 +51,6 @@
 
         (exit-arg-sym (cps-gensym)))
 
-    (format t "arg0:~a~%" arg0)
     (do-lisp-to-cps arg0 (cons exit-arg-sym
       (copy-tree
         `(:exit (,exit-arg-sym) () ()))))))
@@ -51,13 +62,13 @@
 
         (condition-sym (cps-gensym))
 
-        (result-sym (car env)) ; not use
+        (result-sym (car env))
         (continuation (cdr env)))
 
     (do-lisp-to-cps condition-expr (cons condition-sym
       (copy-tree `(:neq (,condition-sym :#f) () (
-         ,(do-lisp-to-cps true-clouse (cons nil continuation))
-         ,(do-lisp-to-cps false-clouse (cons nil continuation)))))))))
+         ,(do-lisp-to-cps true-clouse (cons result-sym continuation))
+         ,(do-lisp-to-cps false-clouse (cons result-sym continuation)))))))))
 
 ;----------------------------------------------------------------
 ;(func-name (arg*) expr)
@@ -112,7 +123,7 @@
         (funcall transfer expr env)
 
     (case op
-      (:if (if-trasfer expr env))
+      (:if (if-transfer expr env))
       (:fix (fix-transfer expr env)) 
       (:exit (exit-transfer expr env))
       (otherwise (user-func-call-transfer expr env)))))))

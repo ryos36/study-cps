@@ -6,6 +6,9 @@
 (defun caadddr (tree)
          (car (cadddr tree)))
 
+(defun cadadddr (tree)
+        (cadr (cadddr tree)))
+
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (symbolp expr)
@@ -24,12 +27,16 @@
             result))))))
 
 (defun parse-expr-terminal (expr env)
-  (if (symbolp expr)
-    (let ((result (lookup-symbol expr env))) 
-      (if (eq result :not-found)
-        (cps-error-exit expr env)
-        result))
-    expr))
+  (cond 
+    ((eq :#t expr) :#t)
+    ((eq :#f expr) :#f)
+    ((null expr) nil)
+    ((symbolp expr)
+     (let ((result (lookup-symbol expr env))) 
+       (if (eq result :not-found)
+         (cps-error-exit expr env)
+         result)))
+    (t expr)))
 
 (defun make-new-env (env)
   (cons env (make-hash-table)))
@@ -112,7 +119,7 @@
 
 ;----------------------------------------------------------------
 (defun cps-id (expr env)
-  (let* ((arg0 (caadr expr))
+  (let* ((arg0 (parse-expr-terminal (caadr expr) env))
          (result (caaddr expr))
          (next-expr (caadddr expr))
          (new-env (make-new-env env)))
@@ -120,6 +127,15 @@
     (set-key-value result arg0 new-env)
     (parse-cps next-expr new-env)))
 
+;----------------------------------------------------------------
+(defun cps-neq (expr env)
+  (let* ((arg0 (parse-expr-terminal (caadr expr) env))
+         (arg1 (parse-expr-terminal (cadadr expr) env))
+
+         (true-expr (caadddr expr))
+         (false-expr (cadadddr expr)))
+
+    (parse-cps (if (not (eq arg0 arg1)) true-expr false-expr) env)))
 ;----------------------------------------------------------------
 (defun cps-app (expr env)
   (let* ((func-name (cadr expr))
@@ -160,6 +176,7 @@
       (:fix (cps-fix expr env))
       (:app (cps-app expr env))
       (:id (cps-id expr env))
+      (:neq (cps-neq expr env))
       (:exit (cps-exit expr env))
       (otherwise (let ((primitive-cps (lookup-primitive op)))
                    ;(format t "primitive-cps:~a ~s~%" op primitive-cps)

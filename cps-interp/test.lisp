@@ -8,4 +8,5 @@
 
 (set-test-files '(0 1 2 3))
 (set-test-files 2)
+(set-test-files '(3))
 (do-test)
