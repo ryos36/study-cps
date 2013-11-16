@@ -29,7 +29,31 @@
 (load "primitive.lisp")
 
 ;----------------------------------------------------------------
-(defun if-transfer (expr env))
+(defun exit-transfer (expr env)
+  (let ((arg0 (cadr expr))
+
+        (exit-arg-sym (cps-gensym)))
+
+    (format t "arg0:~a~%" arg0)
+    (do-lisp-to-cps arg0 (cons exit-arg-sym
+      (copy-tree
+        `(:exit (,exit-arg-sym) () ()))))))
+
+(defun if-transfer (expr env)
+  (let ((condition-expr (cadr expr))
+        (true-clouse (caddr expr))
+        (false-clouse (cadddr expr))
+
+        (condition-sym (cps-gensym))
+
+        (result-sym (car env)) ; not use
+        (continuation (cdr env)))
+
+    (do-lisp-to-cps condition-expr (cons condition-sym
+      (copy-tree `(:neq (,condition-sym :#f) () (
+         ,(do-lisp-to-cps true-clouse (cons nil continuation))
+         ,(do-lisp-to-cps false-clouse (cons nil continuation)))))))))
+
 (defun fix-transfer (expr env))
 (defun user-func-transfer (expr env))
 
@@ -47,5 +71,6 @@
     (case (op)
       (:if (if-trasfer expr env))
       (:fix (fix-transfer expr env)) 
+      (:exit (exit-transfer expr env))
       (otherwise (user-func-transfer expr env)))))))
 

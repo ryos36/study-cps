@@ -2,10 +2,10 @@
 ; essential
 
 (defun lisp-if (expr env)
-  (let ((condition-s (cadr expr))
+  (let ((condition-expr (cadr expr))
         (true-clouse (caddr expr))
         (false-clouse (cadddr expr)))
-    (let ((cond-result (parse-mini-lisp condition-s env)))
+    (let ((cond-result (parse-mini-lisp condition-expr env)))
       (if (not (eq :#f cond-result))
         (parse-mini-lisp true-clouse env)
         (if false-clouse 
