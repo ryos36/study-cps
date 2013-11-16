@@ -83,8 +83,8 @@
                       (LET ((SYM (CAR FIX-FUNC-DEFINE)))
                        (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT EXPR ENV))
                        (SET-KEY-VALUE SYM
-                        (MAKE-FUNC-CLOSURE (COPY-TREE FIX-FUNC-DEFINE)
-                         NEW-ENV))))
+                        (MAKE-FUNC-CLOSURE (COPY-TREE FIX-FUNC-DEFINE) NEW-ENV)
+                        NEW-ENV)))
                      (LET*
                       ((FIX-MAIN-FUNC-DEFINE
                         (MAKE-FUNC-DEFINE FUNCTION 'NIL BODY-EXPR))
@@ -118,9 +118,9 @@
                  #<FUNCTION LISP-IF (EXPR ENV) (DECLARE (IN-DEFUN LISP-IF))
                    (BLOCK LISP-IF
                     (LET
-                     ((CONDITION-S (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
+                     ((CONDITION-EXPR (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
                       (FALSE-CLOUSE (CADDDR EXPR)))
-                     (LET ((COND-RESULT (PARSE-MINI-LISP CONDITION-S ENV)))
+                     (LET ((COND-RESULT (PARSE-MINI-LISP CONDITION-EXPR ENV)))
                       (IF (NOT (EQ #F COND-RESULT))
                        (PARSE-MINI-LISP TRUE-CLOUSE ENV)
                        (IF FALSE-CLOUSE
@@ -234,7 +234,8 @@
                          (IF (NOT (SYMBOLP SYM)) (LISP-ERROR-EXIT EXPR ENV))
                          (SET-KEY-VALUE SYM
                           (MAKE-FUNC-CLOSURE (COPY-TREE FIX-FUNC-DEFINE)
-                           NEW-ENV))))
+                           NEW-ENV)
+                          NEW-ENV)))
                        (LET*
                         ((FIX-MAIN-FUNC-DEFINE
                           (MAKE-FUNC-DEFINE FUNCTION 'NIL BODY-EXPR))
@@ -270,9 +271,10 @@
                    #<FUNCTION LISP-IF (EXPR ENV) (DECLARE (IN-DEFUN LISP-IF))
                      (BLOCK LISP-IF
                       (LET
-                       ((CONDITION-S (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
+                       ((CONDITION-EXPR (CADR EXPR)) (TRUE-CLOUSE (CADDR EXPR))
                         (FALSE-CLOUSE (CADDDR EXPR)))
-                       (LET ((COND-RESULT (PARSE-MINI-LISP CONDITION-S ENV)))
+                       (LET
+                        ((COND-RESULT (PARSE-MINI-LISP CONDITION-EXPR ENV)))
                         (IF (NOT (EQ #F COND-RESULT))
                          (PARSE-MINI-LISP TRUE-CLOUSE ENV)
                          (IF FALSE-CLOUSE

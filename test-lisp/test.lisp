@@ -1,3 +1,5 @@
+(setf *print-circle* t)
+
 (defparameter *test-script-dir* nil)
 (defparameter *test-ext* nil)
 (defparameter *test-result-dir* "result/")

@@ -2,7 +2,6 @@
 (defun l ()
   (load "mini-lisp.lisp"))
 
-(setf *print-circle* t)
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (null expr)
@@ -30,7 +29,7 @@
 (defun parse-expr-terminal (expr env)
   (if (symbolp expr)
     (case expr
-      (:#t :#t)   ; simulate scheme style #t
+      (:#t :#t) ; simulate scheme style #t
       (:#f :#f) ; simulate scheme style #f
       (otherwise (let ((result (lookup-symbol expr env)))
                    (if (eq result :not-found) (lisp-error-exit expr env)

@@ -7,8 +7,8 @@
 (defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
 
-(set-test-files 7)
-(set-test-files '(8))
+(set-test-files 8)
+(set-test-files '(9))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)

@@ -37,7 +37,7 @@
 
 (defun lisp-fix (expr env)
   (let ((fbinds (cadr expr))
-        (body-expr (caddr expr))
+        (body-expr (cddr expr))
         (new-env (make-new-env env)))
 
     (dolist (fix-func-define fbinds)
@@ -45,9 +45,8 @@
         (if (not (symbolp sym))
           (lisp-error-exit expr env))
         (set-key-value sym 
-                       (make-func-closure 
-                         (copy-tree fix-func-define)
-                         new-env))))
+                       (make-func-closure (copy-tree fix-func-define) new-env)
+                         new-env)))
 
     (let* ((fix-main-func-define (make-func-define :function '() body-expr))
            (fix-main-func-closure 

@@ -4,6 +4,7 @@
 (defparameter *test-script-dir* "../scm-script/" )
 (defparameter *test-ext* ".scm")
 (defparameter *test-parse-func* #'parse-mini-lisp)
+;(defparameter *debug-mode* t)
 
-(set-test-files 8)
+(set-test-files '(10))
 (do-test)

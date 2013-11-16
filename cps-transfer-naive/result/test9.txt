@@ -1,0 +1,18 @@
+(FIX
+ ((EVEN? (X) (IF (= X 0) #T (ODD? (- X 1))))
+  (ODD? (X) (IF (= X 0) #F (EVEN? (- X 1)))))
+ (EVEN? 10)):
+(FIX
+ ((EVEN? (sym2 X)
+   (APP =
+    ((NEQ (sym4 #F) NIL
+      ((ID (#T) (sym3) ((APP sym2 (sym3))))
+       (APP ODD? ((APP sym2 (sym3)) - X 1))))
+     . X)))
+  (ODD? (sym5 X)
+   (APP =
+    ((NEQ (sym7 #F) NIL
+      ((ID (#F) (sym6) ((APP sym5 (sym6))))
+       (APP EVEN? ((APP sym5 (sym6)) - X 1))))
+     . X))))
+ (APP EVEN? ((EXIT sym1) . 10)))

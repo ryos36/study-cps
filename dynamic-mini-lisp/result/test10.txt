@@ -1,0 +1,8 @@
+(FIX
+ ((EVEN? (X) (IF (= X 0) #T (ODD? (- X 1))))
+  (ODD? (X) (IF (= X 0) #F (EVEN? (- X 1)))))
+ (EVEN? 10)):#T
+(FIX
+ ((EVEN? (X) (IF (= X 0) #T (ODD? (- X 1))))
+  (ODD? (X) (IF (= X 0) #F (EVEN? (- X 1)))))
+ (ODD? 10)):#F
