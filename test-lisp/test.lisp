@@ -61,26 +61,26 @@
           (do ((i 1 (incf i))) ((= (min (length result) (length result-txt)) i))
             (let ((s0 (substring result i (+ i 1)))
                   (s1 (substring result-txt i (+ i 1))))
-              (format t "<~a:~s:~s:~a>~%" i
+              (format t "<~a:~a:~a:~a>~%" i
                       (char s0 0)
                       (char s1 0)
                       (string= s0 s1))))
-          (format t "Length ~a:~a~s~%" (length result) (length result-txt) result-txt)
+          (format t "Length ~a:~a~a~%" (length result) (length result-txt) result-txt)
           |#
 
           (if result-txt
-            (format t "~s:~s~%" name
+            (format t "~a:~a~%" name
                     (if (string= 
                           (string-right-trim trim-string result)
                           (string-right-trim trim-string result-txt))
                       "Passed" "Failed"))
             (progn
               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
-                (format out "~s" result))
+                (format out "~a" result))
 
-              (format t "~s:Saved~%" name)
+              (format t "~a:Saved~%" name)
               (format t  "--------------Result:-----------~%")
-              (format t "~s~%" result)
+              (format t "~a~%" result)
               (format t  "--------------------------------~%")))
           ))
     *test-files*))
