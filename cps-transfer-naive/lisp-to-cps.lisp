@@ -54,8 +54,46 @@
          ,(do-lisp-to-cps true-clouse (cons nil continuation))
          ,(do-lisp-to-cps false-clouse (cons nil continuation)))))))))
 
-(defun fix-transfer (expr env))
-(defun user-func-transfer (expr env))
+;----------------------------------------------------------------
+;(func-name (arg*) expr)
+
+(defun func-transfer (fbind)
+  (let ((func-name (car fbind))
+        (args (cadr fbind))
+        (func-expr (caddr fbind))
+
+        (kont-sym (cps-gensym))
+        (result-sym (cps-gensym)))
+
+    (let ((cps-new-args (cons kont-sym args)))
+      (copy-tree `(,func-name ,cps-new-args ,(do-lisp-to-cps func-expr (cons result-sym `(:app ,kont-sym (,result-sym)))))))))
+
+;----------------------------------------------------------------
+(defun fix-transfer (expr env)
+  (let ((fbinds (cadr expr))
+        (fix-expr (caddr expr))
+
+        (result-sym (car env)) ; not use
+        (continuation (cdr env)))
+
+    (let ((cps-binds (mapcar #'(lambda (fbind) (func-transfer fbind)) fbinds)))
+      (copy-tree `(:fix ,cps-binds
+                        ,(do-lisp-to-cps fix-expr env))))))
+
+;----------------------------------------------------------------
+(defun user-func-call-transfer (expr env)
+  (let ((func-name (car expr))
+        (args (cadr expr))
+
+        (continuation-sym (cdr env)))
+
+    (let ((cps-new-args (cons continuation-sym args)))
+      (copy-tree `(:app ,func-name ,cps-new-args)))))
+
+
+;----------------------------------------------------------------
+(setf *transfer-table* (make-hash-table))
+(setf (gethash ':+ *transfer-table*) #'+-two)
 
 ;----------------------------------------------------------------
 (defun do-lisp-to-cps (expr env)
@@ -68,9 +106,9 @@
       (if transfer
         (funcall transfer expr env)
 
-    (case (op)
+    (case op
       (:if (if-trasfer expr env))
       (:fix (fix-transfer expr env)) 
       (:exit (exit-transfer expr env))
-      (otherwise (user-func-transfer expr env)))))))
+      (otherwise (user-func-call-transfer expr env)))))))
 
