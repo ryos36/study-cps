@@ -1,10 +1,11 @@
+(DEFINE V0 5963):5963
 (DEFINE F
  (LET ((V0 129))
   (DEFINE (F0 A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
   F0)):
 #1=((F0 (A) (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G) (+ V0 100)))
     (#2=(NIL .
-         #S(HASH-TABLE TEST FASTHASH-EQL
+         #S(HASH-TABLE TEST FASTHASH-EQL (V0 . 5963)
             (G .
              ((G (X Y) (+ X (F X Y))) #2# .
               #S(HASH-TABLE TEST FASTHASH-EQL (Y . 8) (X . 7))))
@@ -150,7 +151,8 @@
 (DEFINE G (F #T)):
 #1=((G (X) (+ V0 11))
     (#2=(((NIL .
-           #S(HASH-TABLE TEST FASTHASH-EQL (G . #1#) (Y . (9 10 11)) (X . 3)
+           #S(HASH-TABLE TEST FASTHASH-EQL (V0 . 5963) (G . #1#)
+              (Y . (9 10 11)) (X . 3)
               (F .
                #3=((F0 (A)
                     (IF A (LET ((TEMP 0)) (DEFINE (G X) (+ V0 11)) G)

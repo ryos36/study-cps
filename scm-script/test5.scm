@@ -1,4 +1,5 @@
-((:define f
+((:define v0 5963)
+ (:define f
   (:let ((v0 129))
    (:define (f0 a) (:if a
                     (:let ((temp 0))
