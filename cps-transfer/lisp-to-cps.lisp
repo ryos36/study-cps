@@ -103,9 +103,9 @@
 ;----------------------------------------------------------------
 
 (setf my-result nil)
-(setf key nil)
-(setf my-table nil)
-(defun my-callback (new-sym)
+;(setf key nil)
+;(setf my-table nil)
+(defun xmy-callback (new-sym)
   (let ((callbacks (gethash key my-table)))
     (dolist (callback callbacks)
       (funcall callback new-sym)))
@@ -115,12 +115,19 @@
 
   (let ((cont-lambda (car context))
         (table-list (cdr context))
-        (table (make-hash-table)))
+        (table (make-hash-table))
+        key-is-let-arg-sym
+        result)
+
+    (flet ((call-all-fill-placeholder (new-sym)
+      (let ((callbacks (gethash key-is-let-arg-sym table)))
+        (dolist (callback callbacks)
+          (funcall callback new-sym)))
+        result))
 
     (let ((new-context (cons cont-lambda (cons table table-list)))
           (let-args-reverse (reverse (cadr expr)))
-          (let-body-reverse (reverse (cddr expr)))
-          result)
+          (let-body-reverse (reverse (cddr expr))))
 
       (dolist (let-arg let-args-reverse)
         (let ((let-arg-sym (car let-arg)))
@@ -130,18 +137,16 @@
         (setf result (do-lisp-to-cps let-body-one new-context))
         (setf (car new-context) result))
 
-(format t "XXXXXXXXXXXXXXXresult:~a~%" result)
-
-      (setf my-result result)
-      (setf my-table table)
-      (setf (car new-context) #'my-callback)
+      ;(setf my-result result)
+      ;(setf my-table table)
+      (setf (car new-context) #'call-all-fill-placeholder)
 
       (dolist (let-arg let-args-reverse)
         (let ((let-arg-sym (car let-arg))
               (let-arg-body (cadr let-arg)))
-          (setf key let-arg-sym)
-          (setf my-result (do-lisp-to-cps let-arg-body new-context))))
-      my-result)))
+          (setf key-is-let-arg-sym let-arg-sym)
+          (setf result (do-lisp-to-cps let-arg-body new-context))))
+      result))))
 
 ;----------------------------------------------------------------
 
