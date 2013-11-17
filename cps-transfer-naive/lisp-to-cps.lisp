@@ -44,7 +44,7 @@
 (defun make-exit-continuous ()
   (let ((r (cps-gensym))
         (k (cps-gensym)))
-    (copy-tree `(,r . ,k))))
+    (copy-tree `(,r . (:exit ,r)))))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr env)
@@ -103,17 +103,30 @@
         (args (cdr expr))
 
         (continuation-sym (cdr env)))
-(format t "user:~a~%" expr)
+(format t "**** USER:~a~%" expr)
 
     (let ((cps-new-args (cons continuation-sym args)))
       (copy-tree `(:app ,func-name ,cps-new-args)))))
 
 
 ;----------------------------------------------------------------
-(setf *transfer-table* (make-hash-table))
-(setf (gethash ':+ *transfer-table*) #'+-two)
-(setf (gethash ':- *transfer-table*) #'--two)
-(setf (gethash ':= *transfer-table*) #'=-two)
+(defun make-transfer-table ()
+  (let ((table (make-hash-table)))
+    (map nil #'(lambda (x) 
+                 (let ((op (car x))
+                       (func (cdr x)))
+                   (setf (gethash op table) func)))
+         `((:+ . ,#'+-two)
+           (:- . ,#'--two)
+           (:>> . ,#'>>-two)
+           (:<< . ,#'<<-two)
+
+           (:> . ,#'>-two)
+           (:< . ,#'<-two)
+           (:>= . ,#'>=-two)
+           (:<= . ,#'<=-two)
+           (:= . ,#'=-two)))
+    table))
 
 ;----------------------------------------------------------------
 (defun do-lisp-to-cps (expr env)

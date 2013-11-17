@@ -6,14 +6,18 @@
 (defparameter *test-parse-func* #'do-lisp-to-cps)
 (defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
+(defparameter *transfer-table* (make-transfer-table))
 
 (let ((av (argv)))
   (setf last-arg (elt av (- (length av) 1))))
 
-(format t "~a~%" last-arg)
+;(format t "~a~%" last-arg)
+;(format t "transfer-table:~a~%" *transfer-table*)
 
 (set-test-files 8)
 (set-test-files '(9 10))
+(set-test-files '(1))
+(set-test-files '(11 12))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)
