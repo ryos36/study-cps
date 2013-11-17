@@ -12,8 +12,10 @@ lisp-v2 クロージャを入れた。
         v1 と v2 で環境(*env* 本当は context)の形式が違うのに注意
         v1 は (a b) で v2 が (a . b)
 cps インタプリタ: クロージャーに対応したつもり。
+        テストが不十分
 cps transfer naive: 効率の悪いバージョンかつ let および define を実装せず
         fix も 関数内の cps が 1 cps と限定的。
         なお lisp の fix は begin を意味的に含むが
         cps の方は begin を含まない(やや混乱気味)
+        heap もないや、、、
 cps transfer: 作り始めた

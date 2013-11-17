@@ -17,18 +17,12 @@
 ;----------------------------------------------------------------
   
 (defun terminal-transfer (expr env)
-  (labels ((scheme-to-lisp-symbol (expr)
-                                 (case expr
-                                   (:#f nil)
-                                   (:#t t)
-                                   (otherwise expr))))
+  (let ((arg0 expr)
 
-    (let ((arg0 expr)
+        (result-sym (car env))
+        (continuation (cdr env)))
 
-          (result-sym (car env))
-          (continuation (cdr env)))
-
-      (copy-tree `(:id (,arg0) (,result-sym) (,continuation))))))
+    (copy-tree `(:id (,arg0) (,result-sym) (,continuation)))))
 
 ;----------------------------------------------------------------
 (let ((no 0))
