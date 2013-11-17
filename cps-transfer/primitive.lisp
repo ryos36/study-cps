@@ -16,11 +16,11 @@
           (cont-lambda (car context))
           (table-list (cdr context)))
 
-
-      (format t "do +:~a ~a~%" arg0 arg1)
+      (format t "do +:~a ~a result-sym:~a~%" arg0 arg1 result-sym)
+      (format t "   cl:~a~%" cont-lambda)
 
       (setf cont-result
-            (fill-cont (funcall cont-lambda result-sym)))
+            (fill-cont (call-continuation-lambda cont-lambda result-sym)))
 
       (setf arg1-result
             (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
