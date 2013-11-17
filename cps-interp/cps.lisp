@@ -155,10 +155,11 @@
 
 
 ;----------------------------------------------------------------
+;(:exit (r) () ())
 (defun cps-exit (expr env)
-  (let ((result (parse-expr-terminal (cadr expr) env)))
-  (format *cps-exit-output* "cps-exit:~a~%" result)
-  result))
+  (let ((result (parse-expr-terminal (caadr expr) env)))
+    (format *cps-exit-output* "cps-exit:~a~%" result)
+    result))
         
 ;----------------------------------------------------------------
 (defparameter *debug-mode* nil)

@@ -1,0 +1,3 @@
+(+ 3 5):
+(ID (3) (sym3)
+ ((ID (5) (sym4) ((+ (sym3 sym4) (sym1) ((EXIT (sym1) NIL NIL)))))))

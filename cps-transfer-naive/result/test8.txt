@@ -1,0 +1,10 @@
+(IF #F 3 5):
+(ID (#F) (sym5)
+ ((NEQ (sym5 #F) NIL
+   ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+    (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))))
+(IF #T 3 5):
+(ID (#T) (sym6)
+ ((NEQ (sym6 #F) NIL
+   ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+    (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))))

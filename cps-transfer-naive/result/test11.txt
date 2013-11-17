@@ -1,0 +1,12 @@
+(+ 4 5):
+(ID (4) (sym45)
+ ((ID (5) (sym46) ((+ (sym45 sym46) (sym1) ((EXIT (sym1) NIL NIL)))))))
+(- 3 2):
+(ID (3) (sym47)
+ ((ID (2) (sym48) ((- (sym47 sym48) (sym1) ((EXIT (sym1) NIL NIL)))))))
+(<< 10 3):
+(ID (10) (sym49)
+ ((ID (3) (sym50) ((<< (sym49 sym50) (sym1) ((EXIT (sym1) NIL NIL)))))))
+(>> 1023 3):
+(ID (1023) (sym51)
+ ((ID (3) (sym52) ((>> (sym51 sym52) (sym1) ((EXIT (sym1) NIL NIL)))))))

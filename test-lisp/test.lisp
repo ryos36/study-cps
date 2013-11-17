@@ -5,6 +5,7 @@
 (defparameter *test-result-dir* "result/")
 (defparameter *test-files* nil)
 (defparameter *test-parse-func* nil)
+(defparameter *test-save* t)
 
 (defun set-test-files (max-no-or-no-list)
   (setf *test-files* 
@@ -47,7 +48,8 @@
           (setf lisp-test-list
                 (with-open-file (in scm-file)
                   (read in)))
-          (setf result-txt (read-file result-file))
+          (if *test-save*
+            (setf result-txt (read-file result-file)))
 
           (setf result
                 (with-output-to-string (str)
@@ -77,10 +79,11 @@
                           (string-right-trim trim-string result-txt))
                       "Passed" "Failed"))
             (progn
-              (with-open-file (out result-file :if-does-not-exist :create :direction :output)
+              (when *test-save*
+               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
                 (format out "~a" result))
 
-              (format t "~a:Saved~%" name)
+               (format t "~a:Saved~%" name))
               (format t  "--------------Result:-----------~%")
               (format t "~a~%" result)
               (format t  "--------------------------------~%")))

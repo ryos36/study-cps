@@ -1,0 +1,72 @@
+(IF (> 3 5) 3 5):
+(ID (3) (sym57)
+ ((ID (5) (sym58)
+   ((> (sym57 sym58) (sym56)
+     (((NEQ (sym56 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym56 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))
+(IF (< 3 5) 3 5):
+(ID (3) (sym60)
+ ((ID (5) (sym61)
+   ((< (sym60 sym61) (sym59)
+     (((NEQ (sym59 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym59 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))
+(IF (>= 3 5) 3 5):
+(ID (3) (sym63)
+ ((ID (5) (sym64)
+   ((>= (sym63 sym64) (sym62)
+     (((NEQ (sym62 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym62 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))
+(IF (<= 3 5) 3 5):
+(ID (3) (sym66)
+ ((ID (5) (sym67)
+   ((<= (sym66 sym67) (sym65)
+     (((NEQ (sym65 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym65 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))
+(IF (= 3 5) 3 5):
+(ID (3) (sym69)
+ ((ID (5) (sym70)
+   ((= (sym69 sym70) (sym68)
+     (((NEQ (sym68 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym68 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))
+(IF (= 3 3) 3 5):
+(ID (3) (sym72)
+ ((ID (3) (sym73)
+   ((= (sym72 sym73) (sym71)
+     (((NEQ (sym71 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym71 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))

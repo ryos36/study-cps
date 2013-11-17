@@ -1,0 +1,12 @@
+(IF (> 3 5) 3 5):
+(ID (3) (sym54)
+ ((ID (5) (sym55)
+   ((> (sym54 sym55) (sym53)
+     (((NEQ (sym53 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #T)
+      ((NEQ (sym53 #F) NIL
+        ((ID (3) (sym1) ((EXIT (sym1) NIL NIL)))
+         (ID (5) (sym1) ((EXIT (sym1) NIL NIL)))))
+       #F)))))))

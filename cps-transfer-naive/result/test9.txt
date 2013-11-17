@@ -1,6 +1,6 @@
 (FIX ((ADD (A0 A1) (+ A0 A1))) (ADD 2 3)):
 (FIX
- ((ADD (sym3 A0 A1)
-   (ID (A0) (sym5)
-    ((ID (A1) (sym6) ((+ (sym5 sym6) (sym4) ((APP sym3 (sym4))))))))))
- (APP ADD (sym2 2 3)))
+ ((ADD (sym7 A0 A1)
+   (ID (A0) (sym9)
+    ((ID (A1) (sym10) ((+ (sym9 sym10) (sym8) ((APP sym7 (sym8))))))))))
+ (FIX ((sym11 (sym12) ((EXIT (sym1) NIL NIL) sym12))) (APP ADD (sym11 2 3))))

@@ -14,7 +14,7 @@
        (do-lisp-to-cps arg1 (cons arg1-sym
          (copy-tree `(,,op (,arg0-sym ,arg1-sym) (,result-sym) (,continuation)))))))))
 
-(defun primitive-comparison (expr env op) 
+(defmacro primitive-comparison (expr env op) 
   `(let ((arg0 (cadr expr))
          (arg1 (caddr expr))
 
@@ -25,7 +25,7 @@
 
      (do-lisp-to-cps arg0 (cons arg0-sym 
        (do-lisp-to-cps arg1 (cons arg1-sym
-         (copy-tree `(,,op (,arg0-sym ,arg1-sym) () ((,continuation :#t)(,continuation :#f))))))))))
+         (copy-tree `(,,op (,arg0-sym ,arg1-sym) (,result-sym) ((,continuation :#t)(,continuation :#f))))))))))
 
 
 (defun +-two (expr env)

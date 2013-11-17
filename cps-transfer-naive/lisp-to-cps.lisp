@@ -44,7 +44,9 @@
 (defun make-exit-continuous ()
   (let ((r (cps-gensym))
         (k (cps-gensym)))
-    (copy-tree `(,r . (:exit ,r)))))
+    (copy-tree `(,r . 
+                 (:exit (,r) () ())
+                 ))))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr env)
@@ -97,16 +99,21 @@
       (copy-tree `(:fix ,cps-binds
                         ,(do-lisp-to-cps fix-expr env))))))
 
+
 ;----------------------------------------------------------------
 (defun user-func-call-transfer (expr env)
   (let ((func-name (car expr))
         (args (cdr expr))
 
-        (continuation-sym (cdr env)))
-(format t "**** USER:~a~%" expr)
+        (inner-func-name (cps-gensym))
+        (inner-func-arg0 (cps-gensym))
 
-    (let ((cps-new-args (cons continuation-sym args)))
-      (copy-tree `(:app ,func-name ,cps-new-args)))))
+        (continuation (cdr env)))
+
+    (let ((cps-new-args (cons inner-func-name args)))
+      (copy-tree `(:fix ((,inner-func-name (,inner-func-arg0)
+                                           (,continuation ,inner-func-arg0)))
+        (:app ,func-name ,cps-new-args))))))
 
 
 ;----------------------------------------------------------------

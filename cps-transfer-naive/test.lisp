@@ -7,6 +7,7 @@
 (defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
 (defparameter *transfer-table* (make-transfer-table))
+;(defparameter *test-save* nil)
 
 (let ((av (argv)))
   (setf last-arg (elt av (- (length av) 1))))
@@ -14,10 +15,7 @@
 ;(format t "~a~%" last-arg)
 ;(format t "transfer-table:~a~%" *transfer-table*)
 
-(set-test-files 8)
-(set-test-files '(9 10))
-(set-test-files '(1))
-(set-test-files '(11 12))
+(set-test-files '(7 8 9 10 11 12 13 14))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)
