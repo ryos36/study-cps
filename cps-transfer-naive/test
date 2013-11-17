@@ -1,8 +1,0 @@
-
-(if-transfer '(:if :#f 3 5) (cons 'exit-msg '(:exit exit-msg)))
-(:ID (:|#F|) (#:G3109)
-      ((:NEQ (#:G3109 :|#F|) NIL
-                ((:ID (3) (NIL) ((:EXIT EXIT-MSG))) (:ID (5) (NIL) ((:EXIT EXIT-MSG)))))))
-(ID (#F) (G2954)
- ((NEQ (G2954 #F) NIL
-    ((ID (3) (NIL) ((EXIT G2919))) (ID (5) (NIL) ((EXIT G2919)))))))

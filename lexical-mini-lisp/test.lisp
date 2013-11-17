@@ -6,5 +6,5 @@
 (defparameter *test-parse-func* #'parse-mini-lisp)
 ;(defparameter *debug-mode* t)
 
-(set-test-files '(10))
+(set-test-files 10)
 (do-test)

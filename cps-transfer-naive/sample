@@ -1,9 +1,0 @@
-(:fix ((F (a0 a1) (:+ a0 a1))) F)
-
-(:fix [(F (kont a0 a1) (:+ [a0 a1] [r] ((:app kont (r)))))] KONT)
-
-
-((:fix ((F (a0 a1) (:+ a0 a1))) F) 5 10)
-
-(:id [5] [x0] (:id [10] [x1]
-  (:fix [(F (kont a0 a1) (:+ [a0 a1] [r] ((:app kont (r)))))] (:app F (kont x0 x1)))))
