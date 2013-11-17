@@ -62,6 +62,7 @@
 
 ;----------------------------------------------------------------
 (defun terminal-transfer (expr context)
+(format t "terminal-transfer ~a~%" expr)
     (let ((arg0 (valiable-rename expr context))
 
           (cont-lambda (car context)))
@@ -100,24 +101,23 @@
 
 
 ;----------------------------------------------------------------
-;(defmacro make-let-arg-template ()
-;  `
 
 (setf my-result nil)
 (setf key nil)
 (setf my-table nil)
 (defun my-callback (new-sym)
-  (let ((callbacks (getf key my-table)))
+  (let ((callbacks (gethash key my-table)))
     (dolist (callback callbacks)
       (funcall callback new-sym)))
    my-result)
 
 (defun let-transfer (expr context)
+
   (let ((cont-lambda (car context))
         (table-list (cdr context))
         (table (make-hash-table)))
 
-    (let ((new-context (cont-lambda (cons table table-list)))
+    (let ((new-context (cons cont-lambda (cons table table-list)))
           (let-args-reverse (reverse (cadr expr)))
           (let-body-reverse (reverse (cddr expr)))
           result)
@@ -128,15 +128,15 @@
 
       (dolist (let-body-one let-body-reverse)
         (setf result (do-lisp-to-cps let-body-one new-context))
-(format t "result:~a~%" result)
         (setf (car new-context) result))
+
+(format t "XXXXXXXXXXXXXXXresult:~a~%" result)
 
       (setf my-result result)
       (setf my-table table)
       (setf (car new-context) #'my-callback)
 
       (dolist (let-arg let-args-reverse)
-(format t "arg result:~a~%" result)
         (let ((let-arg-sym (car let-arg))
               (let-arg-body (cadr let-arg)))
           (setf key let-arg-sym)
