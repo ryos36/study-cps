@@ -4,7 +4,7 @@
 (defparameter *test-script-dir* "../scm-script/" )
 (defparameter *test-ext* ".scm")
 (defparameter *test-parse-func* #'do-lisp-to-cps)
-(defparameter *debug-mode* t)
+(defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
 (defparameter *transfer-table* (make-transfer-table))
 (defparameter *test-save* nil)

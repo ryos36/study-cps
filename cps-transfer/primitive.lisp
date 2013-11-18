@@ -16,8 +16,8 @@
           (cont-lambda (car context))
           (table-list (cdr context)))
 
-      (format t "do +:~a ~a result-sym:~a~%" arg0 arg1 result-sym)
-      (format t "   cl:~a~%" cont-lambda)
+      ;(format t "do +:~a ~a result-sym:~a~%" arg0 arg1 result-sym)
+      ;(format t "   cl:~a~%" cont-lambda)
 
       (setf cont-result
             (fill-cont (call-continuation-lambda cont-lambda result-sym)))
