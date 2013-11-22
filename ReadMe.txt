@@ -19,3 +19,5 @@ cps transfer naive: 効率の悪いバージョンかつ let および define を実装せず
         cps の方は begin を含まない(やや混乱気味)
         heap もないや、、、
 cps transfer: 作り始めた
+cps eta-reduction: 簡単バージョンができた。
+clousure 変換。途中。先に inline の最適化をしないといけない。
