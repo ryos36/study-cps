@@ -1,23 +1,23 @@
-‚Æ‚è‚ ‚¦‚¸Ž©•ª‚Ì CPS ‚Ì•×‹­—p‚Éì‚éB
+ã¨ã‚Šã‚ãˆãšè‡ªåˆ†ã® CPS ã®å‹‰å¼·ç”¨ã«ä½œã‚‹ã€‚
 
-‚Ü‚¸‚Í lisp ƒCƒ“ƒ^ƒvƒŠƒ^‚ðì‚èA
-cps ƒCƒ“ƒ^ƒvƒŠƒ^‚ðì‚èA
-‚»‚ÌŒã cps •ÏŠ·Ší‚ð‚Â‚­‚éB
+ã¾ãšã¯ lisp ã‚¤ãƒ³ã‚¿ãƒ—ãƒªã‚¿ã‚’ä½œã‚Šã€
+cps ã‚¤ãƒ³ã‚¿ãƒ—ãƒªã‚¿ã‚’ä½œã‚Šã€
+ãã®å¾Œ cps å¤‰æ›å™¨ã‚’ã¤ãã‚‹ã€‚
 
-uƒRƒ“ƒpƒCƒ‰ì¬ŽÀŒ±Ž‘—¿v‚Æ‚¢‚¤ 1996 ”N‚Ì‚Æ‚ ‚é‘åŠw‚Ì ŽÀK(?)Ž‘—¿‚ð
-Œ³‚Éì‚Á‚Ä‚¢‚éB‚Æ‚Í‚¢‚¦AŸŽè‚È‰ðŽß‚ð‚µ‚Ä•ÏX‚à‚µ‚Ä‚¢‚éB
+ã€Œã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ä½œæˆå®Ÿé¨“è³‡æ–™ã€ã¨ã„ã† 1996 å¹´ã®ã¨ã‚ã‚‹å¤§å­¦ã® å®Ÿç¿’(?)è³‡æ–™ã‚’
+å…ƒã«ä½œã£ã¦ã„ã‚‹ã€‚ã¨ã¯ã„ãˆã€å‹æ‰‹ãªè§£é‡ˆã‚’ã—ã¦å¤‰æ›´ã‚‚ã—ã¦ã„ã‚‹ã€‚
 
-lisp-v1 •’Ê‚Éì‚Á‚½‚çƒ_ƒCƒiƒ~ƒbƒNƒXƒR[ƒv‚É‚È‚Á‚Ä‚µ‚Ü‚Á‚½B
-lisp-v2 ƒNƒ[ƒWƒƒ‚ð“ü‚ê‚½B
-        v1 ‚Æ v2 ‚ÅŠÂ‹«(*env* –{“–‚Í context)‚ÌŒ`Ž®‚ªˆá‚¤‚Ì‚É’ˆÓ
-        v1 ‚Í (a b) ‚Å v2 ‚ª (a . b)
-cps ƒCƒ“ƒ^ƒvƒŠƒ^: ƒNƒ[ƒWƒƒ[‚É‘Î‰ž‚µ‚½‚Â‚à‚èB
-        ƒeƒXƒg‚ª•s\•ª
-cps transfer naive: Œø—¦‚Ìˆ«‚¢ƒo[ƒWƒ‡ƒ“‚©‚Â let ‚¨‚æ‚Ñ define ‚ðŽÀ‘•‚¹‚¸
-        fix ‚à ŠÖ”“à‚Ì cps ‚ª 1 cps ‚ÆŒÀ’è“IB
-        ‚È‚¨ lisp ‚Ì fix ‚Í begin ‚ðˆÓ–¡“I‚ÉŠÜ‚Þ‚ª
-        cps ‚Ì•û‚Í begin ‚ðŠÜ‚Ü‚È‚¢(‚â‚â¬—‹C–¡)
-        heap ‚à‚È‚¢‚âAAA
-cps transfer: ì‚èŽn‚ß‚½
-cps eta-reduction: ŠÈ’Pƒo[ƒWƒ‡ƒ“‚ª‚Å‚«‚½B
-clousure •ÏŠ·B“r’†Bæ‚É inline ‚ÌÅ“K‰»‚ð‚µ‚È‚¢‚Æ‚¢‚¯‚È‚¢B
+lisp-v1 æ™®é€šã«ä½œã£ãŸã‚‰ãƒ€ã‚¤ãƒŠãƒŸãƒƒã‚¯ã‚¹ã‚³ãƒ¼ãƒ—ã«ãªã£ã¦ã—ã¾ã£ãŸã€‚
+lisp-v2 ã‚¯ãƒ­ãƒ¼ã‚¸ãƒ£ã‚’å…¥ã‚ŒãŸã€‚
+        v1 ã¨ v2 ã§ç’°å¢ƒ(*env* æœ¬å½“ã¯ context)ã®å½¢å¼ãŒé•ã†ã®ã«æ³¨æ„
+        v1 ã¯ (a b) ã§ v2 ãŒ (a . b)
+cps ã‚¤ãƒ³ã‚¿ãƒ—ãƒªã‚¿: ã‚¯ãƒ­ãƒ¼ã‚¸ãƒ£ãƒ¼ã«å¯¾å¿œã—ãŸã¤ã‚‚ã‚Šã€‚
+        ãƒ†ã‚¹ãƒˆãŒä¸ååˆ†
+cps transfer naive: åŠ¹çŽ‡ã®æ‚ªã„ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‹ã¤ let ãŠã‚ˆã³ define ã‚’å®Ÿè£…ã›ãš
+        fix ã‚‚ é–¢æ•°å†…ã® cps ãŒ 1 cps ã¨é™å®šçš„ã€‚
+        ãªãŠ lisp ã® fix ã¯ begin ã‚’æ„å‘³çš„ã«å«ã‚€ãŒ
+        cps ã®æ–¹ã¯ begin ã‚’å«ã¾ãªã„(ã‚„ã‚„æ··ä¹±æ°—å‘³)
+        heap ã‚‚ãªã„ã‚„ã€ã€ã€
+cps transfer: ä½œã‚Šå§‹ã‚ãŸ
+cps eta-reduction: ç°¡å˜ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãŒã§ããŸã€‚
+clousure å¤‰æ›ã€‚é€”ä¸­ã€‚å…ˆã« inline ã®æœ€é©åŒ–ã‚’ã—ãªã„ã¨ã„ã‘ãªã„ã€‚
