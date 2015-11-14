@@ -18,6 +18,12 @@ cps transfer naive: 効率の悪いバージョンかつ let および define �
         なお lisp の fix は begin を意味的に含むが
         cps の方は begin を含まない(やや混乱気味)
         heap もないや、、、
+        だいぶあやしい
+        let がない。
+
 cps transfer: 作り始めた
+        なぜか let がある。
+        let はトリッキーだがうまくいっている模様
+
 cps eta-reduction: 簡単バージョンができた。
 clousure 変換。途中。先に inline の最適化をしないといけない。
