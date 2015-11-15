@@ -7,7 +7,7 @@
 (defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
 (defparameter *transfer-table* (make-transfer-table))
-(defparameter *test-save* nil)
+;(defparameter *test-save* nil)
 
 (let ((av (argv)))
   (setf last-arg (elt av (- (length av) 1))))

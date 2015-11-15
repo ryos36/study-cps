@@ -79,11 +79,20 @@
 (load "primitive.lisp")
 
 ;----------------------------------------------------------------
-(defun make-exit-continuous ()
+(defun old-xmake-exit-continuous ()
   (let ((new-cps-expr (copy-list `(:exit (ARG0) () ()))))
     (flet ((fill-arg0 (arg0) (setf (caadr new-cps-expr) arg0) new-cps-expr))
 
       (cons #'fill-arg0 nil))))
+
+(defmacro make-exit-continuous0 ()
+  (let ((new-cps-expr '`(:exit (,arg0) () ())))
+    `(lambda (arg0)
+       (let ((new-cps-expr ,new-cps-expr))
+         new-cps-expr))))
+
+(defun make-exit-continuous ()
+      (cons (make-exit-continuous0) nil))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr context)
