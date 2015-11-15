@@ -38,9 +38,9 @@
 (defun make-exit-continuous ()
   (let ((r (cps-gensym))
         (k (cps-gensym)))
-    (copy-tree `(,r . 
-                 (:exit (,r) () ())
-                 ))))
+    `(,r . 
+         (:exit (,r) () ())
+         )))
 
 ;----------------------------------------------------------------
 (defun exit-transfer (expr env)
@@ -62,10 +62,10 @@
         (result-sym (car env))
         (continuation (cdr env)))
 
-    (do-lisp-to-cps condition-expr (cons condition-sym
-      (copy-tree `(:neq (,condition-sym :#f) () (
-         ,(do-lisp-to-cps true-clouse (cons result-sym continuation))
-         ,(do-lisp-to-cps false-clouse (cons result-sym continuation)))))))))
+    (do-lisp-to-cps condition-expr `(,condition-sym .
+      (:neq (,condition-sym :#f) () (
+         ,(do-lisp-to-cps true-clouse `(,result-sym . ,continuation))
+         ,(do-lisp-to-cps false-clouse `(,result-sym . ,continuation))))))))
 
 ;----------------------------------------------------------------
 ;(func-name (arg*) expr)

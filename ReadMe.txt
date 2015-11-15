@@ -11,19 +11,30 @@ lisp-v1 普通に作ったらダイナミックスコープになってしまっ
 lisp-v2 クロージャを入れた。
         v1 と v2 で環境(*env* 本当は context)の形式が違うのに注意
         v1 は (a b) で v2 が (a . b)
-cps インタプリタ: クロージャーに対応したつもり。
-        テストが不十分
-cps transfer naive: 効率の悪いバージョンかつ let および define を実装せず
-        fix も 関数内の cps が 1 cps と限定的。
-        なお lisp の fix は begin を意味的に含むが
-        cps の方は begin を含まない(やや混乱気味)
-        heap もないや、、、
-        だいぶあやしい
-        let がない。
 
-cps transfer: 作り始めた
-        なぜか let がある。
-        let はトリッキーだがうまくいっている模様
+cps-interp: cps の インタプリタ
+  クロージャーに対応したつもり。
+  テストが不十分
+  cps 変換が出来たら検証用に必要だと思って作った。
+  がいまだ必要とされず。
 
-cps eta-reduction: 簡単バージョンができた。
-clousure 変換。途中。先に inline の最適化をしないといけない。
+cps-transfer-naive: 効率の悪いバージョンかつ let および define を実装せず
+    fix も 関数内の cps が 1 cps と限定的。
+    なお lisp の fix は begin を意味的に含むが
+    cps の方は begin を含まない(やや混乱気味)
+    heap もないや、、、
+    だいぶあやしい
+    let がない。
+    id がいっぱいできる。
+    lisp のマクロを理解していないころのものなので不必要な copy-tree が
+    随所にある。
+
+cps-transfer: 作り始めた
+    なぜか let がある。
+    let はトリッキーだがうまくいっている模様
+
+cps-eta-reduction: 簡単バージョンができた。
+    どこにもない(2015/11/15)気がする。
+
+k-clousure
+    clousure 変換。途中。先に inline の最適化をしないといけない。
