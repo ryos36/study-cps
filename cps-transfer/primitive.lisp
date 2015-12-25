@@ -28,8 +28,21 @@
              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))))))
 
 (make-two-args-primitive --two :-)
+(make-two-args-primitive +-two :+)
+(make-two-args-primitive *-two :*)
 
-(defun +-two (expr context)
+(make-two-args-primitive >>-two :>>)
+(make-two-args-primitive <<-two :<<)
+
+(make-two-args-primitive >-two :>)
+(make-two-args-primitive <-two :<)
+(make-two-args-primitive >=-two :>=)
+(make-two-args-primitive <=-two :<=)
+(make-two-args-primitive =-two :=)
+
+
+#|
+(defun old-+-two (expr context)
   (let* ((result-sym (cps-gensym))
          (new-cps-expr (copy-tree `(:+ (ARG0 ARG1) (,result-sym) (CONT))))
          cont-result arg1-result)
@@ -54,3 +67,4 @@
               (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
 
         (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+|#
