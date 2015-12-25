@@ -19,9 +19,12 @@
 
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
-  (or (null expr)
-      (symbolp expr)
-      (numberp expr)))
+  (or 
+    (eq :#t expr)
+    (eq :#f expr)
+    (null expr)
+    (symbolp expr)
+    (numberp expr)))
 
 ;----------------------------------------------------------------
 ;
