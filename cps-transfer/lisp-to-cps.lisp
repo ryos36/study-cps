@@ -85,23 +85,28 @@
 
       (cons #'fill-arg0 nil))))
 
-(defmacro make-exit-continuous0 ()
+(defmacro make-exit-transfer-lambda ()
   (let ((new-cps-expr '`(:exit (,arg0) () ())))
     `(lambda (arg0)
        (let ((new-cps-expr ,new-cps-expr))
          new-cps-expr))))
 
 (defun make-exit-continuous ()
-      (cons (make-exit-continuous0) nil))
+      (cons (make-exit-transfer-lambda) nil))
 
 ;----------------------------------------------------------------
-(defun exit-transfer (expr context)
+(defun x-exit-transfer (expr context)
   (flet ((exit-transfer-lambda (r0)
            (copy-tree `(:exit (,r0) () ()))))
 
   (let ((arg0 (cadr expr))
         (table-list (cdr context)))
     (do-lisp-to-cps arg0 (cons #'exit-transfer-lambda table-list)))))
+
+(defun exit-transfer (expr context)
+  (let ((arg0 (cadr expr))
+        (table-list (cdr context)))
+    (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
 
 ;----------------------------------------------------------------
 ;(func-name (arg*) expr)
