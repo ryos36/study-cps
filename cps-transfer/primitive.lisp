@@ -1,39 +1,33 @@
 ;----------------------------------------------------------------
 ; primitive
 
-(defmacro make---two-lambda-list ()
-  (let* ((result-sym (cps-gensym))
-         (template-cps-expr ``(:- (,arg0 ,arg1) (,result-sym) (,kont))))
-    `(let (arg1-result kont-result)
-       (list (lambda (arg0)
-               (let ((new-cps-expr ,template-cps-expr))
-                 arg1-result))
+(defmacro xmake-two-args-primitive (func-name op)
+  `(defun ,func-name (x) ,op))
 
-             (lambda (arg1)
-               (let ((new-cps-expr ,template-cps-expr))
-                 kont-result))
+(defmacro make-two-args-primitive (func-name op)
+    `(defun ,func-name (expr context)
+       (let* ((result-sym (cps-gensym))
+              (new-cps-expr (copy-tree `(,,op (ARG0 ARG1) (,result-sym) (CONT))))
+              arg1-result cont-result)
+         (flet ((fill-cont (cont) (setf (caadddr new-cps-expr) cont) new-cps-expr)
+                (fill-arg1 (arg1) (setf (cadadr new-cps-expr) arg1) cont-result)
+                (fill-arg0 (arg0) (setf (caadr new-cps-expr) arg0) arg1-result))
 
-             (lambda (kont)
-               (let ((new-cps-expr ,template-cps-expr))
-                 new-cps-expr))
+           (let ((arg0 (cadr expr))
+                 (arg1 (caddr expr))
 
-             (lambda (arg2)
-               (setf arg1-result arg2))
+                 (cont-lambda (car context))
+                 (table-list (cdr context)))
 
-             (lambda (arg2)
-               (setf arg1-result arg2))
-               )))))
+             (setf cont-result
+                   (fill-cont (call-continuation-lambda cont-lambda result-sym)))
 
-(defun xxx--two (expr xcontext)
-  (let ((lambda-list (make---two-lambda-list context))
-        (arg0 (cadr expr))
-        (arg1 (cadr expr))
-        (table-list (cdr xcontext)))
+             (setf arg1-result
+                   (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
 
-    (funcall (caddr lambda-list)
-          (do-lisp-to-cps arg1 (cons (cadr lambda-list) table-list)))
+             (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))))))
 
-    (do-lisp-to-cps arg0 (cons (car lambda-list) table-list))))
+(make-two-args-primitive --two :-)
 
 (defun +-two (expr context)
   (let* ((result-sym (cps-gensym))
@@ -44,19 +38,19 @@
            (fill-arg1 (arg1) (setf (cadadr new-cps-expr) arg1) cont-result)
            (fill-cont (cont) (setf (caadddr new-cps-expr) cont) new-cps-expr))
 
-    (let ((arg0 (cadr expr))
-          (arg1 (caddr expr))
+      (let ((arg0 (cadr expr))
+            (arg1 (caddr expr))
 
-          (cont-lambda (car context))
-          (table-list (cdr context)))
+            (cont-lambda (car context))
+            (table-list (cdr context)))
 
-      ;(format t "do +:~a ~a result-sym:~a~%" arg0 arg1 result-sym)
-      ;(format t "   cl:~a~%" cont-lambda)
+        ;(format t "do +:~a ~a result-sym:~a~%" arg0 arg1 result-sym)
+        ;(format t "   cl:~a~%" cont-lambda)
 
-      (setf cont-result
-            (fill-cont (call-continuation-lambda cont-lambda result-sym)))
+        (setf cont-result
+              (fill-cont (call-continuation-lambda cont-lambda result-sym)))
 
-      (setf arg1-result
-            (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
+        (setf arg1-result
+              (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
 
-      (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+        (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))

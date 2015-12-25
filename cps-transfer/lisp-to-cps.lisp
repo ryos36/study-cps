@@ -70,7 +70,8 @@
 
 ;----------------------------------------------------------------
 (let ((no 0))
- (defun cps-gensym () 
+ (defun cps-gensym (&optional do-init )
+   (if do-init (setf no (if (numberp do-init) do-init 0)))
    (if *cps-gensym-debug*
      (intern (format nil "sym~a" (incf no)))
      (gensym))))
@@ -158,8 +159,8 @@
                        (func (cdr x)))
                    (setf (gethash op table) func)))
          `((:+ . ,#'+-two)
-           #|
            (:- . ,#'--two)
+           #|
            (:>> . ,#'>>-two)
            (:<< . ,#'<<-two)
 

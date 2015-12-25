@@ -35,8 +35,10 @@
                     (string #\return)
                     (string #\newline)))
 (defun do-test ()
+   (if (null (directory *test-result-dir*)) (ext:make-directory *test-result-dir*))
   (mapcar 
     #'(lambda (name)
+        (cps-gensym 0) ; reset
         (let 
           ((scm-file (string-concat *test-script-dir* name *test-ext*))
            lisp-test-list
