@@ -17,7 +17,7 @@
 
 (set-test-files '(7 15 16))
 (set-test-files '(7 15 16 17 18))
-(set-test-files '(10 17 18 19 20))
+(set-test-files '(17 18 19 20))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)

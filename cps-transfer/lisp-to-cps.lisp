@@ -80,15 +80,10 @@
      (gensym))))
 
 ;----------------------------------------------------------------
+(load "make-cxr-route.lisp")
 (load "primitive.lisp")
 
 ;----------------------------------------------------------------
-(defun old-xmake-exit-continuous ()
-  (let ((new-cps-expr (copy-list `(:exit (ARG0) () ()))))
-    (flet ((fill-arg0 (arg0) (setf (caadr new-cps-expr) arg0) new-cps-expr))
-
-      (cons #'fill-arg0 nil))))
-
 (defmacro make-exit-transfer-lambda ()
   (let ((new-cps-expr '`(:exit (,arg0) () ())))
     `(lambda (arg0)
@@ -99,21 +94,36 @@
       (cons (make-exit-transfer-lambda) nil))
 
 ;----------------------------------------------------------------
-(defun x-exit-transfer (expr context)
-  (flet ((exit-transfer-lambda (r0)
-           (copy-tree `(:exit (,r0) () ()))))
-
-  (let ((arg0 (cadr expr))
-        (table-list (cdr context)))
-    (do-lisp-to-cps arg0 (cons #'exit-transfer-lambda table-list)))))
-
 (defun exit-transfer (expr context)
   (let ((arg0 (cadr expr))
         (table-list (cdr context)))
     (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
 
 ;----------------------------------------------------------------
-;(func-name (arg*) expr)
+(defun if-transfer (expr context)
+  (let* ((inner-func-name (cps-gensym))
+         (clouse-result-sym (cps-gensym))
+         (cont-result-sym (cps-gensym))
+         (new-cps-expr 
+           (copy-tree 
+             `(:FIXS ((,inner-func-name (,clouse-result) CONT))
+                     (:NEQ? (,cont-result-sym :#f)
+                            ((:APP ,inner-func-name (TRUE-CLOUSE))
+                             (:APP ,inner-func-name (FALSE-CLOUSE)))))))
+         fill-cont-result
+         fill-true-result
+         fill-false-result)
+
+    (flet ((fill-cont (cont) (setf (cxr '(A A D D A A D) new-cps-expr) cont) new-cps-expr)
+           (fill-true (true-clouse) (setf (cxr '(A A A D D A A D D A D D) new-cps-expr)
+
+
+    (let ((cont-lambda (car context))
+          (table-list (cdr context))
+
+          (condition-expr (cadr expr))
+          (true-clouse (caddr expr))
+          (false-clouse (cadddr expr)))
 
 
 ;----------------------------------------------------------------
