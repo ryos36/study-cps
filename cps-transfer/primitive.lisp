@@ -5,8 +5,9 @@
     `(defun ,func-name (expr context)
        (let* ((result-sym (cps-gensym))
               (new-cps-expr (copy-tree `(,,op (ARG0 ARG1) (,result-sym) (CONT))))
+              (cont-list (pickup-list new-cps-expr 'CONT))
               arg1-result cont-result)
-         (flet ((fill-cont (cont) (setf (caadddr new-cps-expr) cont) new-cps-expr)
+         (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
                 (fill-arg1 (arg1) (setf (cadadr new-cps-expr) arg1) cont-result)
                 (fill-arg0 (arg0) (setf (caadr new-cps-expr) arg0) arg1-result))
 

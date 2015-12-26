@@ -9,6 +9,7 @@
   (load "lisp-to-cps.lisp"))
 
 ;----------------------------------------------------------------
+#|
 (defun caadddr (tree)
          (car (cadddr tree)))
 
@@ -16,6 +17,7 @@
   (setf (car (cadddr tree)) value))
 
 (defsetf caadddr caadddr-set)
+|#
 
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
