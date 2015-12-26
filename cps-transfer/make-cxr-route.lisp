@@ -29,21 +29,3 @@
       (do-cxr (reverse (cdr rv-cxr)) expr))))
 
 
-#|
-(let ((expr '(:FIXS ((x-inner-func-name (x-clouse-result) CONT))
-                    (:NEQ? (x-cont-result-sym :#f)
-                           ((:APP x-inner-func-name (TRUE-CLOUSE))
-                            (:APP x-inner-func-name (FALSE-CLOUSE)))))))
-  (let ((e0 (print-route expr 'CONT))
-        (e1 (print-route expr 'TRUE-CLOUSE))
-        (e2 (print-route expr 'FALSE-CLOUSE)))
-
-    (flet ((ee0 (a0) (setf (car e0) a0) expr)
-           (ee1 (a0) (setf (car e1) a0) expr)
-           (ee2 (a0) (setf (car e2) a0) expr))
-
-      (ee0 'put-into-cont)
-      (ee1 'put-into-true-clouse)
-      (ee2 'put-into-false-clouse)
-  (print expr))))
-|#

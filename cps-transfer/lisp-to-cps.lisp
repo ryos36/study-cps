@@ -102,29 +102,51 @@
 ;----------------------------------------------------------------
 (defun if-transfer (expr context)
   (let* ((inner-func-name (cps-gensym))
-         (clouse-result-sym (cps-gensym))
          (cont-result-sym (cps-gensym))
          (new-cps-expr 
            (copy-tree 
-             `(:FIXS ((,inner-func-name (,clouse-result) CONT))
-                     (:NEQ? (,cont-result-sym :#f)
-                            ((:APP ,inner-func-name (TRUE-CLOUSE))
-                             (:APP ,inner-func-name (FALSE-CLOUSE)))))))
-         fill-cont-result
-         fill-true-result
-         fill-false-result)
+             `(:FIXS ((,inner-func-name (,cont-result-sym) CONT))
+                     (:NEQ? (CLOUSE-RESULT :#f) ()
+                            (TRUE-CLOUSE FALSE-CLOUSE)))))
+         (true-clouse-expr
+          (copy-tree `(:APP ,inner-func-name (TRUE-RESULT-SYM))))
 
-    (flet ((fill-cont (cont) (setf (cxr '(A A D D A A D) new-cps-expr) cont) new-cps-expr)
-           (fill-true (true-clouse) (setf (cxr '(A A A D D A A D D A D D) new-cps-expr)
+         (false-clouse-expr
+          (copy-tree `(:APP ,inner-func-name (FALSE-RESULT-SYM))))
 
+         (cont-list (pickup-list new-cps-expr 'CONT))
+         (clouse-list (pickup-list new-cps-expr 'CLOUSE-RESULT))
+         (true-list (pickup-list new-cps-expr 'TRUE-CLOUSE))
+         (false-list (pickup-list new-cps-expr 'FALSE-CLOUSE))
+         cont-result
 
-    (let ((cont-lambda (car context))
-          (table-list (cdr context))
+         clouse-result
+         true-result)
 
-          (condition-expr (cadr expr))
-          (true-clouse (caddr expr))
-          (false-clouse (cadddr expr)))
+    ;(setf cl (pickup-list new-cps-expr 'CONT))
+    ;(setf true-list (pickup-list new-cps-expr 'TRUE-CLOUSE))
+    ;(setf false-list (pickup-list new-cps-expr 'FALSE-CLOUSE))
 
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+           (fill-true-symbol (sym) (setf (caaddr true-clouse-expr) sym) true-clouse-expr)
+           (fill-false-symbol (sym) (setf (caaddr false-clouse-expr) sym) false-clouse-expr)
+           (fill-true-clouse (true-clouse) (setf (car true-list) true-clouse) new-cps-expr)
+           (fill-false-clouse (false-clouse) (setf (car false-list) false-clouse) new-cps-expr)
+           (fill-clouse-result (clouse) (setf (car clouse-list) clouse) new-cps-expr))
+
+      (let ((cont-lambda (car context))
+            (table-list (cdr context))
+
+            (condition-expr (cadr expr))
+            (true-clouse (caddr expr))
+            (false-clouse (cadddr expr)))
+
+        (fill-cont (call-continuation-lambda cont-lambda cont-result-sym))
+        (fill-true-clouse
+              (do-lisp-to-cps true-clouse (cons #'fill-true-symbol table-list)))
+        (fill-false-clouse
+              (do-lisp-to-cps false-clouse (cons #'fill-false-symbol table-list)))
+        (do-lisp-to-cps condition-expr (cons #'fill-clouse-result table-list))))))
 
 ;----------------------------------------------------------------
 (defun let-transfer (expr context)
@@ -198,7 +220,7 @@
         (funcall transfer expr context)
 
         (case op
-          ;(:if (if-transfer expr context))
+          (:if (if-transfer expr context))
           ;(:fix (fix-transfer expr context)) 
           (:let (let-transfer expr context)) 
           (:exit (exit-transfer expr context))

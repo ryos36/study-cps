@@ -1,9 +1,6 @@
 ;----------------------------------------------------------------
 ; primitive
 
-(defmacro xmake-two-args-primitive (func-name op)
-  `(defun ,func-name (x) ,op))
-
 (defmacro make-two-args-primitive (func-name op)
     `(defun ,func-name (expr context)
        (let* ((result-sym (cps-gensym))

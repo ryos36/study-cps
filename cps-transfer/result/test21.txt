@@ -1,0 +1,6 @@
+(IF (> 3 5) (+ 7 9) (* 2 4)):
+(> (3 5) (sym6)
+ ((FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
+   (NEQ? (sym6 #F) NIL
+    ((+ (7 9) (sym4) ((APP sym2 (sym4))))
+     (* (2 4) (sym5) ((APP sym2 (sym5)))))))))
