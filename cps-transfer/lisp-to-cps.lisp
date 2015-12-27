@@ -9,17 +9,6 @@
   (load "lisp-to-cps.lisp"))
 
 ;----------------------------------------------------------------
-#|
-(defun caadddr (tree)
-         (car (cadddr tree)))
-
-(defun caadddr-set (tree value)
-  (setf (car (cadddr tree)) value))
-
-(defsetf caadddr caadddr-set)
-|#
-
-;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or 
     (eq :#t expr)
@@ -34,14 +23,14 @@
 ;
 
 
-(defun valiable-rename (value context)
+(defun variable-rename (value context)
   (let ((continuation-lambda (car context)))
     (labels ((find-renamed-value (value table-list)
              (if (null table-list) 
                value
                (let ((table (car table-list)))
                  (if (null table) 
-                   (find-renamed-value (value (cdr table-list)))
+                   (find-renamed-value value (cdr table-list))
                    (multiple-value-bind (renamed-value exist) (gethash value table)
                      (if exist
                        (progn 
@@ -67,7 +56,7 @@
 
 ;----------------------------------------------------------------
 (defun terminal-transfer (expr context)
-    (let ((arg0 (valiable-rename expr context))
+    (let ((arg0 (variable-rename expr context))
 
           (cont-lambda (car context)))
 
@@ -102,39 +91,56 @@
     (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
 
 ;----------------------------------------------------------------
+(defun compare-symbolp (sym)
+  (case sym
+    (:>  t)
+    (:<  t)
+    (:>= t)
+    (:<= t)
+    (:=  t)
+    (otherwise nil)))
+;----------------------------------------------------------------
 (defun if-transfer (expr context)
   (let* ((inner-func-name (cps-gensym))
          (cont-result-sym (cps-gensym))
          (new-cps-expr 
            (copy-tree 
              `(:FIXS ((,inner-func-name (,cont-result-sym) CONT))
-                     (:NEQ? (CLOUSE-RESULT :#f) ()
+                     (:NEQ? (CLOUSE-RESULT ARG1) ()
                             (TRUE-CLOUSE FALSE-CLOUSE)))))
+         (compare-expr 
+           (copy-tree
+             `(OP (ARG0 ARG1) () (TRUE-CLOUSE FALSE-CLOUSE))))
+
          (true-clouse-expr
-          (copy-tree `(:APP ,inner-func-name (TRUE-RESULT-SYM))))
+           (copy-tree `(:APP ,inner-func-name (TRUE-RESULT-SYM))))
 
          (false-clouse-expr
-          (copy-tree `(:APP ,inner-func-name (FALSE-RESULT-SYM))))
+           (copy-tree `(:APP ,inner-func-name (FALSE-RESULT-SYM))))
 
+         (neq-list (pickup-list new-cps-expr :NEQ?))
          (cont-list (pickup-list new-cps-expr 'CONT))
+         (arg1-list (pickup-list new-cps-expr 'ARG1))
          (clouse-list (pickup-list new-cps-expr 'CLOUSE-RESULT))
          (true-list (pickup-list new-cps-expr 'TRUE-CLOUSE))
          (false-list (pickup-list new-cps-expr 'FALSE-CLOUSE))
          cont-result
 
-         clouse-result
-         true-result)
+         compare-arg1-result
+         clouse-result )
 
     ;(setf cl (pickup-list new-cps-expr 'CONT))
     ;(setf true-list (pickup-list new-cps-expr 'TRUE-CLOUSE))
     ;(setf false-list (pickup-list new-cps-expr 'FALSE-CLOUSE))
 
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+
            (fill-true-symbol (sym) (setf (caaddr true-clouse-expr) sym) true-clouse-expr)
            (fill-false-symbol (sym) (setf (caaddr false-clouse-expr) sym) false-clouse-expr)
            (fill-true-clouse (true-clouse) (setf (car true-list) true-clouse) new-cps-expr)
            (fill-false-clouse (false-clouse) (setf (car false-list) false-clouse) new-cps-expr)
-           (fill-clouse-result (clouse) (setf (car clouse-list) clouse) new-cps-expr))
+           (fill-arg1 (arg1) (setf (car arg1-list) arg1) new-cps-expr)
+           (fill-clouse-result (clouse) (setf (car clouse-list) clouse) compare-arg1-result))
 
       (let ((cont-lambda (car context))
             (table-list (cdr context))
@@ -145,10 +151,63 @@
 
         (fill-cont (call-continuation-lambda cont-lambda cont-result-sym))
         (fill-true-clouse
-              (do-lisp-to-cps true-clouse (cons #'fill-true-symbol table-list)))
+          (do-lisp-to-cps true-clouse (cons #'fill-true-symbol table-list)))
         (fill-false-clouse
-              (do-lisp-to-cps false-clouse (cons #'fill-false-symbol table-list)))
-        (do-lisp-to-cps condition-expr (cons #'fill-clouse-result table-list))))))
+          (do-lisp-to-cps false-clouse (cons #'fill-false-symbol table-list)))
+        (let ((op (car condition-expr)))
+          (if (compare-symbolp op)
+            (let ((arg0-expr (cadr condition-expr))
+                  (arg1-expr (caddr condition-expr)))
+
+              (setf compare-arg1-result
+                    (do-lisp-to-cps arg1-expr (cons #'fill-arg1 table-list)))
+              (setf (car neq-list) op)
+              (do-lisp-to-cps arg0-expr (cons #'fill-clouse-result table-list)))
+
+            (progn
+              (setf compare-arg1-result new-cps-expr)
+              (fill-arg1 :#f)
+              (do-lisp-to-cps condition-expr (cons #'fill-clouse-result table-list)))))))))
+
+;----------------------------------------------------------------
+;(func-name (arg*) expr)
+
+(defun fbind-transfer (fbind table-list)
+  (let* ((func-name (car fbind))
+         (args (cadr fbind))
+         (func-expr (caddr fbind))
+         (kont-sym (cps-gensym))
+
+         (return-app `(:APP ,kont-sym (RESULT)))
+         (new-cps-expr (copy-tree `(,func-name (,kont-sym ,@args)
+                                       FUNC-BODY)))
+         (func-body-list (pickup-list new-cps-expr 'FUNC-BODY))
+         (result-list (pickup-list return-app 'RESULT)))
+
+    (flet ((fill-body (func-body) (setf (car func-body-list) func-body) new-cps-expr)
+           (fill-result (rv) (setf (car result-list) rv) return-app))
+
+      (fill-body 
+        (do-lisp-to-cps func-expr `(,#'fill-result ,table-list))))))
+
+;----------------------------------------------------------------
+; not use cont-lambda
+(defun fix-transfer (expr context)
+  (let ((cont-lambda (car context))
+        (table-list (cdr context))
+
+        (fbinds (cadr expr))
+        (fix-expr (caddr expr)))
+
+    (let* ((cps-binds (mapcar #'(lambda (fbind) 
+                                  (fbind-transfer fbind table-list)) fbinds))
+           (fix-expr0 (copy-tree `(FIX-EXPR))))
+
+      (flet ((fill-fix-expr (expr0) (setf (car fix-expr0) expr0) fix-expr0))
+        ;(print `(fix-transfer ,fix-expr ,fix-expr0 ,(cps-gensym)))
+
+        (copy-tree `(:FIXH ,cps-binds ,
+                           (do-lisp-to-cps fix-expr context)))))))
 
 ;----------------------------------------------------------------
 (defun let-transfer (expr context)
@@ -186,9 +245,6 @@
         result))))
 
 ;----------------------------------------------------------------
-
-
-;----------------------------------------------------------------
 (defun make-transfer-table ()
   (let ((table (make-hash-table)))
     (map nil #'(lambda (x) 
@@ -223,8 +279,9 @@
 
         (case op
           (:if (if-transfer expr context))
-          ;(:fix (fix-transfer expr context)) 
+          (:fix (fix-transfer expr context)) 
           (:let (let-transfer expr context)) 
           (:exit (exit-transfer expr context))
 
-          (otherwise nil))))))
+          (otherwise 
+            (error "no primitive: ~a" op) nil))))))

@@ -1,4 +1,3 @@
 (IF (> 3 5) 3 5):
-(> (3 5) (sym4)
- ((FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
-   (NEQ? (sym4 #F) NIL ((APP sym2 (3)) (APP sym2 (5)))))))
+(FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
+ (> (3 5) NIL ((APP sym2 (3)) (APP sym2 (5)))))

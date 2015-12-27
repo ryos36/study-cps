@@ -18,9 +18,24 @@
 (set-test-files '(7 15 16))
 (set-test-files '(7 15 16 17 18))
 (set-test-files '(12 17 18 19 20 21))
+(set-test-files '(22))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)
+
+#|
+(print
+  (fbind-transfer `(func_name (a b c d) (:* (:+ a b) (:- c d))) (cdr *env*)))
+
+(print
+  (do-lisp-to-cps `(:fix ((func0 (a b c d) (:* (:+ a b) (:- c d)))
+                        (func1 (x y z) (:- (:* x y) (:+ z g))))
+                       (:+ 3 5))
+                       (cdr *env*)))
+(print
+  (do-lisp-to-cps `(:+ 3 5)
+                       (cdr *env*)))
+|#
 
 #|
 (let ((expr '(:FIXS ((x-inner-func-name (x-clouse-result) CONT))
