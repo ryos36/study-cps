@@ -9,13 +9,25 @@
   (load "lisp-to-cps.lisp"))
 
 ;----------------------------------------------------------------
+(defun compare-symbolp (sym)
+  (case sym
+    (:>  t)
+    (:<  t)
+    (:>= t)
+    (:<= t)
+    (:=  t)
+    (otherwise nil)))
+
+;----------------------------------------------------------------
 (defun terminal-p (expr)
-  (or 
-    (eq :#t expr)
-    (eq :#f expr)
-    (null expr)
-    (symbolp expr)
-    (numberp expr)))
+  (if (compare-symbolp expr)
+    (error "error compare symbol")
+    (or 
+      (eq :#t expr)
+      (eq :#f expr)
+      (null expr)
+      (symbolp expr)
+      (numberp expr))))
 
 ;----------------------------------------------------------------
 ;
@@ -90,15 +102,7 @@
         (table-list (cdr context)))
     (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
 
-;----------------------------------------------------------------
-(defun compare-symbolp (sym)
-  (case sym
-    (:>  t)
-    (:<  t)
-    (:>= t)
-    (:<= t)
-    (:=  t)
-    (otherwise nil)))
+
 ;----------------------------------------------------------------
 (defun if-transfer (expr context)
   (let* ((inner-func-name (cps-gensym))
@@ -257,12 +261,6 @@
 
            (:>> . ,#'>>-two)
            (:<< . ,#'<<-two)
-
-           (:>  . ,#'>-two)
-           (:<  . ,#'<-two)
-           (:>= . ,#'>=-two)
-           (:<= . ,#'<=-two)
-           (:=  . ,#'=-two)
            ))
     table))
 

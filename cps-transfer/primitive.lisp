@@ -32,13 +32,6 @@
 (make-two-args-primitive >>-two :>>)
 (make-two-args-primitive <<-two :<<)
 
-(make-two-args-primitive >-two :>)
-(make-two-args-primitive <-two :<)
-(make-two-args-primitive >=-two :>=)
-(make-two-args-primitive <=-two :<=)
-(make-two-args-primitive =-two :=)
-
-
 #|
 (defun old-+-two (expr context)
   (let* ((result-sym (cps-gensym))
