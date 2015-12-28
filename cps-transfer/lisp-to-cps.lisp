@@ -195,7 +195,6 @@
         (do-lisp-to-cps func-expr `(,#'fill-result ,table-list))))))
 
 ;----------------------------------------------------------------
-; not use cont-lambda
 (defun fix-transfer (expr context)
   (let ((cont-lambda (car context))
         (table-list (cdr context))
@@ -212,6 +211,35 @@
 
         (copy-tree `(:FIXH ,cps-binds ,
                            (do-lisp-to-cps fix-expr context)))))))
+
+;----------------------------------------------------------------
+(defun apply-transfer (expr context)
+  (let* ((return-sym (cps-binds))
+         (arg0 (cps-binds))
+         (new-cps-expr (copy-tree `(:FIXS ((,return-sym (,arg0) CONT))
+                                        (:APP ,func-name (,return-sym ARGS)))))
+         (cont-list (pickup-list new-cps-expr 'CONT))
+         (args-list (pickup-list new-cps-expr 'ARGS))
+         (new-args nil)
+         wrapped-cps-expr)
+
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+           (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
+
+      (let ((func-name (car expr))
+            (args (reverse (cdr expr)))
+
+            (cont-lambda (car context))
+            (table-list (cdr context)))
+
+        (setf wrapped-cps-expr
+              (fill-cont (call-continuation-lambda cont-lambda arg0)))
+        (dolist (arg args)
+          (setf wrapped-cps-expr
+                (do-lisp-to-cps arg `(,#'fill-arg table-list))))
+
+        (setf (car args-list) new-args)
+        wrapped-cps-expr))))
 
 ;----------------------------------------------------------------
 (defun let-transfer (expr context)
@@ -282,4 +310,4 @@
           (:exit (exit-transfer expr context))
 
           (otherwise 
-            (error "no primitive: ~a" op) nil))))))
+            (apply-transfer expr context)))))))
