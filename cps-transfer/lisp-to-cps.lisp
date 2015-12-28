@@ -8,10 +8,6 @@
 (defun l ()
   (load "lisp-to-cps.lisp"))
 
-(defun xgethash (arg table)
-  (print `(:xgethash ,arg ,table))
-  (gethash arg table))
-
 ;----------------------------------------------------------------
 (defun compare-symbolp (sym)
   (case sym
@@ -43,7 +39,6 @@
 (defun variable-rename (value context)
   (let ((continuation-lambda (car context)))
     (labels ((find-renamed-value (value table-list)
-                       (print `(:table ,table-list))
              (if (null table-list) 
                value
                (let ((table (car table-list)))
@@ -61,13 +56,8 @@
       ((eq value :#t) :#t)
       ((eq value :#f) :#f)
       ((numberp value) value)
-      (t (let ((table-list (cdr context)) rv) 
-           (print `(rename ,value ,table-list))
-           (setf rv
-           (find-renamed-value value table-list))
-           (print `(find ,value ,rv ,table-list))
-           rv
-           ))))))
+      (t (let ((table-list (cdr context)))
+           (find-renamed-value value table-list)))))))
 
 ;----------------------------------------------------------------
 (defun call-continuation-lambda (cont-lambda arg0)
@@ -299,21 +289,14 @@
             (let-args-reverse (reverse (cadr expr)))
             (let-body-reverse (reverse (cddr expr))))
 
-        (print `(:new-table ,(cadr new-context)))
-
         (dolist (let-arg let-args-reverse)
           (let ((let-arg-sym (car let-arg)))
             (setf (gethash let-arg-sym table) nil)))
 
-        (print `(:2new-table ,(cadr new-context)))
-
         (dolist (let-body-one let-body-reverse)
-          (print `(:do-lisp-to-cps ,let-body-one))
           (setf result (do-lisp-to-cps let-body-one new-context))
-          (print `(:result ,result))
           (setf (car new-context) result))
 
-        (print 'dolist)
         (setf (car new-context) #'call-all-fill-placeholder)
 
         (dolist (let-arg let-args-reverse)
