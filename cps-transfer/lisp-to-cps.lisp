@@ -183,7 +183,7 @@
          (func-expr (caddr fbind))
          (kont-sym (cps-gensym))
 
-         (return-app `(:APP ,kont-sym (RESULT)))
+         (return-app (copy-tree `(:APP ,kont-sym (RESULT))))
          (new-cps-expr (copy-tree `(,func-name (,kont-sym ,@args)
                                        FUNC-BODY)))
          (func-body-list (pickup-list new-cps-expr 'FUNC-BODY))
@@ -219,7 +219,7 @@
          (arg0 (cps-gensym))
          (func-name (car expr))
          (new-cps-expr (copy-tree `(:FIXS ((,return-sym (,arg0) CONT))
-                                        (:APP ,func-name (,return-sym ARGS)))))
+                                        (:APP ,func-name ARGS))))
          (cont-list (pickup-list new-cps-expr 'CONT))
          (args-list (pickup-list new-cps-expr 'ARGS))
          (new-args nil)
@@ -240,6 +240,7 @@
           (setf wrapped-cps-expr
                 (do-lisp-to-cps arg (cons #'fill-arg table-list))))
 
+        (push return-sym new-args)
         (setf (car args-list) new-args)
         wrapped-cps-expr))))
 
