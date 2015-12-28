@@ -8,6 +8,10 @@
 (defun l ()
   (load "lisp-to-cps.lisp"))
 
+(defun xgethash (arg table)
+  (print `(:xgethash ,arg ,table))
+  (gethash arg table))
+
 ;----------------------------------------------------------------
 (defun compare-symbolp (sym)
   (case sym
@@ -56,7 +60,7 @@
       ((eq value :#t) :#t)
       ((eq value :#f) :#f)
       ((numberp value) value)
-      (t (let ((table-list (cdr context))) 
+      (t (let ((table-list (cadr context))) 
            (find-renamed-value value table-list)))))))
 
 ;----------------------------------------------------------------
@@ -289,6 +293,8 @@
             (let-args-reverse (reverse (cadr expr)))
             (let-body-reverse (reverse (cddr expr))))
 
+        ;(print `(:new-table ,(cadr new-context)))
+
         (dolist (let-arg let-args-reverse)
           (let ((let-arg-sym (car let-arg)))
             (setf (gethash let-arg-sym table) nil)))
@@ -325,7 +331,11 @@
            (:>=  . ,#'>=-two)
            (:<=  . ,#'<=-two)
            (:=  . ,#'=-two)
-           (:/=  . ,#'/=-two)))
+           (:/=  . ,#'/=-two)
+
+           (:heap . ,#'heap-transfer)
+           (:record-set! . ,#'record-set!-transfer)
+           (:record-ref . ,#'record-ref-transfer)))
     table))
 
 ;----------------------------------------------------------------

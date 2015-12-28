@@ -1,6 +1,6 @@
 clisp test.lisp で result/ に結果が出た。
 
-let -> OK のつもり
+let -> OK のつもり、バグがあった
     トリッキーだがうまくいっている模様
     test17 のなんちゃって :let
     ((:let ((a (:+ 1 3))) (:+ a 5)))
@@ -9,11 +9,12 @@ fix -> OK
 apply -> OK
 比較の primitive => OK のつもり
 define -> OK のつもり
+heap -> OK
+record-ref -> OK
+record-set! -> OK
 
-heap -> NIY
-record-ref -> NIY
-record-set! -> NIY
-main -> 逆順に積んでいけばよい
+main -> NIY
+    逆順に積んでいけばよい
 
 =======================================================
 ISSUES

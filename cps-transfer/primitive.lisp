@@ -72,6 +72,81 @@
 (make-compare-primitive =-two :=)
 (make-compare-primitive /=-two :/=)
 
+;----------------------------------------------------------------
+(defun heap-transfer (expr context)
+  (let* ((result-sym (cps-gensym))
+         (new-cps-expr `(:HEAP ARGS (,result-sym) CONT))
+         (new-args nil)
+         wrapped-cps-expr)
+
+    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+           (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
+
+      (let ((args (reverse (cdr expr)))
+
+            (cont-lambda (car context))
+            (table-list (cdr context)))
+
+      (setf wrapped-cps-expr
+            (fill-cont (call-continuation-lambda cont-lambda result-sym)))
+
+      (dolist (arg args)
+        (setf wrapped-cps-expr
+              (do-lisp-to-cps arg `(,#'fill-arg ,table-list))))
+
+      (setf (cadr new-cps-expr) new-args)
+      wrapped-cps-expr))))
+
+;----------------------------------------------------------------
+(defun record-set!-transfer (expr context)
+  (let* ((record-name (cadr expr))
+         (new-cps-expr (copy-tree `(:RECORD-SET! (,record-name ARG0 ARG1) () CONT)))
+         
+         (arg0-list (pickup-list new-cps-expr 'ARG0))
+         (arg1-list (pickup-list new-cps-expr 'ARG1))
+         arg1-result cont-result)
+
+    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+           (fill-arg1 (arg1) (setf (car arg1-list) arg1) cont-result)
+           (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result))
+
+      (let ((arg0 (caddr expr))
+            (arg1 (cadddr expr))
+
+            (cont-lambda (car context))
+            (table-list (cdr context)))
+
+        (setf cont-result
+              (fill-cont (call-continuation-lambda cont-lambda :unspecified)))
+
+        (setf arg1-result
+              (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
+        ;(print arg1-result)
+
+        (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+;----------------------------------------------------------------
+(defun record-ref-transfer (expr context)
+  (let* ((result-sym (cps-gensym))
+         (record-name (cadr expr))
+         (new-cps-expr (copy-tree `(:RECORD-REF (,record-name ARG0) (,result-sym) CONT)))
+
+         (arg0-list (pickup-list new-cps-expr 'ARG0))
+         cont-result)
+
+    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+           (fill-arg0 (arg0) (setf (car arg0-list) arg0) cont-result))
+
+      (let ((arg0 (caddr expr))
+
+            (cont-lambda (car context))
+            (table-list (cdr context)))
+
+        (setf cont-result
+              (fill-cont (call-continuation-lambda cont-lambda result-sym)))
+
+        (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+
+;----------------------------------------------------------------
 #|
 (defun old-+-two (expr context)
   (let* ((result-sym (cps-gensym))
