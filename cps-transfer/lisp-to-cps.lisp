@@ -238,10 +238,38 @@
               (fill-cont (call-continuation-lambda cont-lambda arg0)))
         (dolist (arg args)
           (setf wrapped-cps-expr
-                (do-lisp-to-cps arg `(,#'fill-arg table-list))))
+                (do-lisp-to-cps arg `(,#'fill-arg ,table-list))))
 
         (setf (car args-list) new-args)
         wrapped-cps-expr))))
+
+;----------------------------------------------------------------
+(defun func-declare-transfer (expr context)
+  (let* ((func-name (caadr expr))
+         (args (cdadr expr))
+         (expr-body (cddr expr))
+         (fix-expr (copy-tree `(:FIXH ((,func-name ,args ,@expr-body))))))
+    (fix-transfer fix-expr context)))
+
+;----------------------------------------------------------------
+(defun id-declare-transfer (expr context)
+  (let* ((id (cadr expr))
+         (new-cps-expr `(:ID (RESULT) (,id) CONT))
+         (expr0 (caddr expr)))
+    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+           (fill-result (rv) (setf (caadr new-cps-expr) rv) new-cps-expr))
+
+      (let ((cont-lambda (car context))
+            (table-list (cdr context)))
+
+        (fill-cont (call-continuation-lambda cont-lambda :unspecified))
+        (do-lisp-to-cps expr0 `(,#'fill-result ,table-list))))))
+
+;----------------------------------------------------------------
+(defun define-transfer (expr context)
+  (if (listp (cadr expr))
+    (func-declare-transfer expr context)
+    (id-declare-transfer expr context)))
 
 ;----------------------------------------------------------------
 (defun let-transfer (expr context)
@@ -312,6 +340,7 @@
         (funcall transfer expr context)
 
         (case op
+          (:define (define-transfer expr context))
           (:if (if-transfer expr context))
           (:fix (fix-transfer expr context)) 
           (:let (let-transfer expr context)) 
