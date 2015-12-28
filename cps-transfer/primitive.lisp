@@ -99,18 +99,20 @@
 
 ;----------------------------------------------------------------
 (defun record-set!-transfer (expr context)
-  (let* ((record-name (cadr expr))
-         (new-cps-expr (copy-tree `(:RECORD-SET! (,record-name ARG0 ARG1) () CONT)))
-         
+  (let* ((new-cps-expr (copy-tree `(:RECORD-SET! (RECORD-NAME ARG0 ARG1) () CONT)))
+         (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
          (arg0-list (pickup-list new-cps-expr 'ARG0))
          (arg1-list (pickup-list new-cps-expr 'ARG1))
+         arg0-result
          arg1-result cont-result)
 
     (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
            (fill-arg1 (arg1) (setf (car arg1-list) arg1) cont-result)
-           (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result))
+           (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result)
+           (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
 
-      (let ((arg0 (caddr expr))
+      (let ((record-name (cadr expr))
+            (arg0 (caddr expr))
             (arg1 (cadddr expr))
 
             (cont-lambda (car context))
@@ -119,24 +121,30 @@
         (setf cont-result
               (fill-cont (call-continuation-lambda cont-lambda :unspecified)))
 
+
         (setf arg1-result
               (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
-        ;(print arg1-result)
 
-        (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+        (setf arg0-result 
+              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))
+
+        (do-lisp-to-cps record-name (cons #'fill-record-name table-list))))))
 ;----------------------------------------------------------------
 (defun record-ref-transfer (expr context)
   (let* ((result-sym (cps-gensym))
-         (record-name (cadr expr))
-         (new-cps-expr (copy-tree `(:RECORD-REF (,record-name ARG0) (,result-sym) CONT)))
+         (new-cps-expr (copy-tree `(:RECORD-REF (RECORD-NAME ARG0) (,result-sym) CONT)))
+         (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
 
          (arg0-list (pickup-list new-cps-expr 'ARG0))
+         arg0-result
          cont-result)
 
     (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
-           (fill-arg0 (arg0) (setf (car arg0-list) arg0) cont-result))
+           (fill-arg0 (arg0) (setf (car arg0-list) arg0) cont-result)
+           (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
 
-      (let ((arg0 (caddr expr))
+      (let ((record-name (cadr expr))
+            (arg0 (caddr expr))
 
             (cont-lambda (car context))
             (table-list (cdr context)))
@@ -144,7 +152,10 @@
         (setf cont-result
               (fill-cont (call-continuation-lambda cont-lambda result-sym)))
 
-        (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list))))))
+        (setf arg0-result
+              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))
+
+        (do-lisp-to-cps record-name (cons #'fill-record-name table-list))))))
 
 ;----------------------------------------------------------------
 #|

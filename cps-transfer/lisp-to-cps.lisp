@@ -43,6 +43,7 @@
 (defun variable-rename (value context)
   (let ((continuation-lambda (car context)))
     (labels ((find-renamed-value (value table-list)
+                       (print `(:table ,table-list))
              (if (null table-list) 
                value
                (let ((table (car table-list)))
@@ -52,16 +53,21 @@
                      (if exist
                        (progn 
                          (setf (gethash value table) 
-                               (cons continuation-lambda (gethash value table)))
+                               (cons continuation-lambda renamed-value))
                          :place-holder)
-                       (find-renamed-value (value (cdr table-list))))))))))
+                       (find-renamed-value value (cdr table-list)))))))))
     (cond
       ((null value) nil) 
       ((eq value :#t) :#t)
       ((eq value :#f) :#f)
       ((numberp value) value)
-      (t (let ((table-list (cadr context))) 
-           (find-renamed-value value table-list)))))))
+      (t (let ((table-list (cdr context)) rv) 
+           (print `(rename ,value ,table-list))
+           (setf rv
+           (find-renamed-value value table-list))
+           (print `(find ,value ,rv ,table-list))
+           rv
+           ))))))
 
 ;----------------------------------------------------------------
 (defun call-continuation-lambda (cont-lambda arg0)
@@ -197,7 +203,7 @@
            (fill-result (rv) (setf (car result-list) rv) return-app))
 
       (fill-body 
-        (do-lisp-to-cps func-expr `(,#'fill-result ,table-list))))))
+        (do-lisp-to-cps func-expr (cons #'fill-result table-list))))))
 
 ;----------------------------------------------------------------
 (defun fix-transfer (expr context)
@@ -242,7 +248,7 @@
               (fill-cont (call-continuation-lambda cont-lambda arg0)))
         (dolist (arg args)
           (setf wrapped-cps-expr
-                (do-lisp-to-cps arg `(,#'fill-arg ,table-list))))
+                (do-lisp-to-cps arg (cons #'fill-arg table-list))))
 
         (setf (car args-list) new-args)
         wrapped-cps-expr))))
@@ -267,7 +273,7 @@
             (table-list (cdr context)))
 
         (fill-cont (call-continuation-lambda cont-lambda :unspecified))
-        (do-lisp-to-cps expr0 `(,#'fill-result ,table-list))))))
+        (do-lisp-to-cps expr0 (cons #'fill-result table-list))))))
 
 ;----------------------------------------------------------------
 (defun define-transfer (expr context)
@@ -293,16 +299,21 @@
             (let-args-reverse (reverse (cadr expr)))
             (let-body-reverse (reverse (cddr expr))))
 
-        ;(print `(:new-table ,(cadr new-context)))
+        (print `(:new-table ,(cadr new-context)))
 
         (dolist (let-arg let-args-reverse)
           (let ((let-arg-sym (car let-arg)))
             (setf (gethash let-arg-sym table) nil)))
 
+        (print `(:2new-table ,(cadr new-context)))
+
         (dolist (let-body-one let-body-reverse)
+          (print `(:do-lisp-to-cps ,let-body-one))
           (setf result (do-lisp-to-cps let-body-one new-context))
+          (print `(:result ,result))
           (setf (car new-context) result))
 
+        (print 'dolist)
         (setf (car new-context) #'call-all-fill-placeholder)
 
         (dolist (let-arg let-args-reverse)
