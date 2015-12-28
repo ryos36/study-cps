@@ -214,8 +214,9 @@
 
 ;----------------------------------------------------------------
 (defun apply-transfer (expr context)
-  (let* ((return-sym (cps-binds))
-         (arg0 (cps-binds))
+  (let* ((return-sym (cps-gensym))
+         (arg0 (cps-gensym))
+         (func-name (car expr))
          (new-cps-expr (copy-tree `(:FIXS ((,return-sym (,arg0) CONT))
                                         (:APP ,func-name (,return-sym ARGS)))))
          (cont-list (pickup-list new-cps-expr 'CONT))
@@ -226,8 +227,8 @@
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
 
-      (let ((func-name (car expr))
-            (args (reverse (cdr expr)))
+      (print expr)
+      (let ((args (reverse (cdr expr)))
 
             (cont-lambda (car context))
             (table-list (cdr context)))
