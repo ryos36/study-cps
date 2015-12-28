@@ -16,6 +16,7 @@
     (:>= t)
     (:<= t)
     (:=  t)
+    (:/=  t)
     (otherwise nil)))
 
 ;----------------------------------------------------------------
@@ -227,7 +228,7 @@
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
 
-      (print expr)
+      ;(print expr)
       (let ((args (reverse (cdr expr)))
 
             (cont-lambda (car context))
@@ -290,7 +291,13 @@
 
            (:>> . ,#'>>-two)
            (:<< . ,#'<<-two)
-           ))
+
+           (:>  . ,#'>-two)
+           (:<  . ,#'<-two)
+           (:>=  . ,#'>=-two)
+           (:<=  . ,#'<=-two)
+           (:=  . ,#'=-two)
+           (:/=  . ,#'/=-two)))
     table))
 
 ;----------------------------------------------------------------

@@ -1,0 +1,21 @@
+(APP (> 3 4) (< 5 6) (>= 7 8) (<= 9 0) (= 1 2) (/= 33 44)):
+(FIXS
+ ((sym15 (sym14)
+   (FIXS
+    ((sym13 (sym12)
+      (FIXS
+       ((sym11 (sym10)
+         (FIXS
+          ((sym9 (sym8)
+            (FIXS
+             ((sym7 (sym6)
+               (FIXS
+                ((sym5 (sym4)
+                  (FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
+                   (APP APP (sym2 (sym14 sym12 sym10 sym8 sym6 sym4))))))
+                (/= (33 44) NIL (APP sym5 (#T)) (APP sym5 (#F))))))
+             (= (1 2) NIL (APP sym7 (#T)) (APP sym7 (#F))))))
+          (<= (9 0) NIL (APP sym9 (#T)) (APP sym9 (#F))))))
+       (>= (7 8) NIL (APP sym11 (#T)) (APP sym11 (#F))))))
+    (< (5 6) NIL (APP sym13 (#T)) (APP sym13 (#F))))))
+ (> (3 4) NIL (APP sym15 (#T)) (APP sym15 (#F))))

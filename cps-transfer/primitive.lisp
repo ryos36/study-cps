@@ -25,12 +25,52 @@
 
              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))))))
 
+;----------------------------------------------------------------
+(defmacro make-compare-primitive (func-name op)
+    `(defun ,func-name (expr context)
+       (let* ((result-sym (cps-gensym))
+              (kont-sym (cps-gensym))
+              (new-cps-expr (copy-tree `(:FIXS ((,kont-sym (,result-sym) CONT))
+                                               (,,op (ARG0 ARG1) () 
+                                                     (:APP ,kont-sym (:#t))
+                                                     (:APP ,kont-sym (:#f))))))
+              (cont-list (pickup-list new-cps-expr 'CONT))
+              (arg1-list (pickup-list new-cps-expr 'ARG1))
+              (arg0-list (pickup-list new-cps-expr 'ARG0))
+              arg1-result cont-result)
+
+         (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+                (fill-arg1 (arg1) (setf (car arg1-list) arg1) cont-result)
+                (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result))
+
+           (let ((arg0 (cadr expr))
+                 (arg1 (caddr expr))
+
+                 (cont-lambda (car context))
+                 (table-list (cdr context)))
+
+             (setf cont-result
+                   (fill-cont (call-continuation-lambda cont-lambda result-sym)))
+
+             (setf arg1-result
+                   (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
+
+             (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))))))
+;----------------------------------------------------------------
+
 (make-two-args-primitive --two :-)
 (make-two-args-primitive +-two :+)
 (make-two-args-primitive *-two :*)
 
 (make-two-args-primitive >>-two :>>)
 (make-two-args-primitive <<-two :<<)
+
+(make-compare-primitive >-two :>)
+(make-compare-primitive <-two :<)
+(make-compare-primitive >=-two :>=)
+(make-compare-primitive <=-two :<=)
+(make-compare-primitive =-two :=)
+(make-compare-primitive /=-two :/=)
 
 #|
 (defun old-+-two (expr context)
