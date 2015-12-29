@@ -21,14 +21,12 @@
 
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
-  (if (compare-symbolp expr)
-    (error "error compare symbol")
-    (or 
-      (eq :#t expr)
-      (eq :#f expr)
-      (null expr)
-      (symbolp expr)
-      (numberp expr))))
+  (or 
+    (eq :#t expr)
+    (eq :#f expr)
+    (null expr)
+    (symbolp expr)
+    (numberp expr)))
 
 ;----------------------------------------------------------------
 ;
@@ -159,7 +157,7 @@
           (do-lisp-to-cps true-clouse (cons #'fill-true-symbol table-list)))
         (fill-false-clouse
           (do-lisp-to-cps false-clouse (cons #'fill-false-symbol table-list)))
-        (let ((op (car condition-expr)))
+        (let ((op (and (listp condition-expr) (car condition-expr))))
           (if (compare-symbolp op)
             (let ((arg0-expr (cadr condition-expr))
                   (arg1-expr (caddr condition-expr)))
