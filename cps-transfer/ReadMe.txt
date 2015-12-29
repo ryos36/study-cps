@@ -1,9 +1,8 @@
 clisp test.lisp で result/ に結果が出た。
 
-let -> OK のつもり
-    トリッキーだがうまくいっている模様
-    test17 のなんちゃって :let
-    ((:let ((a (:+ 1 3))) (:+ a 5)))
+DEFINE にバグがあった。修正したら Failed になりはじめた。
+
+let -> OK かも
 if -> OK
 fix -> OK
 apply -> OK

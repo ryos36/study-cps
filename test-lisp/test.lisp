@@ -6,6 +6,7 @@
 (defparameter *test-files* nil)
 (defparameter *test-parse-func* nil)
 (defparameter *test-save* t)
+(defparameter *test-print* nil)
 
 (defun min-max-no-list (min-max-list)
   (let ((min-no (car min-max-list))
@@ -62,7 +63,7 @@
                     (string #\return)
                     (string #\newline)))
 (defun do-test ()
-   (if (null (directory *test-result-dir*)) (ext:make-directory *test-result-dir*))
+  (if (null (directory *test-result-dir*)) (ext:make-directory *test-result-dir*))
   (mapcar 
     #'(lambda (name)
         (cps-gensym 0) ; reset
@@ -71,8 +72,7 @@
            lisp-test-list
            result
            (result-file (string-concat *test-result-dir* name ".txt"))
-           result-txt
-           )
+           result-txt)
 
           (setf lisp-test-list
                 (with-open-file (in scm-file)
@@ -101,21 +101,22 @@
           (format t "Length ~a:~a~a~%" (length result) (length result-txt) result-txt)
           |#
 
+          (if (or *test-print* (not result-txt) (= (length *test-files*) 1))
+            (progn
+              (format t  "--------------Result:-----------~%")
+              (format t "~a~%" result)
+              (format t  "--------------------------------~%")))
+
           (if result-txt
             (format t "~a:~a~%" name
                     (if (string= 
                           (string-right-trim trim-string result)
                           (string-right-trim trim-string result-txt))
                       "Passed" "Failed"))
-            (progn
-              (when *test-save*
-               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
+            (when *test-save*
+              (with-open-file (out result-file :if-does-not-exist :create :direction :output)
                 (format out "~a" result))
-
-               (format t "~a:Saved~%" name))
-              (format t  "--------------Result:-----------~%")
-              (format t "~a~%" result)
-              (format t  "--------------------------------~%")))
+              (format t "~a:Saved~%" name)))
           ))
     *test-files*))
 

@@ -246,9 +246,31 @@
 (defun func-declare-transfer (expr context)
   (let* ((func-name (caadr expr))
          (args (cdadr expr))
-         (expr-body (cddr expr))
-         (fix-expr (copy-tree `(:FIXH ((,func-name ,args ,@expr-body))))))
-    (fix-transfer fix-expr context)))
+         (kont-sym (cps-gensym))
+         (return-app (copy-tree `(:APP ,kont-sym (RESULT))))
+         (new-cps-expr (copy-tree 
+                         `(FIXH ((,func-name (,kont-sym ,@args) FUNC-BODY)) CONT)))
+         (cont-list (pickup-list new-cps-expr 'CONT))
+         (func-body-list (pickup-list new-cps-expr 'FUNC-BODY))
+         (result-list (pickup-list return-app 'RESULT)))
+
+    (flet ((fill-body (func-body) (setf (car func-body-list) func-body) new-cps-expr)
+           (fill-result (rv) (setf (car result-list) rv) return-app)
+           (fill-cont (cont) (setf (car cont-list) cont) new-cps-expr))
+
+      (let ((expr-body (reverse (cddr expr)))
+
+            (cont-lambda (car context))
+            (new-context (cons #'fill-result (cdr context)))
+            body-result)
+
+        (dolist (expr0 expr-body)
+          (setf body-result (do-lisp-to-cps expr0 new-context))
+          (setf (car new-context) body-result))
+
+        (fill-body body-result)
+
+        (fill-cont (do-lisp-to-cps :unspecified context))))))
 
 ;----------------------------------------------------------------
 (defun id-declare-transfer (expr context)
