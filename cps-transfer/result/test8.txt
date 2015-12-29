@@ -1,0 +1,6 @@
+(IF #F 3 5):
+(FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
+ (NEQ? (#F #F) NIL ((APP sym2 (3)) (APP sym2 (5)))))
+(IF #T 3 5):
+(FIXS ((sym4 (sym5) (EXIT (sym5) NIL NIL)))
+ (NEQ? (#T #F) NIL ((APP sym4 (3)) (APP sym4 (5)))))

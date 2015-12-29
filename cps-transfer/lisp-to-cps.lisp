@@ -45,8 +45,9 @@
                    (multiple-value-bind (renamed-value exist) (gethash value table)
                      (if exist
                        (progn 
-                         (setf (gethash value table) 
-                               (cons continuation-lambda renamed-value))
+                         (if (functionp continuation-lambda)
+                           (setf (gethash value table) 
+                                 (cons continuation-lambda renamed-value)))
                          :place-holder)
                        (find-renamed-value value (cdr table-list)))))))))
     (cond
@@ -86,21 +87,20 @@
 (load "primitive.lisp")
 
 ;----------------------------------------------------------------
-(defmacro make-exit-transfer-lambda ()
-  (let ((new-cps-expr '`(:exit (,arg0) () ())))
-    `(lambda (arg0)
-       (let ((new-cps-expr ,new-cps-expr))
-         new-cps-expr))))
+(defun make-exit-transfer-lambda ()
+  (let* ((new-cps-expr (copy-tree `(:EXIT (ARG0) () ())))
+         (arg0-list (pickup-list new-cps-expr 'ARG0)))
+    (flet ((fill-arg0 (arg0) (setf (car arg0-list) arg0)
+                      new-cps-expr))
+      #'fill-arg0)))
 
 (defun make-exit-continuous ()
       (cons (make-exit-transfer-lambda) nil))
 
-;----------------------------------------------------------------
 (defun exit-transfer (expr context)
   (let ((arg0 (cadr expr))
         (table-list (cdr context)))
     (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
-
 
 ;----------------------------------------------------------------
 (defun if-transfer (expr context)
@@ -285,6 +285,7 @@
               result))
 
       (let ((new-context (cons cont-lambda (cons table table-list)))
+            (old-context (cons cont-lambda table-list))
             (let-args-reverse (reverse (cadr expr)))
             (let-body-reverse (reverse (cddr expr))))
 
@@ -296,13 +297,14 @@
           (setf result (do-lisp-to-cps let-body-one new-context))
           (setf (car new-context) result))
 
-        (setf (car new-context) #'call-all-fill-placeholder)
+        (setf (car old-context) #'call-all-fill-placeholder)
 
         (dolist (let-arg let-args-reverse)
           (let ((let-arg-sym (car let-arg))
                 (let-arg-body (cadr let-arg)))
             (setf key-is-let-arg-sym let-arg-sym)
-            (setf result (do-lisp-to-cps let-arg-body new-context))))
+            (setf result (do-lisp-to-cps let-arg-body old-context))))
+
         result))))
 
 ;----------------------------------------------------------------

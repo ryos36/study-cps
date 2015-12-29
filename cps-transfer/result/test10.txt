@@ -1,0 +1,39 @@
+(FIX
+ ((EVEN? (X) (IF (= X 0) #T (ODD? (- X 1))))
+  (ODD? (X) (IF (= X 0) #F (EVEN? (- X 1)))))
+ (EVEN? 10)):
+(FIXH
+ ((EVEN? (sym2 X)
+   (FIXS ((sym3 (sym4) (APP sym2 (sym4))))
+    (= (X 0) NIL
+     ((APP sym3 (#T))
+      (- (X 1) (sym7)
+       ((FIXS ((sym5 (sym6) (APP sym3 (sym6)))) (APP ODD? (sym5 sym7)))))))))
+  (ODD? (sym8 X)
+   (FIXS ((sym9 (sym10) (APP sym8 (sym10))))
+    (= (X 0) NIL
+     ((APP sym9 (#F))
+      (- (X 1) (sym13)
+       ((FIXS ((sym11 (sym12) (APP sym9 (sym12))))
+         (APP EVEN? (sym11 sym13))))))))))
+ (FIXS ((sym14 (sym15) (EXIT (sym15) NIL NIL))) (APP EVEN? (sym14 10))))
+(FIX
+ ((EVEN? (X) (IF (= X 0) #T (ODD? (- X 1))))
+  (ODD? (X) (IF (= X 0) #F (EVEN? (- X 1)))))
+ (ODD? 10)):
+(FIXH
+ ((EVEN? (sym16 X)
+   (FIXS ((sym17 (sym18) (APP sym16 (sym18))))
+    (= (X 0) NIL
+     ((APP sym17 (#T))
+      (- (X 1) (sym21)
+       ((FIXS ((sym19 (sym20) (APP sym17 (sym20))))
+         (APP ODD? (sym19 sym21)))))))))
+  (ODD? (sym22 X)
+   (FIXS ((sym23 (sym24) (APP sym22 (sym24))))
+    (= (X 0) NIL
+     ((APP sym23 (#F))
+      (- (X 1) (sym27)
+       ((FIXS ((sym25 (sym26) (APP sym23 (sym26))))
+         (APP EVEN? (sym25 sym27))))))))))
+ (FIXS ((sym28 (sym29) (EXIT (sym29) NIL NIL))) (APP ODD? (sym28 10))))
