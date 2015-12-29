@@ -7,5 +7,5 @@
     ((- (C D) (sym4) ((* (sym5 sym4) (sym3) ((APP sym2 (sym3)))))))))
   (FUNC1 (sym6 X Y Z)
    (* (X Y) (sym9)
-    ((+ (Z G) (sym8) ((- (sym9 sym8) (sym7) ((sym7 sym6 (sym3))))))))))
+    ((+ (Z G) (sym8) ((- (sym9 sym8) (sym7) ((APP sym6 (sym7))))))))))
  (+ (3 5) (sym10) ((EXIT (sym10) NIL NIL))))

@@ -12,7 +12,7 @@
                (FIXS
                 ((sym5 (sym4)
                   (FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
-                   (APP APP (sym2 (sym14 sym12 sym10 sym8 sym6 sym4))))))
+                   (APP APP (sym2 sym14 sym12 sym10 sym8 sym6 sym4)))))
                 (/= (33 44) NIL (APP sym5 (#T)) (APP sym5 (#F))))))
              (= (1 2) NIL (APP sym7 (#T)) (APP sym7 (#F))))))
           (<= (9 0) NIL (APP sym9 (#T)) (APP sym9 (#F))))))

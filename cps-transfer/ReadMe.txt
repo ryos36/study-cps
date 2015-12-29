@@ -1,6 +1,6 @@
 clisp test.lisp で result/ に結果が出た。
 
-let -> OK のつもり、バグがあった
+let -> OK のつもり
     トリッキーだがうまくいっている模様
     test17 のなんちゃって :let
     ((:let ((a (:+ 1 3))) (:+ a 5)))
