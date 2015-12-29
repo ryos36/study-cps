@@ -7,11 +7,38 @@
 (defparameter *test-parse-func* nil)
 (defparameter *test-save* t)
 
+(defun min-max-no-list (min-max-list)
+  (let ((min-no (car min-max-list))
+        (max-no (cdr min-max-list)))
+    (labels ((make-list (n rv) (if (< n min-no) rv
+                                 (make-list (- n 1)
+                                            (push n rv)))))
+      (make-list max-no '()))))
+
+(defun easy-flatten (lst)
+  (labels ((easy-flatten0 (lst0 rv)
+                          (if (null lst0) rv
+                            (let ((top-elm (car lst0)))
+                              (easy-flatten0 
+                                (cdr lst0)
+                                (if (listp top-elm)
+                                  (easy-flatten0 top-elm rv)
+                                  (push top-elm rv)))))))
+    (nreverse (easy-flatten0 lst '()))))
+
+;(1 (2 . 5) 10)
 (defun set-test-files (max-no-or-no-list)
   (setf *test-files* 
         (if (listp max-no-or-no-list)
           (let ((no-list max-no-or-no-list))
-            (mapcar #'(lambda (no) (format nil "test~a" no)) no-list))
+            (if (stringp (car no-list)) `(,(format nil "test~a" (car no-list)))
+              (mapcar #'(lambda (no) (format nil "test~a" no))
+                      (easy-flatten 
+                        (mapcar #'(lambda (no) 
+                                    (if (listp no)
+                                      (min-max-no-list no)
+                                      no))
+                                no-list)))))
 
           (let ((max-no max-no-or-no-list))
             (incf max-no)

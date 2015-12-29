@@ -15,7 +15,7 @@
 ;(format t "~a~%" last-arg)
 ;(format t "transfer-table:~a~%" *transfer-table*)
 
-(set-test-files '(1 2 3 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29))
+(set-test-files '("6" (1 . 3) (7 . 29)))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)
