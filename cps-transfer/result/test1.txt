@@ -1,4 +1,4 @@
 (DEFINE (F A B) (+ A B)):
 (FIXH ((F (sym2 A B) (+ (A B) (sym3) ((APP sym2 (sym3))))))
- (EXIT (NIL) NIL NIL))
+ (EXIT (UNSPECIFIED) NIL NIL))
 (F 3 5):(FIXS ((sym4 (sym5) (EXIT (sym5) NIL NIL))) (APP F (sym4 3 5)))

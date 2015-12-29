@@ -1,0 +1,7 @@
+(FIX ((F0 (A) B) (F1 (B) C)) (+ (F0 C) (F1 B))):
+(FIXH ((F0 (sym2 A) (APP sym2 (B))) (F1 (sym3 B) (APP sym3 (C))))
+ (FIXS
+  ((sym7 (sym8)
+    (FIXS ((sym5 (sym6) (+ (sym8 sym6) (sym4) ((EXIT (sym4) NIL NIL)))))
+     (APP F1 (sym5 B)))))
+  (APP F0 (sym7 C))))

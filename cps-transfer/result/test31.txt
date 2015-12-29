@@ -1,0 +1,3 @@
+(LET ((V0 129)) (DEFINE (F0 A) (+ V0 100) A)):
+(FIXH ((F0 (sym2 A) (+ (129 100) (sym3) ((APP sym2 (A))))))
+ (EXIT (UNSPECIFIED) NIL NIL))

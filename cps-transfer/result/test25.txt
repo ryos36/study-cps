@@ -9,4 +9,4 @@
     ((- (A B) (sym9)
       ((* (sym10 sym9) (sym8)
         ((* (B X) (sym7) ((+ (sym8 sym7) (sym6) ((APP sym5 (sym6))))))))))))))
- (EXIT (NIL) NIL NIL))
+ (EXIT (UNSPECIFIED) NIL NIL))

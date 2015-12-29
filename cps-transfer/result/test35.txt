@@ -1,0 +1,6 @@
+(DEFINE (F0 A) (* (- V0 100) (+ V0 A))):
+(FIXH
+ ((F0 (sym2 A)
+   (- (V0 100) (sym5)
+    ((+ (V0 A) (sym4) ((* (sym5 sym4) (sym3) ((APP sym2 (sym3))))))))))
+ (EXIT (UNSPECIFIED) NIL NIL))
