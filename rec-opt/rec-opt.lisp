@@ -64,7 +64,7 @@
                             (fill-list (+ n 1) new-n-list rv))))
 
              (make-args (n-list)
-                        (let ((new-n-list (fill-list (car n-list) n-list '())))
+                        (let ((new-n-list (fill-list 1 n-list '())))
                           (mapcar #'(lambda(x)
                                       (intern (format nil "~a-~a" func-name x)))
                                   new-n-list)))
@@ -75,13 +75,9 @@
                                          `(:if (:= n ,(car one)) ,(cadr one) ,body)))))
 
              (make-if-sym (sym)
-                          `(,sym (:- n 1) ,@(mapcar #'(lambda (x) (cadr x)) cond-list)))
+                          `(,sym (:- n 1) (:+ n 1) ,@(mapcar #'(lambda (x) (cadr x)) cond-list)))
              (make-if (sym)
-                      (make-if-if cond-list (make-if-sym sym)))
-             (make-if-old (sym)
-                      `(:if (:= 0 n) 1
-                            (:if (:= 1 n) 1 
-                                 ,(make-if-sym sym)))))
+                      (make-if-if cond-list (make-if-sym sym))))
 
       (let* ((expr-oldn-list (get-oldn func-name (cadr func-def)))
              (expr (car expr-oldn-list))
@@ -89,10 +85,11 @@
              (old-args (make-args oldn-list))
              (old-old-args (nreverse (cdr (reverse old-args))))
              (sym (intern (format nil "~a0" func-name)))
+             (sym-0 (intern (format nil "~a-0" func-name)))
              (if-expr (make-if sym))
 
-             (new-expr `(:FIX ((,sym (i n FB-0 ,@old-args) 
-                                     (:if (:= i 0) FB-0
+             (new-expr `(:FIX ((,sym (i n ,sym-0 ,@old-args) 
+                                     (:if (:= i 0) ,sym-0
                                           (,sym (:- i 1)
                                                 (:+ n 1)
                                                 ,expr
@@ -104,3 +101,5 @@
 
 (let ((e '(FB (1 1) (0 1) (N (:+ (FB (:- n 1)) (FB (:- n 2)))))))
   (print (rec-opt e)))
+
+(let ((e '(my-fib (2 2) (1 1) (0 1) (3 3) (N (:* (my-fib (:- n 3)) (my-fib (:- n 4))))))) (print (rec-opt e)))
