@@ -46,13 +46,15 @@
     (setf (gethash key table) value)))
 ;----------------------------------------------------------------
 ; primitive
-(load "cps-primitive.lisp")
+(load "primitive.lisp")
 
 ;----------------------------------------------------------------
 (defun make-init-primitive-table ()
   (let ((htable (make-hash-table))
         (primitives `((:+  . ,#'cps-+)
                       (:-  . ,#'cps--)
+                      (:*  . ,#'cps-*)
+
                       (:>> . ,#'cps->>)
                       (:<< . ,#'cps-<<)
                       (:<  . ,#'cps-<)
@@ -60,6 +62,8 @@
                       (:>= . ,#'cps->=)
                       (:<= . ,#'cps-<=)
                       (:=  . ,#'cps-=)
+                      (:/= . ,#'cps-/=)
+
                       (:heap . ,#'cps-heap)
                       (:record-set! . ,#'cps-record-set!)
                       (:record-ref . ,#'cps-record-ref)
@@ -146,9 +150,7 @@
          (arg-syms (cadr func-define))
          (next-expr (caddr func-define)))
 
-    (print `(:cps-app ,args))
     (map nil #'(lambda (key arg) 
-                 (print `(key-arg ,key ,arg))
                  (let ((value (parse-expr-terminal arg env)))
                    (set-key-value key value func-env)))
          arg-syms args)
@@ -177,6 +179,8 @@
   (let ((op (car expr)))
     (case op
       (:fix (cps-fix expr env))
+      (:fixs (cps-fix expr env))
+      (:fixh (cps-fix expr env))
       (:app (cps-app expr env))
       (:id (cps-id expr env))
       (:neq (cps-neq expr env))
