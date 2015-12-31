@@ -3,10 +3,6 @@
   (load "cps.lisp"))
 
 ;----------------------------------------------------------------
-(defun caadddr (expr)
-  (car (cadddr expr)))
-
-;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (symbolp expr)
       (numberp expr)))
@@ -102,7 +98,6 @@
     (setf (gethash :exit table) '(:exit))
     env))
 
-
 ;----------------------------------------------------------------
 ;(f (args...) cps)
 ;  rv found : (func-name . op)
@@ -185,6 +180,7 @@
     (copy-tree `(:exit ,(cps-terminal arg env) () ()))))
 
 ;----------------------------------------------------------------
+#|
 (defun n-reduction0 (expr func-name op-call-func target-expr)
   (let ((new-expr (subst op-call-func func-name target-expr)))
     new-expr))
@@ -224,6 +220,7 @@
     (format t "new-expr:~a~%" new-expr )
     (if new-expr
       (map nil #'(lambda (each-expr) (n-reduction each-expr)) new-expr))))
+|#
 
 ;----------------------------------------------------------------
 ;(f (args...) cps)
