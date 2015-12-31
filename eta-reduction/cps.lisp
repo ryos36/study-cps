@@ -75,7 +75,7 @@
 ;(:op (id...) (rv) (cps))
 
 (defun do-primitive-cps (expr env)
-  (format t "do-primitive-cps:~a:~a~%" expr (cadddr expr))
+  ;(format t "do-primitive-cps:~a:~a~%" expr (cadddr expr))
   (let ((op (car expr))
         (args (mapcar #'(lambda (x) (cps-terminal x env)) (cadr expr)))
         (rv (caddr expr))
@@ -113,7 +113,7 @@
          (op (car func-body))
          (op-func-name (cadr func-body))
          (op-args (caddr func-body)))
-    (format t "~a ~a/ ~a ~a~%" func-name func-args op op-args)
+    ;(format t "~a ~a/ ~a ~a~%" func-name func-args op op-args)
     (if (and (eq op :app) (equal func-args op-args))
       (cons func-name op-func-name) 
       nil)))

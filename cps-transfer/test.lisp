@@ -6,8 +6,15 @@
 (defparameter *test-parse-func* #'do-lisp-to-cps)
 (defparameter *debug-mode* nil)
 (defparameter *cps-gensym-debug* t)
-(defparameter *transfer-table* (make-transfer-table))
 ;(defparameter *test-save* nil)
+
+(defun cps-gensym-reset ()
+  (cps-gensym 0))
+
+(defparameter *test-reset-func* #'cps-gensym-reset)
+
+
+(defparameter *transfer-table* (make-transfer-table))
 
 (let ((av (argv)))
   (setf last-arg (elt av (- (length av) 1))))

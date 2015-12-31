@@ -1,1 +1,1 @@
-((:exit "good bye"))
+((:exit (good-bye) () ()))

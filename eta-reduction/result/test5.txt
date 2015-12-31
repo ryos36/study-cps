@@ -1,0 +1,13 @@
+(F (K6 X) (+ (X 1) (V9) ((FIX ((K7 (K8) (APP K6 (K8)))) (APP G (K7 V9)))))):(F (K6 X) (+ (X 1) (V9) ((APP G (K6 V9)))))
+(F (K6 X)
+ (+ (X 1) (V9)
+  ((FIX ((K7 (K8) (APP KA (K8))) (KA (KB) (APP K6 (KB)))) (APP G (K7 V9)))))):(F (K6 X) (+ (X 1) (V9) ((APP G (K6 V9)))))
+(F (K6 X)
+ (+ (X 1) (V9)
+  ((FIX
+    ((KC (KD) (APP K6 (KD))) (K7 (K8) (APP KA (K8)))
+     (K10 (X0 X1) (+ (X0 X1) (RV) ((APP KC (RV))))) (KA (KB) (APP KC (KB))))
+    (APP G (K7 V9)))))):
+(F (K6 X)
+ (+ (X 1) (V9)
+  ((FIX ((K10 (X0 X1) (+ (X0 X1) (RV) ((APP K6 (RV)))))) (APP G (K6 V9))))))

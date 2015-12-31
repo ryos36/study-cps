@@ -7,6 +7,7 @@
 (defparameter *test-parse-func* nil)
 (defparameter *test-save* t)
 (defparameter *test-print* nil)
+(defparameter *test-reset-func* nil)
 
 (defun min-max-no-list (min-max-list)
   (let ((min-no (car min-max-list))
@@ -66,7 +67,8 @@
   (if (null (directory *test-result-dir*)) (ext:make-directory *test-result-dir*))
   (mapcar 
     #'(lambda (name)
-        (cps-gensym 0) ; reset
+        (if *test-reset-func*
+          (funcall *test-reset-func*))
         (let 
           ((scm-file (string-concat *test-script-dir* name *test-ext*))
            lisp-test-list
