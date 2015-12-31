@@ -146,7 +146,9 @@
          (arg-syms (cadr func-define))
          (next-expr (caddr func-define)))
 
+    (print `(:cps-app ,args))
     (map nil #'(lambda (key arg) 
+                 (print `(key-arg ,key ,arg))
                  (let ((value (parse-expr-terminal arg env)))
                    (set-key-value key value func-env)))
          arg-syms args)

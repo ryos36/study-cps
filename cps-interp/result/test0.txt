@@ -1,1 +1,0 @@
-(EXIT good bye):good bye

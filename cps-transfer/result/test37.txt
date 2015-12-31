@@ -1,12 +1,12 @@
 (FIX
- ((FIBO-2 (N A-1 A-2) (IF (= N 0) A1 (FIBO-2 (- N 1) (+ A-1 A-2) A-1)))
+ ((FIBO-2 (N A-1 A-2) (IF (= N 0) A-1 (FIBO-2 (- N 1) (+ A-1 A-2) A-1)))
   (FIBO (N) (FIBO-2 N 1 0)))
  (FIBO 8)):
 (FIXH
  ((FIBO-2 (sym2 N A-1 A-2)
    (FIXS ((sym3 (sym4) (APP sym2 (sym4))))
     (= (N 0) NIL
-     ((APP sym3 (A1))
+     ((APP sym3 (A-1))
       (- (N 1) (sym8)
        ((+ (A-1 A-2) (sym7)
          ((FIXS ((sym5 (sym6) (APP sym3 (sym6))))

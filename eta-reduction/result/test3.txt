@@ -1,9 +1,12 @@
 (ID (#F) (SYM2)
  ((NEQ (SYM2 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (#F) (SYM2 NIL NIL))
+   ((ID (3) (SYM1) ((EXIT (SYM1) NIL NIL)))
+    (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (#F) (SYM2 NIL NIL))
 (ID (#T) (SYM3)
  ((NEQ (SYM3 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (#T) (SYM3 NIL NIL))
+   ((ID (3) (SYM1) ((EXIT (SYM1) NIL NIL)))
+    (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (#T) (SYM3 NIL NIL))
 (ID (NIL) (SYM3)
  ((NEQ (SYM3 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (NIL) (SYM3 NIL NIL))
+   ((ID (3) (SYM1) ((EXIT (SYM1) NIL NIL)))
+    (ID (5) (SYM1) ((EXIT (SYM1) NIL NIL))))))):(ID (NIL) (SYM3 NIL NIL))

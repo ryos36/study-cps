@@ -5,8 +5,7 @@
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'parse-cps)
 (defparameter *debug-mode* nil)
+(defparameter *debug-mode* t)
 
-(set-test-files '(0 1 2 3))
-(set-test-files 2)
-(set-test-files '(3))
+(set-test-files '("6" (0 . 3) 6))
 (do-test)

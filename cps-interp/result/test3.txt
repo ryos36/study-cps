@@ -1,9 +1,0 @@
-(ID (#F) (SYM2)
- ((NEQ (SYM2 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT SYM1))))))):5
-(ID (#T) (SYM3)
- ((NEQ (SYM3 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT SYM1))))))):3
-(ID (NIL) (SYM3)
- ((NEQ (SYM3 #F) NIL
-   ((ID (3) (SYM1) ((EXIT SYM1))) (ID (5) (SYM1) ((EXIT SYM1))))))):3

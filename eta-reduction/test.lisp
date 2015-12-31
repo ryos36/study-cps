@@ -12,8 +12,9 @@
 ;(format t "~a~%" last-arg)
 ;(format t "transfer-table:~a~%" *transfer-table*)
 
-(set-test-files '((0 . 6)))
-;(setf *test-files* '("test37"))
+; test0 includes string , so ignore here
+
+(set-test-files '((1 . 6)))
 
 (defparameter *env* (make-env))
 (do-test)
