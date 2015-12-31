@@ -207,7 +207,7 @@
 
 
           (mapcar #'(lambda (x) (cps-terminal x env)) func-args)
-          (walk-cps func-body env))))
+          (walk-cps func-body env)))))
         
 ;----------------------------------------------------------------
 (defparameter *debug-mode* nil)

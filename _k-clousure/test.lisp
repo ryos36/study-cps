@@ -1,22 +1,10 @@
 (load "cps.lisp")
 (setf test-files '( "test10" ))
 
-;(format t "~a~%" (a-to-b '((a . b) (b . c)) 'b))
-;(format t "~a~%" (cps-exit '(:exit (a) (ignore a b c) (4)) *env*))
-;(format t "~a~%" (do-primitive-cps '(:exit (a) (ignore a b c) (4)) *env*))
-;(format t "~a~%" (cps-define '(f (a b c) (:exit (a) () ())) *env* ))
-;(format t "~a~%" (cps-app '(:app f (a b c)) *env* ))
-;(format t "~a~%" (check-eta-reduction '(f (a b c) (:app k (a b c)))))
-;
-;(setf lst '((d . e) nil (f . g) (a . b) (b . c) (g . h) (c . d)))
-;(format t "~a~%~a~%" lst (normalize-reduction-list lst))
-;
-#|
-(format t "~a~%" 
-        (cps-fix '(:fix ((f (a b) (:+ (a b) (r) ((:app k (r)))))
-                         (g (t) (:app h (t)))) (:app g (3))) *env*))
+(format t "~a~%" (cps-app '()
+                           *env*))
+
 (exit)
-|#
 
 (defun read-file (name)
   (if (probe-file name)
