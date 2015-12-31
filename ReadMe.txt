@@ -7,9 +7,9 @@
     結果として NEON を含む ARM のオブジェクトを生成し
     ARM Linux で動かすのがここの目標。
 
-    clousure 変換。
-    cps-interp に残骸がある模様。動いているかもしれない。
-    closure ？イギリス的には clousure かも。:w
+    cps-interp の closure
+        fix がきたら closure を作って table に登録している
+        closure 変換をしているわけではない
 
 ----------------------------------------------------------------
 ISSUES
@@ -26,6 +26,7 @@ define は
     グローバル変数に対応しているのか？
     レジスタに対応しているのか？
 
+closure ？イギリス的には clousure かも。
 
 IDEA
     (let ((io (heap-io 0xc0000000 0x1000)))
