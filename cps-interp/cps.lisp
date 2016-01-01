@@ -15,16 +15,19 @@
       (numberp expr)))
 
 ;----------------------------------------------------------------
+(defun env-length (env &optional rv)
+  (length env))
+
 (defun lookup-symbol (key env)
-  (if (null env) :not-found
-    (let ((table (cdr env)))
-      (if (null table)
-        (lookup-symbol key (car env))
-        (multiple-value-bind
-          (result exist) (gethash key table)
-          (if (null exist)
-            (lookup-symbol key (car env))
-            result))))))
+  (if (null env) 
+    :not-found
+    (let ((table (car env)))
+      (if (null table) 
+        :not-found
+        (let ((key-value (assoc keY table)))
+          (if (null key-value) 
+            (lookup-symbol key (cdr env))
+            (cadr key-value)))))))
 
 (defun parse-expr-terminal (expr env)
   (cond 
@@ -35,15 +38,15 @@
      (let ((result (lookup-symbol expr env))) 
        (if (eq result :not-found)
          (cps-error-exit expr env)
-         result)))
+           result)))
     (t expr)))
 
 (defun make-new-env (env)
-  (cons env (make-hash-table)))
+  (cons `(()) env))
 
 (defun set-key-value (key value env)
-  (let ((table (cdr env)))
-    (setf (gethash key table) value)))
+  (let ((table (car env)))
+    (setf (car env) (push `(,key ,value) table))))
 ;----------------------------------------------------------------
 ; primitive
 (load "primitive.lisp")
@@ -97,15 +100,24 @@
 
 ;----------------------------------------------------------------
 (defun make-env ()
-  (let* ((env (make-new-env nil))
-         (table (cdr env)))
-    (setf (gethash :exit table) '(:exit))
+  (let* ((env (make-new-env nil)))
     env))
 
-
 ;----------------------------------------------------------------
-(defun make-cps-closure (bind new-env)
-  (cons bind new-env))
+(defun save-cps-closure (bind new-env)
+  `(:closure ,bind ,new-env))
+
+(defun make-cps-closure (func-name env)
+  (let ((saved-cps-closure (parse-expr-terminal func-name env)))
+    (if (eq :closure (car saved-cps-closure))
+      (let ((bind (cadr saved-cps-closure))
+            (closure-env (caddr saved-cps-closure)))
+        (let ((copy-env (mapcar #'(lambda (an-env)
+                               (copy-list an-env)) closure-env)))
+
+          (print `(copy-env ,copy-env))
+          `(:closure ,bind ,copy-env)))
+      (cps-error-exit `(,func-name ,saved-cps-closure env)))))
 
 ;----------------------------------------------------------------
 (defun cps-fix (expr env)
@@ -115,8 +127,9 @@
 
     (map nil #'(lambda (func-define)
                  (let ((func-name (car func-define))
-                       (cps-closure (make-cps-closure func-define new-env)))
+                       (cps-closure (save-cps-closure func-define new-env)))
 
+                   (print `(:cps-fix ,func-name ,func-define ,(env-length env 0)))
                    (set-key-value func-name cps-closure new-env)))
          binds)
     (parse-cps next-expr new-env)))
@@ -142,21 +155,41 @@
     (parse-cps (if (not (eq arg0 arg1)) true-expr false-expr) env)))
 ;----------------------------------------------------------------
 (defun cps-app (expr env)
-  (let* ((func-name (cadr expr))
+ ;(print `(:cps-app-first ,(parse-expr-terminal (cadr expr) env) search-SYM5 ,(lookup-symbol 'SYM5 env) ,(env-length env 0)))
+  (let* ((func-name (parse-expr-terminal (cadr expr) env))
          (args (caddr expr))
-         (cps-closure (lookup-symbol func-name env))
-         (func-define (car cps-closure))
-         (func-env (cdr cps-closure))
+         (x (print 'app))
+         (cps-closure (make-cps-closure func-name env))
+         (func-define (cadr cps-closure))
+         (func-env (caddr cps-closure))
          (arg-syms (cadr func-define))
-         (next-expr (caddr func-define)))
+         (next-expr (caddr func-define))
+         (new-env (make-new-env func-env))
+         v-args
+         )
 
     (map nil #'(lambda (key arg) 
                  (let ((value (parse-expr-terminal arg env)))
-                   (set-key-value key value func-env)))
+                   (push `(,key ,arg ,(if (listp value) 'LIST value)) v-args)
+                   (set-key-value key value new-env)))
          arg-syms args)
 
-    (parse-cps next-expr func-env)))
+    (print `(:do-app ,func-name ,v-args, (env-length new-env 0)))
+    ;(print `(:do-app-app ,func-name ,next-expr))
 
+    (if (eq func-name 'sym2)
+      (let* ((sym5-closure (parse-expr-terminal 'sym2 new-env))
+             (sym5-bind (cadr sym5-closure))
+             (sym5-name (car sym5-bind))
+             (sym5-args (cadr sym5-bind))
+             (sym5-body (caddr sym5-bind)))
+        (print `(SYM2 IS ,sym5-name))
+        (print `(ARG IS ,sym5-args))
+        (print `(FUNC IS ,sym5-body))
+        ;(exit 0)
+        ))
+
+    (parse-cps next-expr new-env)))
 
 ;----------------------------------------------------------------
 ;(:exit (r) () ())
@@ -174,7 +207,7 @@
 ;----------------------------------------------------------------
 (defun parse-cps (expr env)
   (if *debug-mode*
-    (format t "expr:~s~%" expr))
+    (format t "expr:~a ~s~%" (env-length env 0) expr))
 
   (let ((op (car expr)))
     (case op
