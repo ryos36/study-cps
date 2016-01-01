@@ -9,4 +9,4 @@
            (:APP FIBO-2 (sym5 sym8 sym7 A-1)))))))))))
   (FIBO (sym9 N)
    (:FIX ((sym10 (sym11) (:APP sym9 (sym11)))) (:APP FIBO-2 (sym10 N 1 0)))))
- (:FIX ((sym12 (sym13) (:EXIT (sym13) NIL NIL))) (:APP FIBO (sym12 2)))))
+ (:FIX ((sym12 (sym13) (:EXIT (sym13) NIL NIL))) (:APP FIBO (sym12 8)))))
