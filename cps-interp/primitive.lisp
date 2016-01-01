@@ -48,13 +48,12 @@
        (let ((parsed-arg0 (parse-expr-terminal (car args) env))
              (parsed-arg1 (parse-expr-terminal (cadr args) env))
              (next-cps-expr0 (car cps-pair))
-             (next-cps-expr1 (cadr cps-pair))
-             (new-env (make-new-env env)))
+             (next-cps-expr1 (cadr cps-pair)))
 
          (let ((compare-rv ,@body))
            (if compare-rv
-             (parse-cps next-cps-expr0 new-env)
-             (parse-cps next-cps-expr1 new-env)))))))
+             (parse-cps next-cps-expr0 env)
+             (parse-cps next-cps-expr1 env)))))))
 
 ;----------------------------------------------------------------
 (make-two-compare-primitive cps-< 
