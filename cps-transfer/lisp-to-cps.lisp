@@ -48,7 +48,7 @@
                          (if (functionp continuation-lambda)
                            (setf (gethash value table) 
                                  (cons continuation-lambda renamed-value)))
-                         value)
+                         :place-holder)
                        (find-renamed-value value (cdr table-list)))))))))
     (cond
       ((null value) nil) 
@@ -208,8 +208,8 @@
       (flet ((fill-fix-expr (expr0) (setf (car fix-expr0) expr0) fix-expr0))
         ;(print `(fix-transfer ,fix-expr ,fix-expr0 ,(cps-gensym)))
 
-        (copy-tree `(:FIXH ,cps-binds ,
-                           (do-lisp-to-cps fix-expr context)))))))
+        `(:FIXH ,cps-binds ,
+                           (do-lisp-to-cps fix-expr context))))))
 
 ;----------------------------------------------------------------
 (defun apply-transfer (expr context)
@@ -217,20 +217,28 @@
          (arg0 (cps-gensym))
          (func-name (car expr))
          (new-cps-expr (copy-tree `(:FIXS ((,return-sym (,arg0) CONT))
-                                        (:APP ,func-name ARGS))))
+                                        (:APP FUNC-NAME ARGS))))
+         (func-name-list (pickup-list new-cps-expr 'FUNC-NAME))
          (cont-list (pickup-list new-cps-expr 'CONT))
          (args-list (pickup-list new-cps-expr 'ARGS))
          (new-args nil)
          wrapped-cps-expr)
 
+    ;(print `('apply-transfer ,func-name ,(variable-rename func-name context)))
+
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+           (fill-func-name (func-name) (setf (car func-name-list) func-name) wrapped-cps-expr)
            (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
+
 
       ;(print expr)
       (let ((args (reverse (cdr expr)))
 
             (cont-lambda (car context))
             (table-list (cdr context)))
+
+        (setf wrapped-cps-expr 
+              (do-lisp-to-cps func-name (cons #'fill-func-name table-list)))
 
         (setf wrapped-cps-expr
               (fill-cont (call-continuation-lambda cont-lambda arg0)))

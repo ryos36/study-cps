@@ -1,10 +1,11 @@
 (LET ((X 3))
  (FIX ((FX (A0) (+ A0 X)) (F0 (A0) (LET ((Z (FX A0))) (FIX ((F1 (A0) Z)) F1))))
-  (LET ((G0 (F0 3)) (G1 (F0 4))) (+ (G0 0) (G0 1))))):
+  (LET ((G0 (F0 3)) (G1 (F0 4))) (+ (G0 0) (G1 1))))):
 (FIXH
- ((FX (sym2 A0) (+ (A0 X) (sym3) ((APP sym2 (sym3)))))
+ ((FX (sym2 A0) (+ (A0 3) (sym3) ((APP sym2 (sym3)))))
   (F0 (sym4 A0)
-   (FIXS ((sym6 (sym7) (FIXH ((F1 (sym5 A0) (APP sym5 (Z)))) (APP sym4 (F1)))))
+   (FIXS
+    ((sym6 (sym7) (FIXH ((F1 (sym5 A0) (APP sym5 (sym7)))) (APP sym4 (F1)))))
     (APP FX (sym6 A0)))))
  (FIXS
   ((sym15 (sym16)
@@ -14,7 +15,10 @@
         ((sym11 (sym12)
           (FIXS
            ((sym9 (sym10) (+ (sym12 sym10) (sym8) ((EXIT (sym8) NIL NIL)))))
-           (APP G0 (sym9 1)))))
-        (APP G0 (sym11 0)))))
+           (APP sym14 (sym9 1)))))
+        (APP sym16 (sym11 0)))))
      (APP F0 (sym13 4)))))
   (APP F0 (sym15 3))))
+(LET ((X 3)) (FIX ((FX (A0) (+ A0 X))) (+ 3 5))):
+(FIXH ((FX (sym17 A0) (+ (A0 3) (sym18) ((APP sym17 (sym18))))))
+ (+ (3 5) (sym19) ((EXIT (sym19) NIL NIL))))

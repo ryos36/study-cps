@@ -5,6 +5,7 @@
 (defparameter *test-ext* ".scm")
 (defparameter *test-parse-func* #'do-lisp-to-cps)
 (defparameter *debug-mode* nil)
+;(defparameter *debug-mode* t)
 ;(defparameter *test-save* nil)
 
 (defun cps-gensym-reset ()
@@ -21,7 +22,7 @@
 ;(format t "~a~%" last-arg)
 ;(format t "transfer-table:~a~%" *transfer-table*)
 
-(set-test-files '("39" (1 . 39)))
+(set-test-files '((1 . 39)))
 
 (defparameter *env* (make-exit-continuous))
 (do-test)
