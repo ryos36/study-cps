@@ -148,25 +148,32 @@
 ;(:fix (binds*) cps)
 ;
 (defun cps-fix (expr env)
-  (let ((binds (cadr expr))
-        (next-expr (caddr expr))
-        (new-env (make-new-env env)))
+  (let* ((binds (cadr expr))
+         (next-expr (caddr expr))
+         (new-env (make-new-env env))
+         (re-binds (mapcar #'(lambda (bind) 
+                               (let ((func-name (car bind))
+                                     (func-args (cadr bind))
+                                     (func-body (caddr bind)))
+                                 `(,func-name ,func-args
+                                              ,(walk-cps func-body env))))
+                           binds))
+         (re-list (normalize-reduction-list
+                     (mapcar #'check-eta-reduction re-binds)))
+         new-binds
+         (table (cdr new-env)))
 
-    (let ((re-list (normalize-reduction-list
-                     (mapcar #'check-eta-reduction binds)))
-          new-binds
-          (table (cdr new-env)))
-      (put-reduction-list-into-htable re-list table) 
+    (put-reduction-list-into-htable re-list table) 
 
-      (let ((new-binds
-              (remove-if #'null
-                         (map 'list #'(lambda(bind re)
-                                        (if re nil (cps-define bind new-env)))
-                              binds re-list)))
-            (new-cps (walk-cps next-expr new-env)))
-        (if new-binds
-          (list :fix new-binds new-cps)
-          new-cps)))))
+    (let ((new-binds
+            (remove-if #'null
+                       (map 'list #'(lambda(bind re)
+                                      (if re nil (cps-define bind new-env)))
+                            binds re-list)))
+          (new-cps (walk-cps next-expr new-env)))
+      (if new-binds
+        (list :fix new-binds new-cps)
+        new-cps))))
 
 ;----------------------------------------------------------------
 ;(app f (id...))
