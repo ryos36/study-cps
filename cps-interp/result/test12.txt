@@ -1,0 +1,8 @@
+(FIX
+ ((FIBO-2 (SYM2 N A-1 A-2)
+   (= (N 0) NIL
+    ((APP SYM2 (A-1))
+     (- (N 1) (SYM8)
+      ((+ (A-1 A-2) (SYM7) ((APP FIBO-2 (SYM2 SYM8 SYM7 A-1)))))))))
+  (FIBO (SYM9 N) (APP FIBO-2 (SYM9 N 1 0))))
+ (FIX ((SYM12 (SYM13) (EXIT (SYM13) NIL NIL))) (APP FIBO (SYM12 8)))):34
