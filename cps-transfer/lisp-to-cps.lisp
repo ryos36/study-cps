@@ -48,7 +48,7 @@
                          (if (functionp continuation-lambda)
                            (setf (gethash value table) 
                                  (cons continuation-lambda renamed-value)))
-                         :place-holder)
+                         value)
                        (find-renamed-value value (cdr table-list)))))))))
     (cond
       ((null value) nil) 
