@@ -27,7 +27,7 @@
     ((symbolp expr) (let ((result (lookup-symbol expr env))) 
                       (if (eq result :not-found)
                         expr
-                        result)))
+                        (cps-terminal result env))))
     (t expr)))
 
 (defun make-new-env (env)
@@ -42,13 +42,18 @@
   (let ((htable (make-hash-table))
         (primitives `((:+  . t)
                       (:-  . t)
+                      (:*  . t)
+
                       (:>> . t)
                       (:<< . t)
+
                       (:<  . t)
                       (:>  . t)
                       (:>= . t)
                       (:<= . t)
                       (:=  . t)
+                      (:/=  . t)
+
                       (:heap . t)
                       (:record-set! . t)
                       (:record-ref . t)
@@ -68,14 +73,15 @@
 (defun lookup-primitive (op)
   (gethash op *primitive-table*))
 ;----------------------------------------------------------------
-;(:op (id...) (rv) (cps))
+;(:op (id...) (rv) (cps...))
 
 (defun do-primitive-cps (expr env)
   ;(format t "do-primitive-cps:~a:~a~%" expr (cadddr expr))
   (let ((op (car expr))
         (args (mapcar #'(lambda (x) (cps-terminal x env)) (cadr expr)))
-        (rv (caddr expr))
+        (rv (cps-terminal (caddr expr) env))
         (next-expr-list (cadddr expr)))
+    ;(print `(next-expr-list ,op ,(cadr next-expr-list)))
     (list op args rv
           (mapcar #'(lambda(x) (walk-cps x env)) next-expr-list))))
 
@@ -169,6 +175,7 @@
         (args 
           (mapcar #'(lambda (x) (cps-terminal x env))
                       (caddr expr))))
+    ;(print `(cps-app ,(caddr expr) ,args ,(cps-terminal (car args) env)))
     (copy-tree `(:app ,call-func-name ,args))))
 
 

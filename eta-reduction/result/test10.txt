@@ -1,0 +1,18 @@
+(< (4 4) NIL
+ ((EXIT (#F) NIL NIL)
+  (> (7 7) NIL
+   ((EXIT (#F) NIL NIL)
+    (= (2 40) NIL
+     ((EXIT (#F) NIL NIL)
+      (<= (200 30) NIL
+       ((EXIT (#F) NIL NIL)
+        (>= (200 3000) NIL ((EXIT (#F) NIL NIL) (EXIT (#T) NIL NIL))))))))))):
+(< (4 4) NIL
+ ((EXIT (#F) NIL NIL)
+  (> (7 7) NIL
+   ((EXIT (#F) NIL NIL)
+    (= (2 40) NIL
+     ((EXIT (#F) NIL NIL)
+      (<= (200 30) NIL
+       ((EXIT (#F) NIL NIL)
+        (>= (200 3000) NIL ((EXIT (#F) NIL NIL) (EXIT (#T) NIL NIL)))))))))))
