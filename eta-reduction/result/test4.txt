@@ -1,1 +1,2 @@
 (FIX ((F (K X0 X1) (+ (X0 X1) (R) ((APP K (R)))))) (APP F (F 3 5))):(FIX ((F (K X0 X1) (+ (X0 X1) (R) ((APP K (R)))))) (APP F (F 3 5)))
+SAME

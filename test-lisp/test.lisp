@@ -86,8 +86,10 @@
           (setf result
                 (with-output-to-string (str)
                   (dolist (i lisp-test-list)
-                    (format str "~a:~a~%" i 
-                            (funcall *test-parse-func* i *env*)))))
+                    (let ((rv (funcall *test-parse-func* i *env*)))
+                      (format str "~a:~a~%" i rv)
+                      (if (equal i rv) 
+                        (format str "SAME~%" i rv))))))
 
           #|
           (if result-txt 

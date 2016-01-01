@@ -4,3 +4,4 @@
 (<< (1 3) (SYM0)
  ((* (3 1024) (SYM2)
    ((>> (SYM2 4) (SYM1) ((+ (SYM0 SYM1) (SYM7) ((EXIT (SYM7) NIL NIL)))))))))
+SAME
