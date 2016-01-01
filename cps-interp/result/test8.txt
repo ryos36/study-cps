@@ -1,0 +1,2 @@
+(* (1 2) (SYM0)
+ ((- (3 4) (SYM1) ((+ (SYM0 SYM1) (SYM7) ((EXIT (SYM7) NIL NIL))))))):1

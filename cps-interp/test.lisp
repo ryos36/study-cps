@@ -7,5 +7,5 @@
 (defparameter *debug-mode* nil)
 (defparameter *debug-mode* nil)
 
-(set-test-files '("6" (0 . 3) (7 . 10)))
+(set-test-files '((0 . 3) (6 . 11)))
 (do-test)
