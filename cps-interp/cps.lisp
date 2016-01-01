@@ -115,7 +115,7 @@
         (let ((copy-env (mapcar #'(lambda (an-env)
                                (copy-list an-env)) closure-env)))
 
-          (print `(copy-env ,copy-env))
+          ;(print `(copy-env ,copy-env))
           `(:closure ,bind ,copy-env)))
       (cps-error-exit `(,func-name ,saved-cps-closure env)))))
 
@@ -129,7 +129,7 @@
                  (let ((func-name (car func-define))
                        (cps-closure (save-cps-closure func-define new-env)))
 
-                   (print `(:cps-fix ,func-name ,func-define ,(env-length env 0)))
+                   ;(print `(:cps-fix ,func-name ,func-define ,(env-length env 0)))
                    (set-key-value func-name cps-closure new-env)))
          binds)
     (parse-cps next-expr new-env)))
@@ -155,10 +155,8 @@
     (parse-cps (if (not (eq arg0 arg1)) true-expr false-expr) env)))
 ;----------------------------------------------------------------
 (defun cps-app (expr env)
- ;(print `(:cps-app-first ,(parse-expr-terminal (cadr expr) env) search-SYM5 ,(lookup-symbol 'SYM5 env) ,(env-length env 0)))
   (let* ((func-name (parse-expr-terminal (cadr expr) env))
          (args (caddr expr))
-         (x (print 'app))
          (cps-closure (make-cps-closure func-name env))
          (func-define (cadr cps-closure))
          (func-env (caddr cps-closure))
@@ -174,9 +172,10 @@
                    (set-key-value key value new-env)))
          arg-syms args)
 
-    (print `(:do-app ,func-name ,v-args, (env-length new-env 0)))
+    ;(print `(:do-app ,func-name ,v-args, (env-length new-env 0)))
     ;(print `(:do-app-app ,func-name ,next-expr))
 
+    #|
     (if (eq func-name 'sym2)
       (let* ((sym5-closure (parse-expr-terminal 'sym2 new-env))
              (sym5-bind (cadr sym5-closure))
@@ -188,6 +187,7 @@
         (print `(FUNC IS ,sym5-body))
         ;(exit 0)
         ))
+    |#
 
     (parse-cps next-expr new-env)))
 
