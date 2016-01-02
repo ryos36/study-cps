@@ -1,7 +1,8 @@
-(LET ((R (HEAP 0 1 2 3))) (RECORD-SET! R 0 10)
- (+ (RECORD-REF R 0) (RECORD-REF R 1))):
-(HEAP (0 1 2 3) (sym5)
- (RECORD-SET! (sym5 0 10) NIL
-  (RECORD-REF (sym5 0) (sym4)
-   (RECORD-REF (sym5 1) (sym3)
-    (+ (sym4 sym3) (sym2) ((EXIT (sym2) NIL NIL)))))))
+(:LET ((R (:HEAP 0 1 2 3))) (:RECORD-SET! R 0 10)
+ (:+ (:RECORD-REF R 0) (:RECORD-REF R 1)))
+:
+(:HEAP (0 1 2 3) (|sym5|)
+ (:RECORD-SET! (|sym5| 0 10) NIL
+  (:RECORD-REF (|sym5| 0) (|sym4|)
+   (:RECORD-REF (|sym5| 1) (|sym3|)
+    (:+ (|sym4| |sym3|) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))))))

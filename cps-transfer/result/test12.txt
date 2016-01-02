@@ -1,3 +1,4 @@
-(IF (> 3 5) 3 5):
-(FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
- (> (3 5) NIL ((APP sym2 (3)) (APP sym2 (5)))))
+(:IF (:> 3 5) 3 5)
+:
+(:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+ (:> (3 5) NIL ((:APP |sym2| (3)) (:APP |sym2| (5)))))

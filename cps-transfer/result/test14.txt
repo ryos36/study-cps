@@ -1,1 +1,3 @@
-(EXIT 5):(EXIT (5) NIL NIL)
+(:EXIT 5)
+:
+(:EXIT (5) NIL NIL)

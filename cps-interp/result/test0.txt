@@ -1,1 +1,3 @@
-(EXIT (good-bye) NIL NIL):good-bye
+(:EXIT ("good-bye") NIL NIL)
+:
+"good-bye"

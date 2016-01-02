@@ -1,12 +1,14 @@
-(FIX
+(:FIX
  ((FIBO-2 (SYM2 N A-1 A-2)
-   (FIX ((SYM3 (SYM4) (APP SYM2 (SYM4))))
-    (= (N 0) NIL
-     ((APP SYM3 (A-1))
-      (- (N 1) (SYM8)
-       ((+ (A-1 A-2) (SYM7)
-         ((FIX ((SYM5 (SYM6) (APP SYM3 (SYM6))))
-           (APP FIBO-2 (SYM5 SYM8 SYM7 A-1)))))))))))
+   (:FIX ((SYM3 (SYM4) (:APP SYM2 (SYM4))))
+    (:= (N 0) NIL
+     ((:APP SYM3 (A-1))
+      (:- (N 1) (SYM8)
+       ((:+ (A-1 A-2) (SYM7)
+         ((:FIX ((SYM5 (SYM6) (:APP SYM3 (SYM6))))
+           (:APP FIBO-2 (SYM5 SYM8 SYM7 A-1)))))))))))
   (FIBO (SYM9 N)
-   (FIX ((SYM10 (SYM11) (APP SYM9 (SYM11)))) (APP FIBO-2 (SYM10 N 1 0)))))
- (FIX ((SYM12 (SYM13) (EXIT (SYM13) NIL NIL))) (APP FIBO (SYM12 8)))):34
+   (:FIX ((SYM10 (SYM11) (:APP SYM9 (SYM11)))) (:APP FIBO-2 (SYM10 N 1 0)))))
+ (:FIX ((SYM12 (SYM13) (:EXIT (SYM13) NIL NIL))) (:APP FIBO (SYM12 8))))
+:
+34

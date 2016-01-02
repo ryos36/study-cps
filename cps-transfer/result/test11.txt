@@ -1,4 +1,12 @@
-(+ 4 5):(+ (4 5) (sym2) ((EXIT (sym2) NIL NIL)))
-(- 3 2):(- (3 2) (sym3) ((EXIT (sym3) NIL NIL)))
-(<< 10 3):(<< (10 3) (sym4) ((EXIT (sym4) NIL NIL)))
-(>> 1023 3):(>> (1023 3) (sym5) ((EXIT (sym5) NIL NIL)))
+(:+ 4 5)
+:
+(:+ (4 5) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))
+(:- 3 2)
+:
+(:- (3 2) (|sym3|) ((:EXIT (|sym3|) NIL NIL)))
+(:<< 10 3)
+:
+(:<< (10 3) (|sym4|) ((:EXIT (|sym4|) NIL NIL)))
+(:>> 1023 3)
+:
+(:>> (1023 3) (|sym5|) ((:EXIT (|sym5|) NIL NIL)))

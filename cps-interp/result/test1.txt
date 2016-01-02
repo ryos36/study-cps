@@ -1,1 +1,3 @@
-(+ (3 5) (R) ((EXIT (R) NIL NIL))):8
+(:+ (3 5) (R) ((:EXIT (R) NIL NIL)))
+:
+8

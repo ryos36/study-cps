@@ -1,3 +1,6 @@
-(DEFINE (F X) (LET ((Y (+ X 1))) (* Y 2))):
-(FIXH ((F (sym2 X) (+ (X 1) (sym4) ((* (sym4 2) (sym3) ((APP sym2 (sym3))))))))
- (EXIT (UNSPECIFIED) NIL NIL))
+(:DEFINE (F X) (:LET ((Y (:+ X 1))) (:* Y 2)))
+:
+(FIXH
+ ((F (|sym2| X)
+   (:+ (X 1) (|sym4|) ((:* (|sym4| 2) (|sym3|) ((:APP |sym2| (|sym3|))))))))
+ (:EXIT (:UNSPECIFIED) NIL NIL))

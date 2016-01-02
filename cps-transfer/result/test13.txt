@@ -1,18 +1,24 @@
-(IF (> 3 5) 3 5):
-(FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
- (> (3 5) NIL ((APP sym2 (3)) (APP sym2 (5)))))
-(IF (< 3 5) 3 5):
-(FIXS ((sym4 (sym5) (EXIT (sym5) NIL NIL)))
- (< (3 5) NIL ((APP sym4 (3)) (APP sym4 (5)))))
-(IF (>= 3 5) 3 5):
-(FIXS ((sym6 (sym7) (EXIT (sym7) NIL NIL)))
- (>= (3 5) NIL ((APP sym6 (3)) (APP sym6 (5)))))
-(IF (<= 3 5) 3 5):
-(FIXS ((sym8 (sym9) (EXIT (sym9) NIL NIL)))
- (<= (3 5) NIL ((APP sym8 (3)) (APP sym8 (5)))))
-(IF (= 3 5) 3 5):
-(FIXS ((sym10 (sym11) (EXIT (sym11) NIL NIL)))
- (= (3 5) NIL ((APP sym10 (3)) (APP sym10 (5)))))
-(IF (= 3 3) 3 5):
-(FIXS ((sym12 (sym13) (EXIT (sym13) NIL NIL)))
- (= (3 3) NIL ((APP sym12 (3)) (APP sym12 (5)))))
+(:IF (:> 3 5) 3 5)
+:
+(:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+ (:> (3 5) NIL ((:APP |sym2| (3)) (:APP |sym2| (5)))))
+(:IF (:< 3 5) 3 5)
+:
+(:FIXS ((|sym4| (|sym5|) (:EXIT (|sym5|) NIL NIL)))
+ (:< (3 5) NIL ((:APP |sym4| (3)) (:APP |sym4| (5)))))
+(:IF (:>= 3 5) 3 5)
+:
+(:FIXS ((|sym6| (|sym7|) (:EXIT (|sym7|) NIL NIL)))
+ (:>= (3 5) NIL ((:APP |sym6| (3)) (:APP |sym6| (5)))))
+(:IF (:<= 3 5) 3 5)
+:
+(:FIXS ((|sym8| (|sym9|) (:EXIT (|sym9|) NIL NIL)))
+ (:<= (3 5) NIL ((:APP |sym8| (3)) (:APP |sym8| (5)))))
+(:IF (:= 3 5) 3 5)
+:
+(:FIXS ((|sym10| (|sym11|) (:EXIT (|sym11|) NIL NIL)))
+ (:= (3 5) NIL ((:APP |sym10| (3)) (:APP |sym10| (5)))))
+(:IF (:= 3 3) 3 5)
+:
+(:FIXS ((|sym12| (|sym13|) (:EXIT (|sym13|) NIL NIL)))
+ (:= (3 3) NIL ((:APP |sym12| (3)) (:APP |sym12| (5)))))

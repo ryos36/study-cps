@@ -1,9 +1,10 @@
-(FIX
+(:FIX
  ((ETA-IF (SYM2 X)
-   (FIX ((SYM3 (SYM4) (APP SYM2 (SYM4))))
-    (= (X 0) NIL
-     ((FIX ((SYM5 (SYM6) (APP SYM3 (SYM6)))) (APP F (SYM5 X)))
-      (FIX ((SYM7 (SYM8) (APP SYM3 (SYM8)))) (APP G (SYM7 X))))))))
- (EXIT (UNSPECIFIED) NIL NIL)):
-(FIX ((ETA-IF (SYM2 X) (= (X 0) NIL ((APP F (SYM2 X)) (APP G (SYM2 X))))))
- (EXIT (UNSPECIFIED) NIL NIL))
+   (:FIX ((SYM3 (SYM4) (:APP SYM2 (SYM4))))
+    (:= (X 0) NIL
+     ((:FIX ((SYM5 (SYM6) (:APP SYM3 (SYM6)))) (:APP F (SYM5 X)))
+      (:FIX ((SYM7 (SYM8) (:APP SYM3 (SYM8)))) (:APP G (SYM7 X))))))))
+ (:EXIT (UNSPECIFIED) NIL NIL))
+:
+(:FIX ((ETA-IF (SYM2 X) (:= (X 0) NIL ((:APP F (SYM2 X)) (:APP G (SYM2 X))))))
+ (:EXIT (UNSPECIFIED) NIL NIL))

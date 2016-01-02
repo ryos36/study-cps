@@ -18,6 +18,22 @@
 
 ----------------------------------------------------------------
 ISSUES
+copy-tree/list はなるべく使わない方がよい。
+    copy-tree/list に対して書き換える関数が定義されていると
+    copy された瞬間にリンクを失う。
+    例えば
+        ... (:+ (<ARG0> <ARG1>) (<RV>) (....))) ...
+        があり <ARG0> を置き換える関数があったとすると
+        こぴされて
+        ... (:+ (<ARG0> <ARG1>) (<RV>) (....))) ...
+        と構成は同じものができるが先の関数はコピー前のリストに対する
+        変換関数であるため。
+        実際に let-transfer で問題が発生した
+        let-transfer の延長で fix-transferがよばれ
+        fix-transfer がコピー(copy-tree)してしまったために
+        let-transfer の変数置き換えが機能しなかった。
+        いまは fix-transfer の最後で copy するのをやめた
+
 scheme の複雑な closure にちゃんと対応しているか疑問
   closure の覚書参照の事。
 　いまは fix で closure の元を env に関数名と共にポイントして置き
@@ -196,4 +212,10 @@ eta-reduction: cps-eta-reduction:
     簡単バージョン(n-reduction) を発展させて完成させた。
     これはこれでおしまい。
     関数 n-reduction は削除してよい。
+
+rec-opt
+    ;'(FB (0 1) (1 1) (N (+ (FB (- n 1)) (FB (- n 2)))))
+    の最適化
+    FIBO に似た形の関数を最適化して末尾呼び出しにしようという試み
+    アイデアだけ
 

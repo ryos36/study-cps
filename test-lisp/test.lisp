@@ -87,7 +87,7 @@
                 (with-output-to-string (str)
                   (dolist (i lisp-test-list)
                     (let ((rv (funcall *test-parse-func* i *env*)))
-                      (format str "~a:~a~%" i rv)
+                      (format str "~s~%:~%~s~%" i rv)
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))
 

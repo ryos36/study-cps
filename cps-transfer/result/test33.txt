@@ -1,3 +1,4 @@
-(FIX ((F0 (A) B) (F1 (B) C)) X):
-(FIXH ((F0 (sym2 A) (APP sym2 (B))) (F1 (sym3 B) (APP sym3 (C))))
- (EXIT (X) NIL NIL))
+(:FIX ((F0 (A) B) (F1 (B) C)) X)
+:
+(:FIXH ((F0 (|sym2| A) (:APP |sym2| (B))) (F1 (|sym3| B) (:APP |sym3| (C))))
+ (:EXIT (X) NIL NIL))

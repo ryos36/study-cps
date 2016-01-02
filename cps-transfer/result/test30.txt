@@ -1,5 +1,7 @@
-(+ 3 (LET ((V0 129) (V1 (FUNC V0 4))) V0 (+ V0 V1) V0)):
-(FIXS
- ((sym4 (sym5)
-   (+ (129 sym5) (sym3) ((+ (3 129) (sym2) ((EXIT (sym2) NIL NIL)))))))
- (APP FUNC (sym4 V0 4)))
+(:+ 3 (:LET ((V0 129) (V1 (FUNC V0 4))) V0 (:+ V0 V1) V0))
+:
+(:FIXS
+ ((|sym4| (|sym5|)
+   (:+ (129 |sym5|) (|sym3|)
+    ((:+ (3 129) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))))))
+ (:APP FUNC (|sym4| V0 4)))

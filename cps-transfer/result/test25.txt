@@ -1,12 +1,16 @@
-(DEFINE X (+ (* 3 5) (- 4 2))):
-(* (3 5) (sym4)
- ((- (4 2) (sym3)
-   ((+ (sym4 sym3) (sym2) ((ID (sym2) (X) (EXIT (UNSPECIFIED) NIL NIL))))))))
-(DEFINE (FUNC0 A B C) (+ (* (+ A C) (- A B)) (* B X))):
+(:DEFINE X (:+ (:* 3 5) (:- 4 2)))
+:
+(:* (3 5) (|sym4|)
+ ((:- (4 2) (|sym3|)
+   ((:+ (|sym4| |sym3|) (|sym2|)
+     ((:ID (|sym2|) (X) (:EXIT (:UNSPECIFIED) NIL NIL))))))))
+(:DEFINE (FUNC0 A B C) (:+ (:* (:+ A C) (:- A B)) (:* B X)))
+:
 (FIXH
- ((FUNC0 (sym5 A B C)
-   (+ (A C) (sym10)
-    ((- (A B) (sym9)
-      ((* (sym10 sym9) (sym8)
-        ((* (B X) (sym7) ((+ (sym8 sym7) (sym6) ((APP sym5 (sym6))))))))))))))
- (EXIT (UNSPECIFIED) NIL NIL))
+ ((FUNC0 (|sym5| A B C)
+   (:+ (A C) (|sym10|)
+    ((:- (A B) (|sym9|)
+      ((:* (|sym10| |sym9|) (|sym8|)
+        ((:* (B X) (|sym7|)
+          ((:+ (|sym8| |sym7|) (|sym6|) ((:APP |sym5| (|sym6|))))))))))))))
+ (:EXIT (:UNSPECIFIED) NIL NIL))

@@ -1,1 +1,3 @@
-(+ 3 5):(+ (3 5) (sym2) ((EXIT (sym2) NIL NIL)))
+(:+ 3 5)
+:
+(:+ (3 5) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))

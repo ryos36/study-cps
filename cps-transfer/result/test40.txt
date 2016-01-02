@@ -1,8 +1,10 @@
-(DEFINE (ETA-IF X) (IF (= X 0) (F X) (G X))):
+(:DEFINE (ETA-IF X) (:IF (:= X 0) (F X) (G X)))
+:
 (FIXH
- ((ETA-IF (sym2 X)
-   (FIXS ((sym3 (sym4) (APP sym2 (sym4))))
-    (= (X 0) NIL
-     ((FIXS ((sym5 (sym6) (APP sym3 (sym6)))) (APP F (sym5 X)))
-      (FIXS ((sym7 (sym8) (APP sym3 (sym8)))) (APP G (sym7 X))))))))
- (EXIT (UNSPECIFIED) NIL NIL))
+ ((ETA-IF (|sym2| X)
+   (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+    (:= (X 0) NIL
+     ((:FIXS ((|sym5| (|sym6|) (:APP |sym3| (|sym6|)))) (:APP F (|sym5| X)))
+      (:FIXS ((|sym7| (|sym8|) (:APP |sym3| (|sym8|))))
+       (:APP G (|sym7| X))))))))
+ (:EXIT (:UNSPECIFIED) NIL NIL))

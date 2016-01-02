@@ -1,20 +1,24 @@
-(FIX
- ((FIBO (N) (IF (= N 0) 1 (IF (= N 1) 1 (+ (FIBO (- N 1)) (FIBO (- N 2)))))))
- (FIBO 8)):
-(FIXH
- ((FIBO (sym2 N)
-   (FIXS ((sym3 (sym4) (APP sym2 (sym4))))
-    (= (N 0) NIL
-     ((APP sym3 (1))
-      (FIXS ((sym5 (sym6) (APP sym3 (sym6))))
-       (= (N 1) NIL
-        ((APP sym5 (1))
-         (- (N 1) (sym13)
-          ((FIXS
-            ((sym11 (sym12)
-              (- (N 2) (sym10)
-               ((FIXS
-                 ((sym8 (sym9) (+ (sym12 sym9) (sym7) ((APP sym5 (sym7))))))
-                 (APP FIBO (sym8 sym10)))))))
-            (APP FIBO (sym11 sym13)))))))))))))
- (FIXS ((sym14 (sym15) (EXIT (sym15) NIL NIL))) (APP FIBO (sym14 8))))
+(:FIX
+ ((FIBO (N)
+   (:IF (:= N 0) 1 (:IF (:= N 1) 1 (:+ (FIBO (:- N 1)) (FIBO (:- N 2)))))))
+ (FIBO 8))
+:
+(:FIXH
+ ((FIBO (|sym2| N)
+   (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+    (:= (N 0) NIL
+     ((:APP |sym3| (1))
+      (:FIXS ((|sym5| (|sym6|) (:APP |sym3| (|sym6|))))
+       (:= (N 1) NIL
+        ((:APP |sym5| (1))
+         (:- (N 1) (|sym13|)
+          ((:FIXS
+            ((|sym11| (|sym12|)
+              (:- (N 2) (|sym10|)
+               ((:FIXS
+                 ((|sym8| (|sym9|)
+                   (:+ (|sym12| |sym9|) (|sym7|) ((:APP |sym5| (|sym7|))))))
+                 (:APP FIBO (|sym8| |sym10|)))))))
+            (:APP FIBO (|sym11| |sym13|)))))))))))))
+ (:FIXS ((|sym14| (|sym15|) (:EXIT (|sym15|) NIL NIL)))
+  (:APP FIBO (|sym14| 8))))

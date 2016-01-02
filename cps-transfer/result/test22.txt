@@ -1,11 +1,15 @@
-(FIX
- ((FUNC0 (A B C D) (* (+ A B) (- C D))) (FUNC1 (X Y Z) (- (* X Y) (+ Z G))))
- (+ 3 5)):
-(FIXH
- ((FUNC0 (sym2 A B C D)
-   (+ (A B) (sym5)
-    ((- (C D) (sym4) ((* (sym5 sym4) (sym3) ((APP sym2 (sym3)))))))))
-  (FUNC1 (sym6 X Y Z)
-   (* (X Y) (sym9)
-    ((+ (Z G) (sym8) ((- (sym9 sym8) (sym7) ((APP sym6 (sym7))))))))))
- (+ (3 5) (sym10) ((EXIT (sym10) NIL NIL))))
+(:FIX
+ ((FUNC0 (A B C D) (:* (:+ A B) (:- C D)))
+  (FUNC1 (X Y Z) (:- (:* X Y) (:+ Z G))))
+ (:+ 3 5))
+:
+(:FIXH
+ ((FUNC0 (|sym2| A B C D)
+   (:+ (A B) (|sym5|)
+    ((:- (C D) (|sym4|)
+      ((:* (|sym5| |sym4|) (|sym3|) ((:APP |sym2| (|sym3|)))))))))
+  (FUNC1 (|sym6| X Y Z)
+   (:* (X Y) (|sym9|)
+    ((:+ (Z G) (|sym8|)
+      ((:- (|sym9| |sym8|) (|sym7|) ((:APP |sym6| (|sym7|))))))))))
+ (:+ (3 5) (|sym10|) ((:EXIT (|sym10|) NIL NIL))))

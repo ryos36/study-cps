@@ -1,7 +1,24 @@
-(DEFINE Y (HEAP 9 10 11)):(HEAP (9 10 11) (sym2) (ID (sym2) (Y) (EXIT (UNSPECIFIED) NIL NIL)))
-(DEFINE X (HEAP Y 2 3)):(HEAP (Y 2 3) (sym3) (ID (sym3) (X) (EXIT (UNSPECIFIED) NIL NIL)))
-X:(EXIT (X) NIL NIL)
-(RECORD-REF X 2):(RECORD-REF (X 2) (sym4) (EXIT (sym4) NIL NIL))
-(RECORD-SET! X 1 (HEAP 4 5 6)):(HEAP (4 5 6) (sym5) (RECORD-SET! (X 1 sym5) NIL (EXIT (UNSPECIFIED) NIL NIL)))
-(RECORD-REF (RECORD-REF X 1) 2):(RECORD-REF (X 1) (sym7) (RECORD-REF (sym7 2) (sym6) (EXIT (sym6) NIL NIL)))
-(RECORD-REF (RECORD-REF X 0) 2):(RECORD-REF (X 0) (sym9) (RECORD-REF (sym9 2) (sym8) (EXIT (sym8) NIL NIL)))
+(:DEFINE Y (:HEAP 9 10 11))
+:
+(:HEAP (9 10 11) (|sym2|) (:ID (|sym2|) (Y) (:EXIT (:UNSPECIFIED) NIL NIL)))
+(:DEFINE X (:HEAP Y 2 3))
+:
+(:HEAP (Y 2 3) (|sym3|) (:ID (|sym3|) (X) (:EXIT (:UNSPECIFIED) NIL NIL)))
+X
+:
+(:EXIT (X) NIL NIL)
+(:RECORD-REF X 2)
+:
+(:RECORD-REF (X 2) (|sym4|) (:EXIT (|sym4|) NIL NIL))
+(:RECORD-SET! X 1 (:HEAP 4 5 6))
+:
+(:HEAP (4 5 6) (|sym5|)
+ (:RECORD-SET! (X 1 |sym5|) NIL (:EXIT (:UNSPECIFIED) NIL NIL)))
+(:RECORD-REF (:RECORD-REF X 1) 2)
+:
+(:RECORD-REF (X 1) (|sym7|)
+ (:RECORD-REF (|sym7| 2) (|sym6|) (:EXIT (|sym6|) NIL NIL)))
+(:RECORD-REF (:RECORD-REF X 0) 2)
+:
+(:RECORD-REF (X 0) (|sym9|)
+ (:RECORD-REF (|sym9| 2) (|sym8|) (:EXIT (|sym8|) NIL NIL)))

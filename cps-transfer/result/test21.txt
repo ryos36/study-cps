@@ -1,4 +1,6 @@
-(IF (> 3 5) (+ 7 9) (* 2 4)):
-(FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL)))
- (> (3 5) NIL
-  ((+ (7 9) (sym4) ((APP sym2 (sym4)))) (* (2 4) (sym5) ((APP sym2 (sym5)))))))
+(:IF (:> 3 5) (:+ 7 9) (:* 2 4))
+:
+(:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+ (:> (3 5) NIL
+  ((:+ (7 9) (|sym4|) ((:APP |sym2| (|sym4|))))
+   (:* (2 4) (|sym5|) ((:APP |sym2| (|sym5|)))))))

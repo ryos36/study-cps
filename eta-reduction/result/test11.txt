@@ -1,37 +1,40 @@
-(FIXH
- ((FX (SYM2 A0) (+ (A0 3) (SYM3) ((APP SYM2 (SYM3)))))
+(:FIXH
+ ((FX (SYM2 A0) (:+ (A0 3) (SYM3) ((:APP SYM2 (SYM3)))))
   (F0 (SYM4 A0)
-   (FIXS
-    ((SYM6 (SYM7) (FIXH ((F1 (SYM5 A0) (APP SYM5 (SYM7)))) (APP SYM4 (F1)))))
-    (APP FX (SYM6 A0)))))
- (FIXS
+   (:FIXS
+    ((SYM6 (SYM7)
+      (:FIXH ((F1 (SYM5 A0) (:APP SYM5 (SYM7)))) (:APP SYM4 (F1)))))
+    (:APP FX (SYM6 A0)))))
+ (:FIXS
   ((SYM15 (SYM16)
-    (FIXS
+    (:FIXS
      ((SYM13 (SYM14)
-       (FIXS
+       (:FIXS
         ((SYM11 (SYM12)
-          (FIXS
-           ((SYM9 (SYM10) (+ (SYM12 SYM10) (SYM8) ((EXIT (SYM8) NIL NIL)))))
-           (APP SYM14 (SYM9 1)))))
-        (APP SYM16 (SYM11 0)))))
-     (APP F0 (SYM13 4)))))
-  (APP F0 (SYM15 3)))):
-(FIXH
- ((FX (SYM2 A0) (+ (A0 3) (SYM3) ((APP SYM2 (SYM3)))))
+          (:FIXS
+           ((SYM9 (SYM10) (:+ (SYM12 SYM10) (SYM8) ((:EXIT (SYM8) NIL NIL)))))
+           (:APP SYM14 (SYM9 1)))))
+        (:APP SYM16 (SYM11 0)))))
+     (:APP F0 (SYM13 4)))))
+  (:APP F0 (SYM15 3))))
+:
+(:FIXH
+ ((FX (SYM2 A0) (:+ (A0 3) (SYM3) ((:APP SYM2 (SYM3)))))
   (F0 (SYM4 A0)
-   (FIXS
-    ((SYM6 (SYM7) (FIXH ((F1 (SYM5 A0) (APP SYM5 (SYM7)))) (APP SYM4 (F1)))))
-    (APP FX (SYM6 A0)))))
- (FIXS
+   (:FIXS
+    ((SYM6 (SYM7)
+      (:FIXH ((F1 (SYM5 A0) (:APP SYM5 (SYM7)))) (:APP SYM4 (F1)))))
+    (:APP FX (SYM6 A0)))))
+ (:FIXS
   ((SYM15 (SYM16)
-    (FIXS
+    (:FIXS
      ((SYM13 (SYM14)
-       (FIXS
+       (:FIXS
         ((SYM11 (SYM12)
-          (FIXS
-           ((SYM9 (SYM10) (+ (SYM12 SYM10) (SYM8) ((EXIT (SYM8) NIL NIL)))))
-           (APP SYM14 (SYM9 1)))))
-        (APP SYM16 (SYM11 0)))))
-     (APP F0 (SYM13 4)))))
-  (APP F0 (SYM15 3))))
+          (:FIXS
+           ((SYM9 (SYM10) (:+ (SYM12 SYM10) (SYM8) ((:EXIT (SYM8) NIL NIL)))))
+           (:APP SYM14 (SYM9 1)))))
+        (:APP SYM16 (SYM11 0)))))
+     (:APP F0 (SYM13 4)))))
+  (:APP F0 (SYM15 3))))
 SAME

@@ -1,7 +1,9 @@
-(FUNC2 (FUNC (+ 3 (+ 4 5)))):
-(+ (4 5) (sym7)
- ((+ (3 sym7) (sym6)
-   ((FIXS
-     ((sym4 (sym5)
-       (FIXS ((sym2 (sym3) (EXIT (sym3) NIL NIL))) (APP FUNC2 (sym2 sym5)))))
-     (APP FUNC (sym4 sym6)))))))
+(FUNC2 (FUNC (:+ 3 (:+ 4 5))))
+:
+(:+ (4 5) (|sym7|)
+ ((:+ (3 |sym7|) (|sym6|)
+   ((:FIXS
+     ((|sym4| (|sym5|)
+       (:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+        (:APP FUNC2 (|sym2| |sym5|)))))
+     (:APP FUNC (|sym4| |sym6|)))))))
