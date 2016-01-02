@@ -48,7 +48,7 @@
     (otherwise nil)))
 
 ;----------------------------------------------------------------
-(defun compare-symbolp (sym)
+(defun compare-primitivep (sym)
   (case sym
     (:>  t)
     (:<  t)
@@ -72,6 +72,15 @@
 
 ;----------------------------------------------------------------
 (def-cps-func cps-terminal ((parser cps-parser) expr env)
+  (cond
+    ((eq :#t expr) :#t)
+    ((eq :#f expr) :#f)
+    ((null expr) nil)
+    ((symbolp expr) (cps-symbol parser expr env))
+    (t expr)))
+
+;----------------------------------------------------------------
+(def-cps-func cps-symbol ((parser cps-parser) expr env)
   expr)
 
 ;----------------------------------------------------------------
@@ -79,11 +88,11 @@
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr)))
-    (let ((new-func-name (cps-terminal parser func-name env))
-          (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
+    (let ((new-func-name (cps-symbol parser func-name env))
+          (new-args (mapcar #'(lambda (arg) (cps-symbol parser arg env)) args))
           (new-next-cps (cps-parse parser next-cps env)))
 
-      `(,func-name ,new-args ,new-next-cps))))
+      `(,new-func-name ,new-args ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-parser) expr env)
@@ -108,13 +117,13 @@
   (let ((func-name (cadr expr))
         (args (caddr expr)))
         
-    (let ((new-func-name (cps-terminal parser func-name env))
+    (let ((new-func-name (cps-symbol parser func-name env))
           (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args)))
       `(:APP ,new-func-name ,new-args))))
 ;----------------------------------------------------------------
 (def-cps-func cps-exit ((parser cps-parser) expr env)
   (let ((arg0 (caadr expr)))
-    (let ((new-arg0 (cps-terminal parser expr env)))
+    (let ((new-arg0 (cps-terminal parser arg0 env)))
       `(:EXIT (,new-arg0) () ()))))
 
 ;----------------------------------------------------------------
@@ -125,7 +134,7 @@
         (next-cpss (cadddr expr)))
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
-          (new-result (mapcar #'(lambda (r) (cps-terminal parser r env)) result))
+          (new-result (mapcar #'(lambda (r) (cps-symbol parser r env)) result))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
       `(,op ,new-args ,new-result ,new-next-cpss))))
