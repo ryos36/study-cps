@@ -3,7 +3,7 @@
   ((sym-no :initform 0)))
 
 ;----------------------------------------------------------------
-(defgeneric make-new-env (parser env)
+(defgeneric make-new-env (parser env &optional new-env-item )
             (:documentation "Make a new environment."))
 
 ;----------------------------------------------------------------
@@ -13,8 +13,8 @@
     rv))
 
 ;----------------------------------------------------------------
-(defmethod make-new-env ((parser cps-parser) env)
-  (cons `(()) env))
+(defmethod make-new-env ((parser cps-parser) env &optional (new-env-item `(())))
+  (cons new-env-item env))
 
 ;----------------------------------------------------------------
 (defun terminal-p (expr)
