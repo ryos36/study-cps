@@ -1,10 +1,16 @@
 ;----------------------------------------------------------------
 (defclass cps-parser () 
-  ())
+  ((sym-no :initform 0)))
 
 ;----------------------------------------------------------------
 (defgeneric make-new-env (parser env)
             (:documentation "Make a new environment."))
+
+;----------------------------------------------------------------
+(defmethod cps-gensym ((parser cps-parser))
+  (let ((rv (intern (format nil "sym~a" (slot-value parser 'sym-no)))))
+    (incf (slot-value parser 'sym-no))
+    rv))
 
 ;----------------------------------------------------------------
 (defmethod make-new-env ((parser cps-parser) env)
@@ -88,11 +94,9 @@
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr)))
-    (let ((new-func-name (cps-symbol parser func-name env))
-          (new-args (mapcar #'(lambda (arg) (cps-symbol parser arg env)) args))
-          (new-next-cps (cps-parse parser next-cps env)))
+    (let ((new-next-cps (cps-parse parser next-cps env)))
 
-      `(,new-func-name ,new-args ,new-next-cps))))
+      `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-parser) expr env)
@@ -106,11 +110,11 @@
       `(,fix-op ,new-binds ,new-next-cps))))
 ;----------------------------------------------------------------
 (def-cps-func cps-fixh ((parser cps-parser) expr env)
-  (cps-fix (parser expr env)))
+  (cps-fix parser expr env))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fixs ((parser cps-parser) expr env)
-  (cps-fix (parser expr env)))
+  (cps-fix parser expr env))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-parser) expr env)
