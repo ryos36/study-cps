@@ -198,11 +198,14 @@
         (finder (make-instance 'free-variable-finder)))
 
     (let ((finder-env (make-new-env finder '()))
-          (heap-closure-sym (cps-gensym parser))
           (func-names (mapcar #'(lambda (x) (car x)) binds)))
 
       (cps-parse finder expr finder-env)
       (let* ((all-variables (car finder-env))
+             (func-names-is-1? (= (length func-names) 1))
+             (heap-closure-sym (if func-names-is-1?
+                                 (car func-names)
+                                 (cps-gensym parser)))
              (free-variables
                (remove-if #'null (mapcar #'(lambda (x) (if (null (cdr x)) (car x))) (car finder-env))))
              (strict-free-vars
@@ -213,11 +216,16 @@
              (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind new-env)) binds))
 
              (new-next-cps (cps-parse parser next-cps new-env))
-             (new-expr `(:FIXH ,new-binds ,new-next-cps))
-             (wrapped-cps (wrap-cps-with-heap func-names heap-closure-sym new-expr)))
-        ;(print `(:strict ,strict-free-vars))
+             (new-expr `(:FIXH ,new-binds ,new-next-cps)))
+          ;(print `(:strict ,strict-free-vars))
+        (if func-names-is-1?
+          (let* ((label0 `(:LABEL ,(make-new-func-name heap-closure-sym)))
+                 (heap-list `(,label0 ,@(copy-list strict-free-vars))))
+            `(:HEAP ,heap-list (,heap-closure-sym) (,new-expr)))
 
-        `(:HEAP (:dummy ,@strict-free-vars) (,heap-closure-sym) (,wrapped-cps))))))
+          (let ((wrapped-cps (wrap-cps-with-heap func-names heap-closure-sym new-expr)))
+
+            `(:HEAP (:dummy ,@(copy-tree strict-free-vars)) (,heap-closure-sym) (,wrapped-cps))))))))
 
 ;----------------------------------------------------------------
 
