@@ -138,10 +138,9 @@
         (next-cpss (cadddr expr)))
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
-          (new-result (mapcar #'(lambda (r) (cps-symbol parser r env)) result))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
-      `(,op ,new-args ,new-result ,new-next-cpss))))
+      `(,op ,new-args ,result ,new-next-cpss))))
 
 ;----------------------------------------------------------------
 (defmethod cps-error-exit ((parser cps-parser) expr env)
