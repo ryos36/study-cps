@@ -34,6 +34,38 @@ copy-tree/list はなるべく使わない方がよい。
         let-transfer の変数置き換えが機能しなかった。
         いまは fix-transfer の最後で copy するのをやめた
 
+  copy-tree は必須
+    `(a b c) は必要ないが
+    `(a (b c)) は (b c) が共通になる
+    `(a ,`(b c)) => okそう
+    `(a (,b c))  => okそう
+    clisp にバグ(?)があるようだ。
+    `(a (,b 0))
+　　定数が入ったている時に
+    b/-> 0/nil
+    の 0/nil を共有する。仕様を確認すると
+　　`((,a b)...
+     は (append (list a) (list 'b) nil) である。あるいは
+     (append (list a) (list 'b)) あるいは
+     (append (list a) '(b)) あるいは
+     (cons a '(b)) あるいは
+     (cons a (list 'b)) あるいは
+     (cons a '(b))
+     となっている。
+     (append (list a) '(b)) が選択された場合
+     '(b) を共有することになる。実装依存ということか？
+     sbcl でも clisp でもそうだった。
+     [1]> (defun f (a) `(a (,a z)))
+     F
+     [2]> (setf x0 (f 'x0))
+     (A (X0 Z))
+     [3]> (setf x1 (f 'x1))
+     (A (X1 Z))
+     [4]> (eq (cdadr x0) (cdadr x1))
+     T
+     なお、scheme では規定されていない模様。
+     そうなるとますます copy-tree は必須。
+
 scheme の複雑な closure にちゃんと対応しているか疑問
   closure の覚書参照の事。
 　いまは fix で closure の元を env に関数名と共にポイントして置き
