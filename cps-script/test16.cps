@@ -1,1 +1,1 @@
-((:fixh ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))))
+((:fixh ((c (r) (:+ (ex-x r) (t) ((:app ex-k (t)))))) (:app ex-g (c ex-x))))

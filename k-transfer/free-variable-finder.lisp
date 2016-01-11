@@ -35,7 +35,7 @@
         (next-cps (caddr expr)))
 
     (set-variable parser func-name t env)
-    (mapcar #'(lambda(arg) 
+    (mapc #'(lambda(arg) 
                 (set-variable parser arg t env)) args)
 
     (let ((new-next-cps (cps-parse parser next-cps env)))
@@ -49,10 +49,14 @@
         (result (caddr expr))
         (next-cpss (cadddr expr)))
 
-    (mapcar #'(lambda (r) (set-variable parser r t env)) result)
+    (mapc #'(lambda (r) (set-variable parser r t env)) result)
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
       `(,op ,new-args ,result ,new-next-cpss))))
+
+;----------------------------------------------------------------
+(defun filter-free-variables (all-variables)
+  (remove-if #'null (mapcar #'(lambda (x) (if (null (cdr x)) (car x))) all-variables)))
 
