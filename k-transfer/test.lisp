@@ -18,11 +18,15 @@
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
 ;(defparameter *debug-mode* t)
+(defun cps-gensym-reset ()
+  (setf (slot-value conv 'sym-no) 0))
+
+(defparameter *test-reset-func* #'cps-gensym-reset)
 
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
-;(set-test-files '("15" (0 . 3) (6 . 12)))
-(set-test-files '("16" 14 15))
+;(set-test-files '((1 . 3) (6 . 16)))
+(set-test-files '("17" (14 . 16)))
 (do-test)
 
 #|
