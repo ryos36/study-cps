@@ -26,7 +26,7 @@
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
 ;(set-test-files '((1 . 3) (6 . 16)))
-(set-test-files '((14 . 21)))
+(set-test-files '((14 . 22)))
 (do-test)
 
 #|

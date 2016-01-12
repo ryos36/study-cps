@@ -36,13 +36,15 @@
         (args (cadr expr))
         (next-cps (caddr expr))
         (new-env (make-new-env parser env)))
-    (setf new-env env)
 
     ;(print `(cps-bind ,func-name))
     (mapc #'(lambda(arg) 
                 (set-variable parser arg t new-env)) args)
 
     (let ((new-next-cps (cps-parse parser next-cps new-env)))
+       (mapc #'(lambda(arg) 
+                 (set-variable parser arg nil env))
+             (nreverse (filter-free-variables (car new-env))))
 
       `(,func-name ,args ,new-next-cps))))
 
