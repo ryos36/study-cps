@@ -233,6 +233,7 @@
       ;(print `(cps-bind-fixh ,env ,binds))
 
       (let* ((all-variables (car finder-env))
+             ;(x (print `(all-variables ,all-variables)))
              (func-names-is-1? (= (length func-names) 1))
              (env-closure-sym (if func-names-is-1?
                                  (car func-names)

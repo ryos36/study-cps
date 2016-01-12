@@ -9,10 +9,12 @@
 (defmethod find-variable ((parser free-variable-finder) expr env)
   (if (null env)
     nil
-    (let* ((top-env (car env))
-           (key-value (assoc expr top-env)))
-      (if key-value key-value
-        (find-variable parser expr (cdr env))))))
+    (let ((top-env (car env)))
+      (if (atom top-env)
+        nil
+        (let ((key-value (assoc expr top-env)))
+          (if key-value key-value
+            (find-variable parser expr (cdr env))))))))
 
 ;----------------------------------------------------------------
 (defmethod set-variable ((parser free-variable-finder) key value env)
@@ -32,13 +34,15 @@
 (def-cps-func cps-bind ((parser free-variable-finder) expr env)
   (let ((func-name (car expr))
         (args (cadr expr))
-        (next-cps (caddr expr)))
+        (next-cps (caddr expr))
+        (new-env (make-new-env parser env)))
+    (setf new-env env)
 
     ;(print `(cps-bind ,func-name))
     (mapc #'(lambda(arg) 
-                (set-variable parser arg t env)) args)
+                (set-variable parser arg t new-env)) args)
 
-    (let ((new-next-cps (cps-parse parser next-cps env)))
+    (let ((new-next-cps (cps-parse parser next-cps new-env)))
 
       `(,func-name ,args ,new-next-cps))))
 
