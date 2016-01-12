@@ -188,7 +188,6 @@
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
   (let ((closure-name (cdar top-env)))
     (labels ((get-num0 (sym vars n)
-                    (print `(:get-num ,sym ,vars ,n))
                (if (null vars) :NOT-FOUND 
                  (let ((elm (car vars)))
                    (if (eq sym elm) n
@@ -214,7 +213,6 @@
                       (cdr free-vars1)
                            (do-wrap0 sym cps-expr1))))))
 
-      (print `(this-free-vars ,this-free-vars))
     (do-wrap1 this-free-vars new-next-cps))))
 
 ;----------------------------------------------------------------
@@ -274,7 +272,6 @@
              (free-variables (filter-free-variables all-variables))
              (strict-free-vars
                (get-strict-free-variables free-variables env))
-             (x (print `(free-variables ,free-variables ,strict-free-vars)))
 
              (upper-free-vars-list
                (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
@@ -285,27 +282,21 @@
              (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind new-env)) binds))
 
              (new-next-cps (cps-parse parser next-cps new-env))
-             (new-free-variables  (get-free-variables finder #'cps-parse new-next-cps))
-             (wrapped-new-next-cps (wrap-cps-bind-fixh-with-record-ref parser new-free-variables new-next-cps fixh-free-vars))
-             ; uuuuuuu here ryos todo
-             ;(new-expr `(:FIXH ,new-binds ,wrapped-new-next-cps)))
-             (new-expr `(:FIXH ,new-binds ,new-next-cps)))
-          ;(print `(:strict ,strict-free-vars))
 
-        ; upper-vars is (v5 . ((:fixh . closure-sym-0)  ... v5 ... )))
-        (let* ((upper-closure-list
+             (upper-closure-list
                  (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list))
-               (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list)))
+             (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
+             (label0 (if func-names-is-1?
+               `(:LABEL ,(make-new-func-name heap-closure-sym))
+               `(:LABEL :DUMMY)))
 
-          (if func-names-is-1?
-            (let* ((label0 `(:LABEL ,(make-new-func-name heap-closure-sym)))
+             (heap-list `(,label0 ,@closure-list))
+             (heap-expr (if func-names-is-1?
+                new-next-cps
+                (wrap-cps-with-heap func-names heap-closure-sym new-next-cps))))
 
-                   (heap-list `(,label0 ,@closure-list)))
-              `(:HEAP ,heap-list (,heap-closure-sym) (,new-expr)))
-
-          (let ((wrapped-cps (wrap-cps-with-heap func-names heap-closure-sym new-expr)))
-
-            `(:HEAP (:dummy ,@closure-list) (,heap-closure-sym) (,wrapped-cps)))))))))
+        `(:FIXH ,new-binds ,
+                `(:HEAP ,heap-list (,heap-closure-sym) (,heap-expr)))))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser closure-converter) expr env)

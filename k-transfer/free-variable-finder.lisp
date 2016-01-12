@@ -34,7 +34,7 @@
         (args (cadr expr))
         (next-cps (caddr expr)))
 
-    (print `(cps-bind ,func-name))
+    ;(print `(cps-bind ,func-name))
     (mapc #'(lambda(arg) 
                 (set-variable parser arg t env)) args)
 
