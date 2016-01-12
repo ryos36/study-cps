@@ -148,10 +148,9 @@
 ;           or :fixs :primitive
 ;
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
-  (print `(top-env ,top-env))
+  ;(print `(top-env ,top-env))
   (let ((closure-name (cdar top-env)))
     (labels ((get-num0 (sym vars n)
-                       (print `(get-num0 ,sym ,vars ,n))
                (if (null vars) :NOT-FOUND 
                  (let ((elm (car vars)))
                    (if (eq sym elm) n
@@ -161,7 +160,7 @@
 
              (do-wrap0 (sym cps-expr0)
                 (let ((n-info (get-num0 sym top-env 0)))
-                  (print `(atom ,n-info))
+                  ;(print `(atom ,n-info))
                   (if (atom n-info)
                     `(:RECORD-REF (,closure-name ,n-info) (,sym) (,cps-expr0))
 
@@ -194,7 +193,7 @@
         (env-closure-name (cdaar env0))
 
         (finder (make-instance 'free-variable-finder)))
-    (print `(env-closure-name ,env-closure-name))
+    ;(print `(env-closure-name ,env-closure-name))
 
     (let ((finder-env (make-new-env finder '())))
 
@@ -260,7 +259,7 @@
              (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
              (label0 (if func-names-is-1?
                `(:LABEL ,(make-new-func-name heap-closure-sym))
-               `(:LABEL :DUMMY)))
+               (copy-list '(:LABEL :DUMMY))))
 
              (heap-list `(,label0 ,@closure-list))
              (heap-expr (if func-names-is-1?

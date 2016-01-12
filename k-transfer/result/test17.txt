@@ -1,0 +1,22 @@
+(:FIXH
+ ((F0 (R) (:+ (EX-X R) (T) ((:APP EX-K (T)))))
+  (F1 (R) (:+ (EX-X R) (T) ((:APP EX-L (T))))))
+ (:APP EX-G (C EX-X)))
+:
+(:FIXH
+ ((|:F0| (F0 R)
+   (:RECORD-REF (F0 1) (|sym1|)
+    ((:RECORD-REF (|sym1| 3) (EX-X)
+      ((:RECORD-REF (|sym1| 2) (EX-K)
+        ((:+ (EX-X R) (T)
+          ((:RECORD-REF (EX-K 0) (|sym2|) ((:APP |sym2| (EX-K T)))))))))))))
+  (|:F1| (F1 R)
+   (:RECORD-REF (F1 1) (|sym3|)
+    ((:RECORD-REF (|sym3| 3) (EX-X)
+      ((:RECORD-REF (|sym3| 1) (EX-L)
+        ((:+ (EX-X R) (T)
+          ((:RECORD-REF (EX-L 0) (|sym4|) ((:APP |sym4| (EX-L T))))))))))))))
+ (:HEAP ((:LABEL :DUMMY) EX-L EX-K EX-X) (|sym0|)
+  ((:HEAP ((:LABEL |:F0|) |sym0|) (F0)
+    ((:HEAP ((:LABEL |:F1|) |sym0|) (F1)
+      ((:RECORD-REF (EX-G 0) (|sym5|) ((:APP |sym5| (EX-G C EX-X)))))))))))
