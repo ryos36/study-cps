@@ -99,15 +99,20 @@
       `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
+(def-cps-func cps-binds ((parser cps-parser) binds env)
+  (mapcar #'(lambda (bind) (cps-bind parser bind env)) binds))
+
+;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-parser) expr env)
   (let ((fix-op (car expr))
         (binds (cadr expr))
         (next-cps (caddr expr)))
         
-    (let ((new-binds (mapcar #'(lambda (bind) (cps-bind parser bind env)) binds))
+    (let ((new-binds (cps-binds parser binds env))
           (new-next-cps (cps-parse parser next-cps env)))
 
       `(,fix-op ,new-binds ,new-next-cps))))
+
 ;----------------------------------------------------------------
 (def-cps-func cps-fixh ((parser cps-parser) expr env)
   (cps-fix parser expr env))
