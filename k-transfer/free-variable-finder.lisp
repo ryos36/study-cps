@@ -64,6 +64,14 @@
       `(,op ,new-args ,result ,new-next-cpss))))
 
 ;----------------------------------------------------------------
+;----------------------------------------------------------------
 (defun filter-free-variables (all-variables)
   (remove-if #'null (mapcar #'(lambda (x) (if (null (cdr x)) (car x))) all-variables)))
 
+;----------------------------------------------------------------
+(defun get-free-variables (finder cps-func expr)
+  (let ((finder-env (make-new-env finder '())))
+    (funcall cps-func finder expr finder-env)
+    (let* ((all-variables (car finder-env))
+           (free-variables (filter-free-variables all-variables)))
+      free-variables)))
