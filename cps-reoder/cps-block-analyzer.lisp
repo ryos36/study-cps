@@ -2,7 +2,7 @@
 (load "../k-transfer/cps-parser.lisp")
 
 ;----------------------------------------------------------------
-(defclass cps-block-analysis (cps-parser)
+(defclass cps-block-analyzer (cps-parser)
   ())
 
 ;----------------------------------------------------------------
@@ -13,7 +13,7 @@
 ; (op . ( [:init | :runnable | :dead] (args...) (result)))
 ; (<var> . [:init | :live | :dead])
 
-(defmethod cps-do-block-analysis ((parser cps-reoder) env)
+(defmethod cps-do-block-analyzer ((parser cps-block-analyzer) env)
   (let* ((top-env (car env))
          (vars-holder (assoc :vars top-env))
          (var-list (cdr (cdr vars-holder)))
@@ -50,7 +50,7 @@
     ))
 
 ;----------------------------------------------------------------
-(defmethod make-new-env ((parser cps-block-analysis) env &optional (new-env-item (init-env)))
+(defmethod make-new-env ((parser cps-block-analyzer) env &optional (new-env-item (init-env)))
   (cons new-env-item env))
 
 ;----------------------------------------------------------------
@@ -70,7 +70,7 @@
     (setf (cdr insns-holder) (cons `(,key . ,(copy-tree value)) insns-list))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-fix ((parser cps-block-analysis) expr env)
+(def-cps-func cps-fix ((parser cps-block-analyzer) expr env)
   (let ((fix-op (car expr))
         (binds (cadr expr))
         (next-cps (caddr expr))
@@ -82,7 +82,7 @@
       `(,fix-op ,new-binds ,new-next-cps))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-bind ((parser cps-block-analysis) expr env)
+(def-cps-func cps-bind ((parser cps-block-analyzer) expr env)
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
@@ -92,12 +92,12 @@
                 (set-variable arg :live new-env)) args)
 
     (let ((new-next-cps (cps-parse parser next-cps new-env)))
-      (cps-do-block-analysis parser new-env)
+      (cps-do-block-analyzer parser new-env)
 
       `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-app ((parser cps-block-analysis) expr env)
+(def-cps-func cps-app ((parser cps-block-analyzer) expr env)
   (let ((func-name (cadr expr))
         (args (caddr expr)))
         
@@ -107,7 +107,7 @@
       `(:APP ,new-func-name ,new-args))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-primitive ((parser cps-block-analysis) expr env)
+(def-cps-func cps-primitive ((parser cps-block-analyzer) expr env)
   (let ((op (car expr))
         (args (cadr expr))
         (result (caddr expr))

@@ -1,11 +1,11 @@
-(load "cps-reoder.lisp" )
+(load "cps-block-analyzer" )
 (load "../test-lisp/test.lisp")
 
-(setf finder (make-instance 'cps-reoder))
-(setf *env* (make-new-env finder '()))
+(setf analyzer (make-instance 'cps-block-analyzer))
+(setf *env* (make-new-env analyzer '()))
 
 (defun cps-parse-one (cps-expr env)
-  (cps-parse finder cps-expr env))
+  (cps-parse analyzer cps-expr env))
 
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")
@@ -13,7 +13,7 @@
 (defparameter *debug-mode* nil)
 ;(defparameter *debug-mode* t)
 (defun cps-gensym-reset ()
-  (setf (slot-value finder 'sym-no) 0))
+  (setf (slot-value analyzer 'sym-no) 0))
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
