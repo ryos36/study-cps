@@ -1,4 +1,4 @@
-(load "cps-block-analyzer" )
+(load "cps-block-analyzer.lisp" )
 (load "../test-lisp/test.lisp")
 
 (setf analyzer (make-instance 'cps-block-analyzer))
@@ -16,7 +16,6 @@
   (setf (slot-value analyzer 'sym-no) 0))
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
-
 
 (set-test-files '("24" (14 . 22)))
 (do-test)

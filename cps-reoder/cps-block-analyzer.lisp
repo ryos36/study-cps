@@ -10,27 +10,80 @@
   (copy-tree '((:insns )(:vars ))))
 
 ;----------------------------------------------------------------
-; (op . ( [:init | :runnable | :dead] (args...) (result)))
+(defmethod eval-insn-value ((parser cps-block-analyzer) op)
+  1)
+
+;----------------------------------------------------------------
+(defmethod chase-depth ((parser cps-block-analyzer) runnable insn-list var-list)
+  (labels ((chase-depth0 (vars-values n m)
+           ;(print `(vars-values ,vars-values))
+            (if (null vars-values) (values n m)
+              (let* ((var-value (car vars-values))
+                     (var (car var-value))
+                     (value (cdr var-value))
+                     (inst-value-list
+                        (remove-if #'null
+                          (mapcar #'(lambda (inst)
+                            (let* ((op (car inst))
+                                   (info (cdr inst))
+                                   (args (cadr info))
+                                   (result (caddr info))
+                                   (hit (member var args)))
+                              (if hit
+                                `(,inst . ,(+ value (eval-insn-value parser op))))))
+                                  insn-list)))
+                     (new-m (+ m (length inst-value-list)))
+                     (add-vars-values-list
+                       (mapcar #'(lambda (iv)
+                         (let* ((inst (car iv))
+                                (v (cdr iv))
+                                (rv-syms (cadddr inst))
+                                (naive-rv-syms (if (null rv-syms) '(:dummy) rv-syms)))
+
+                           (mapcar #'(lambda(x) (cons x v)) naive-rv-syms)))
+                               inst-value-list))
+                     (add-vars-values
+                       (reduce #'append add-vars-values-list))
+                     (maxn
+                       (reduce #'(lambda (a b) (max a (cdr b))) add-vars-values :initial-value n)))
+                ;(print `(cd-value-inst-list ,maxn ,add-vars-values))
+                (chase-depth0 (append (cdr vars-values) add-vars-values) maxn new-m)))))
+
+  (let* ((op (car runnable))
+         (info (cdr runnable))
+         (stat (car info))
+         (args (cadr info))
+         (result (caddr info))
+         (op-value (eval-insn-value parser op)))
+
+    ;(print `(:info ,info))
+    (if (null args)
+      op-value
+      (chase-depth0 
+        (mapcar #'(lambda(x) (cons x op-value)) result)
+        op-value 1)))))
+;----------------------------------------------------------------
+; (op . ( [:init | :selected ] (args...) (result)))
 ; (<var> . [:init | :live | :dead])
 
 (defmethod cps-do-block-analyzer ((parser cps-block-analyzer) env)
   (let* ((top-env (car env))
          (vars-holder (assoc :vars top-env))
-         (var-list (cdr (cdr vars-holder)))
+         (var-list (cdr vars-holder))
          (insns-holder (assoc :insns top-env))
-         (insns-list (cdr (cdr insns-holder))))
+         (insn-list (cdr insns-holder)))
 
       ;(print `(env ,env))
-      (print `(var-list ,var-list))
-      ;(print `(insns-list ,insns-list))
-      (let ((runnable-list
+      ;(print `(var-list ,var-list))
+      ;(print `(insn-list ,insn-list))
+      (let* ((runnable-list
               (remove-if #'null
                 (mapcar #'(lambda (insn)
                   (let* ((op (car insn))
                          (info (cdr insn))
                          (stat (car info))
                          (args (cadr info))
-                         (result (cadr info)))
+                         (result (caddr info)))
 
                     (if 
                       (reduce #'(lambda (a b) (and a b)) 
@@ -42,12 +95,38 @@
                                 args))
                       insn)))
 
-                        insns-list))))
-        (print `(runnable-list ,runnable-list)))
+                        insn-list)))
+             (selected-runnable
+               (if (= 1 (length runnable-list))
+                 (car runnable-list)
+                 (let* ((depth-list (mapcar #'(lambda (runnable) 
+                          (multiple-value-bind (n m)
+                            (chase-depth parser runnable insn-list var-list)
+                            (list n m))) runnable-list))
+                        (runnable-depth-list
+                          (mapcar #'cons runnable-list depth-list)))
 
-       ;dolist (insn (cdr insns-holder))
+                   (car 
+                     (reduce #'(lambda (a b)
+                               (let* ((depth-a (cdr a))
+                                      (depth-a0 (car depth-a))
+                                      (depth-b (cdr b))
+                                      (depth-b0 (car depth-b))
+                                      (a<b? 
+                                        (cond
+                                          ((< depth-a0 depth-b0) t)
+                                          ((= depth-a0 depth-b0)
+                                           (let ((depth-a1 (cadr depth-a))
+                                                 (depth-b1 (cadr depth-b)))
+                                             (< depth-a1 depth-b1)))
+                                          (nil nil))))
+                                 (if a<b? a b)))
+                           runnable-depth-list))))))
 
-    ))
+        (setf (cadr selected-runnable) :selected)
+        (print `(selected-runnable ,selected-runnable))
+
+    )))
 
 ;----------------------------------------------------------------
 (defmethod make-new-env ((parser cps-block-analyzer) env &optional (new-env-item (init-env)))
@@ -65,9 +144,9 @@
 (defun set-instruction (key value env)
   (let* ((top-env (car env))
          (insns-holder (assoc :insns top-env))
-         (insns-list (cdr insns-holder)))
+         (insn-list (cdr insns-holder)))
 
-    (setf (cdr insns-holder) (cons `(,key . ,(copy-tree value)) insns-list))))
+    (setf (cdr insns-holder) (cons `(,key . ,(copy-tree value)) insn-list))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-block-analyzer) expr env)
