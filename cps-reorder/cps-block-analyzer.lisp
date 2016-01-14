@@ -9,7 +9,7 @@
      )))
 
 ;----------------------------------------------------------------
-(defmethod reset ((parser cps-block-analyzer))
+(defmethod cps-reset-environment ((parser cps-block-analyzer))
   (setf (get-new-order parser) '()))
 
 ;----------------------------------------------------------------
@@ -218,7 +218,7 @@
     `(:DUMMY-FIX ,(mapcar #'(lambda (bind) (car bind)) binds))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-bind ((parser cps-block-analyzer) expr env)
+(def-cps-func cps-bind-old ((parser cps-block-analyzer) expr env)
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
@@ -234,6 +234,17 @@
 
       ;(print `(result ,result))
 
+      `(,func-name ,args ,new-next-cps))))
+
+(def-cps-func cps-bind ((parser cps-block-analyzer) expr env)
+  (let ((func-name (car expr))
+        (args (cadr expr))
+        (next-cps (caddr expr)))
+
+    (mapc #'(lambda(arg) 
+                (set-variable arg :live env)) args)
+
+    (let ((new-next-cps (cps-parse parser next-cps env)))
       `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
@@ -263,3 +274,18 @@
 
       `(,op ,new-args ,result ,new-next-cpss))))
 
+;----------------------------------------------------------------
+(let* ((analyzer (make-instance 'cps-block-analyzer))
+       (env (make-new-env analyzer '())))
+
+  (defun do-cps-block-analyzer-cps-bind (expr)
+    (cps-reset-environment analyzer)
+    (let ((new-env (make-new-env analyzer env )))
+      (cps-bind analyzer expr new-env)
+      (do-cps-block-analyzer analyzer new-env)))
+
+  (defun do-cps-block-analyzer-cps-parse (expr)
+    (cps-reset-environment analyzer)
+    (let ((new-env (make-new-env analyzer env )))
+      (cps-parse analyzer expr new-env)
+      (do-cps-block-analyzer analyzer new-env))))

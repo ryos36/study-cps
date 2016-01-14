@@ -19,7 +19,8 @@
 
     (cps-bind analyzer expr (make-new-env analyzer '()))
 
-    (let* ((result (get-new-order analyzer))
+    (let* ((result0 (get-new-order analyzer))
+           (result (do-cps-block-analyzer-cps-bind expr))
            (new-env (make-new-env parser env result))
            ;(x (print `(xxresult ,env ,(car new-env))))
            (new-next-cps (cps-parse parser next-cps new-env)))
@@ -30,12 +31,14 @@
 ;(def-cps-func cps-fix ((parser cps-reorder) expr env)
 ;  (let ((fix-op (car expr))
 ;        (binds (cadr expr))
-;        (next-cps (caddr expr)))
+;        (next-cps (caddr expr))
+;        (new-env (make-new-env env)))
 ;        
-;    (let ((new-binds (cps-binds parser binds env))
+;    ; stop reorder
+;    (let ((new-binds (cps-binds parser binds new-env))
 ;          (new-next-cps (cps-parse parser next-cps env)))
 ;
-;      `(,fix-op ,new-binds ,new-next-cps))))
+;      `(,fix-op ,new-binds ,new-next-cps)))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-reorder) expr env)
