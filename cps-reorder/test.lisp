@@ -1,5 +1,4 @@
 (load "cps-block-analyzer.lisp" )
-(load "cps-reorder.lisp" )
 (load "../test-lisp/test.lisp")
 
 (setf analyzer (make-instance 'cps-block-analyzer))
@@ -20,3 +19,12 @@
 
 (set-test-files '("24" (14 . 22)))
 (do-test)
+
+#|
+(setf reorder (make-instance 'cps-reorder))
+;(setf (reorder new-order) '(a b c))
+;(setf (get-new-order reorder) '(a b c))
+;(reset reorder)
+(print `(,(get-new-order reorder)))
+(pop-cps-expr reorder)
+|#

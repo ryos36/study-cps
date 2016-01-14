@@ -1,9 +1,10 @@
 ;----------------------------------------------------------------
 (load "../k-transfer/cps-parser.lisp")
+(load "cps-reorder.lisp")
 
 ;----------------------------------------------------------------
 (defclass cps-block-analyzer (cps-parser)
-  ())
+  (()))
 
 ;----------------------------------------------------------------
 (defun init-env ()
@@ -91,7 +92,7 @@
       (mapc #'(lambda (r) (setf (cdr (assoc r var-list)) :live)) result))
   ))
 ;----------------------------------------------------------------
-; (op . ( [:init | :runnable | :selected ] (args...) (result)))
+; (op . ( [:init | :runnable | :selected ] (args...) (result) expr ))
 ; (<var> . [:init | :live | :dead])
 
 (defmethod do-cps-block-analyzer ((parser cps-block-analyzer) env)
@@ -217,12 +218,16 @@
     (mapc #'(lambda(arg) 
                 (set-variable arg :live new-env)) args)
 
-    (let ((new-next-cps (cps-parse parser next-cps new-env)))
-      (setf result
-      (do-cps-block-analyzer parser new-env))
-      (print `(result ,result))
+    (let ((new-next-cps (cps-parse parser next-cps new-env))
+          (result (do-cps-block-analyzer parser new-env)))
 
-      `(,func-name ,args ,new-next-cps))))
+      (let ((reorder (make-instance 'cps-reorder)))
+        (print `(result ,result))
+        (setf (get-new-order reorder) result)
+        (setf new-next-cps (cps-parse reorder next-cps (make-new-env reorder '())))
+        (print `(reodered-expr ,new-next-cps))
+
+        `(,func-name ,args ,new-next-cps)))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-block-analyzer) expr env)
@@ -231,7 +236,7 @@
         
     (let ((new-func-name (cps-symbol parser func-name env))
           (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args)))
-      (set-instruction :app `(:init (,func-name ,@args) nil) env)
+      (set-instruction :app `(:init (,func-name ,@args) nil ,expr) env)
       `(:APP ,new-func-name ,new-args))))
 
 ;----------------------------------------------------------------
@@ -243,7 +248,7 @@
         (top-env (car env)))
 
     (mapc #'(lambda (r) (set-variable r :init env)) result)
-    (set-instruction op `(:init ,(remove-if #'(lambda (x) (not (symbolp x))) args) ,result) env)
+    (set-instruction op `(:init ,(remove-if #'(lambda (x) (not (symbolp x))) args) ,result ,expr) env)
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
