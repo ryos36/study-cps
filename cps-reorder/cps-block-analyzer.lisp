@@ -1,10 +1,24 @@
 ;----------------------------------------------------------------
-(load "../k-transfer/cps-parser.lisp")
-(load "cps-reorder.lisp")
+;(load "../k-transfer/cps-parser.lisp")
 
 ;----------------------------------------------------------------
 (defclass cps-block-analyzer (cps-parser)
-  (()))
+  ((new-order
+     :initform '()
+     :accessor get-new-order
+     )))
+
+;----------------------------------------------------------------
+(defmethod reset ((parser cps-block-analyzer))
+  (setf (get-new-order parser) '()))
+
+;----------------------------------------------------------------
+(defmethod pop-cps-expr ((parser cps-block-analyzer))
+  (with-slots ((new-order new-order)) parser
+    (if (null new-order) (error "No Expr Item."))
+    (let ((top-expr (car new-order)))
+      (setf new-order (cdr new-order))
+      top-expr)))
 
 ;----------------------------------------------------------------
 (defun init-env ()
@@ -199,14 +213,9 @@
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-block-analyzer) expr env)
   (let ((fix-op (car expr))
-        (binds (cadr expr))
-        (next-cps (caddr expr))
-        (new-env (make-new-env parser env)))
-        
-    (let ((new-binds (cps-binds parser binds env))
-          (new-next-cps (cps-parse parser next-cps env)))
+        (binds (cadr expr)))
 
-      `(,fix-op ,new-binds ,new-next-cps))))
+    `(:DUMMY-FIX ,(mapcar #'(lambda (bind) (car bind)) binds))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind ((parser cps-block-analyzer) expr env)
@@ -221,13 +230,11 @@
     (let ((new-next-cps (cps-parse parser next-cps new-env))
           (result (do-cps-block-analyzer parser new-env)))
 
-      (let ((reorder (make-instance 'cps-reorder)))
-        (print `(result ,result))
-        (setf (get-new-order reorder) result)
-        (setf new-next-cps (cps-parse reorder next-cps (make-new-env reorder '())))
-        (print `(reodered-expr ,new-next-cps))
+      (setf (get-new-order parser) result)
 
-        `(,func-name ,args ,new-next-cps)))))
+      ;(print `(result ,result))
+
+      `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-block-analyzer) expr env)
@@ -248,7 +255,8 @@
         (top-env (car env)))
 
     (mapc #'(lambda (r) (set-variable r :init env)) result)
-    (set-instruction op `(:init ,(remove-if #'(lambda (x) (not (symbolp x))) args) ,result ,expr) env)
+    ; ignore (:label |x|) and number ex. 1
+    (set-instruction op `(:init ,(remove-if #'(lambda (x) (not (cps-symbolp x))) args) ,result ,expr) env)
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))

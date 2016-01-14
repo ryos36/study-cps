@@ -26,6 +26,15 @@
     (numberp expr)))
 
 ;----------------------------------------------------------------
+(defun cps-symbolp (expr)
+  (not (or 
+         (eq :#t expr)
+         (eq :#f expr)
+         (null expr)
+         (numberp expr)
+         (and (listp expr) (eq (car expr) :label)))))
+
+;----------------------------------------------------------------
 (defmethod cps-primitive-p ((parser cps-parser) op)
   (case op 
     (:#t nil)
