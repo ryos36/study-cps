@@ -63,10 +63,38 @@
         (mapcar #'(lambda(x) (cons x op-value)) result)
         op-value 1)))))
 ;----------------------------------------------------------------
-; (op . ( [:init | :selected ] (args...) (result)))
+(defmethod cps-select-runnable ((parser cps-block-analyzer) selected-runnable var-list insn-list)
+
+  (setf (cadr selected-runnable) :selected)
+
+  (let* ((insn (cdr selected-runnable))
+         (args (cadr insn))
+         (result (caddr insn))
+         (used-args-pos-list
+            (mapcar #'(lambda (arg)
+              (remove-if #'null
+                (mapcar #'(lambda(i)
+                  (let ((stat (cadr i))
+                        (i-args (caddr i)))
+                    (if (eq :selected stat)
+                      nil
+                      (car (member arg i-args)))))
+                        insn-list)))
+                    args))
+         (dead-args (remove-if #'null (mapcar #'(lambda (a b) (if (null b) a)) args used-args-pos-list))))
+    ;(print `(,args ,used-args-pos-list ,dead-args))
+
+    (if dead-args
+      (mapcar #'(lambda (da) (setf (cdr (assoc da var-list)) :dead)) dead-args))
+
+    (if result
+      (mapc #'(lambda (r) (setf (cdr (assoc r var-list)) :live)) result))
+  ))
+;----------------------------------------------------------------
+; (op . ( [:init | :runnable | :selected ] (args...) (result)))
 ; (<var> . [:init | :live | :dead])
 
-(defmethod cps-do-block-analyzer ((parser cps-block-analyzer) env)
+(defmethod do-cps-block-analyzer ((parser cps-block-analyzer) env)
   (let* ((top-env (car env))
          (vars-holder (assoc :vars top-env))
          (var-list (cdr vars-holder))
@@ -76,57 +104,76 @@
       ;(print `(env ,env))
       ;(print `(var-list ,var-list))
       ;(print `(insn-list ,insn-list))
-      (let* ((runnable-list
-              (remove-if #'null
-                (mapcar #'(lambda (insn)
-                  (let* ((op (car insn))
-                         (info (cdr insn))
-                         (stat (car info))
-                         (args (cadr info))
-                         (result (caddr info)))
+      (labels ((do-cps-block-analyzer0 (len rv)
+        (if (= 0 len) (nreverse rv)
+          (let* ((runnable-list
+                  (remove-if #'null
+                    (mapcar #'(lambda (insn)
+                      (let* ((op (car insn))
+                             (info (cdr insn))
+                             (stat (car info))
+                             (args (cadr info))
+                             (result (caddr info)))
 
-                    (if 
-                      (reduce #'(lambda (a b) (and a b)) 
-                        (mapcar #'(lambda (x) 
-                            (car (member x var-list :test 
-                               #'(lambda (x0 target) 
-                                   (and (eq (car target) x0)
-                                        (eq (cdr target) :live))))))
-                                args))
-                      insn)))
+                        (case stat
+                          (:runnable insn)
+                          (:selected nil)
+                          (:init
+                            (if 
+                              (reduce #'(lambda (a b) (and a b)) 
+                                      (mapcar #'(lambda (x) 
+                                        (car (member x var-list :test 
+                                           #'(lambda (x0 target) 
+                                               (and (eq (car target) x0)
+                                                    (eq (cdr target) :live))))))
+                                              args))
+                              insn)))))
+                            insn-list)))
+                 (selected-runnable
+                   (if (= 1 (length runnable-list))
+                     (car runnable-list)
+                     (let* ((depth-list (mapcar #'(lambda (runnable) 
+                              (multiple-value-bind (n m)
+                                (chase-depth parser runnable insn-list var-list)
+                                (list n m))) runnable-list))
+                            (runnable-depth-list
+                              (mapcar #'cons runnable-list depth-list)))
 
-                        insn-list)))
-             (selected-runnable
-               (if (= 1 (length runnable-list))
-                 (car runnable-list)
-                 (let* ((depth-list (mapcar #'(lambda (runnable) 
-                          (multiple-value-bind (n m)
-                            (chase-depth parser runnable insn-list var-list)
-                            (list n m))) runnable-list))
-                        (runnable-depth-list
-                          (mapcar #'cons runnable-list depth-list)))
+                       ;(print `(depth-list ,depth-list))
+                       (car 
+                         (reduce #'(lambda (a b)
+                                   (let* ((depth-a (cdr a))
+                                          (depth-a0 (car depth-a))
+                                          (depth-b (cdr b))
+                                          (depth-b0 (car depth-b))
+                                          (a<b? 
+                                            (cond
+                                              ((< depth-a0 depth-b0) t)
+                                              ((= depth-a0 depth-b0)
+                                               (let ((depth-a1 (cadr depth-a))
+                                                     (depth-b1 (cadr depth-b)))
+                                                 (< depth-a1 depth-b1)))
+                                              (nil nil))))
+                                     (if a<b? b a)))
+                               runnable-depth-list))))))
 
-                   (car 
-                     (reduce #'(lambda (a b)
-                               (let* ((depth-a (cdr a))
-                                      (depth-a0 (car depth-a))
-                                      (depth-b (cdr b))
-                                      (depth-b0 (car depth-b))
-                                      (a<b? 
-                                        (cond
-                                          ((< depth-a0 depth-b0) t)
-                                          ((= depth-a0 depth-b0)
-                                           (let ((depth-a1 (cadr depth-a))
-                                                 (depth-b1 (cadr depth-b)))
-                                             (< depth-a1 depth-b1)))
-                                          (nil nil))))
-                                 (if a<b? a b)))
-                           runnable-depth-list))))))
+            (mapc #'(lambda (insn) 
+                      (setf (cadr insn) :runnable)) runnable-list)
+            (cps-select-runnable parser selected-runnable var-list insn-list)
 
-        (setf (cadr selected-runnable) :selected)
-        (print `(selected-runnable ,selected-runnable))
+            ;(setf (cadr selected-runnable) :selected)
+            ;(print `(selected-runnable ,selected-runnable))
+            ;(print `(runnable-list ,runnable-list))
+            ;(print `(insn-list ,insn-list))
+            ;(print `(var-list ,var-list))
 
-    )))
+            (let ((next-len 
+                    (if (null selected-runnable) len (- len 1)))
+                  (next-rv
+                    (if (null selected-runnable) rv (cons selected-runnable rv))))
+              (do-cps-block-analyzer0 next-len next-rv))))))
+
+        (do-cps-block-analyzer0 (length insn-list) '()))))
 
 ;----------------------------------------------------------------
 (defmethod make-new-env ((parser cps-block-analyzer) env &optional (new-env-item (init-env)))
@@ -171,7 +218,9 @@
                 (set-variable arg :live new-env)) args)
 
     (let ((new-next-cps (cps-parse parser next-cps new-env)))
-      (cps-do-block-analyzer parser new-env)
+      (setf result
+      (do-cps-block-analyzer parser new-env))
+      (print `(result ,result))
 
       `(,func-name ,args ,new-next-cps))))
 

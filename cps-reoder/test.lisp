@@ -1,4 +1,5 @@
 (load "cps-block-analyzer.lisp" )
+(load "cps-reorder.lisp" )
 (load "../test-lisp/test.lisp")
 
 (setf analyzer (make-instance 'cps-block-analyzer))
