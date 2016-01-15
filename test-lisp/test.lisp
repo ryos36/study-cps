@@ -30,12 +30,17 @@
     (nreverse (easy-flatten0 lst '()))))
 
 ;(1 (2 . 5) 10)
+(defun test-name (no)
+  (if (numberp no)
+    (format nil "test-~3,'0d" no)
+    (format nil "test-~a" no)))
+
 (defun set-test-files (max-no-or-no-list)
   (setf *test-files* 
         (if (listp max-no-or-no-list)
           (let ((no-list max-no-or-no-list))
-            (if (stringp (car no-list)) `(,(format nil "test~a" (car no-list)))
-              (mapcar #'(lambda (no) (format nil "test~a" no))
+            (if (stringp (car no-list)) `(,(test-name (car no-list)))
+              (mapcar #'(lambda (no) (test-name no))
                       (easy-flatten 
                         (mapcar #'(lambda (no) 
                                     (if (listp no)
@@ -49,7 +54,7 @@
               (let (test-files)
                 (do ((x 0 (+ x 1)))
                   ((= x max-no))
-                  (push (format nil "test~a" x ) test-files))
+                  (push (test-name x) test-files))
                 test-files))))))
 
 ;(setf test-files (mapcar #'(lambda (no) (format nil "test~a" no)) *test-no*))
