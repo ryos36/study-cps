@@ -14,7 +14,10 @@
         ('if t)
         ('fix t)
         ('let t)
-        ('exit t)
+        ('fixh t)
+        ('fixs t)
+        (:fixh t)
+        (:fixs t)
         (otherwise nil))
       (progn
         (warn (format nil "~%Warning!!!!~%Primitive???? ~a~%" func-name))
