@@ -51,7 +51,7 @@
                (if (null var-names0) next-cps0
                  (let ((var-name (car var-names0)))
                    (do-wrap (cdr var-names0) (+ no 1) 
-                     `(:RECORD-REF (,closure-name ,no) (,var-name) ((,next-cps0))))))))
+                     `(:RECORD-REF (,closure-name ,no) (,var-name) (,next-cps0)))))))
       (let ((free-vars (env-to-free-variables new-env)))
         (do-wrap free-vars 1 new-next-cps))))
 
