@@ -15,8 +15,7 @@
 
 ; test0 includes string , so ignore here
 
-(set-test-files '("1" "28" "26" "27" "026" (1 . 13)))
-(set-test-files '("26" (1 . 25)))
+(set-test-files '((1 . 28)))
 
 (defparameter *env* (make-env))
 (do-test)
