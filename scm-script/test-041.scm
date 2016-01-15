@@ -2,8 +2,8 @@
    (:fix ((mul3x3-ji (j0 i0)
            (:let ((j-start (:* i0 3))
                   (i-start j0))
-             (:let ((a-ji (:recored-ref a j-start))
-                    (b-ji (:recored-ref b i-start)))
+             (:let ((a-ji (:record-ref a j-start))
+                    (b-ji (:record-ref b i-start)))
                    (:record-set! (:* a-ji b-ji) (:+ j-start i-start) c))))
 
           (mul3x3-j (j i0)
