@@ -7,22 +7,19 @@
                    (:record-set! (:* a-ji b-ji) (:+ j-start i-start) c))))
 
           (mul3x3-j (j i0)
-            (:if (:= j 3) 
-               :#t
-               (:let ((next-j (:+ j 1)))
-                 (mul3x3-ji j i0)
-                 (mul3x3-j next-j i0))))
+            (:fix ((mul3x3-j-i0 (j)
+                     (:if (:= j 3) 
+                        :#t
+                        (:let ((next-j (:+ j 1)))
+                          (mul3x3-ji j i0)
+                          (mul3x3-j-i0 next-j)))))
+                  (mul3x3-j-i0 j)))
 
-          (mul3x3-i (j0 i)
+          (mul3x3-i (i)
             (:if (:= i 3) 
                :#t
                (:let ((next-i (:+ i 1)))
-                 (mul3x3-j j0 i)
-                 (mul3x3-i j0 next-i)))))
+                 (mul3x3-j i)
+                 (mul3x3-i next-i)))))
 
          (mul3x3-i 0 0))))
-
-
-
-
-
