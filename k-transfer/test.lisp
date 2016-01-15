@@ -9,7 +9,9 @@
   (let* ((op (car cps-expr))
          (rv (if (eq :fixh op)
                (cps-fixh conv cps-expr env)
-               (cps-fixs conv cps-expr env))))
+               (if (eq :fixs op)
+                 (cps-fixs conv cps-expr env)
+                 (cps-parse conv cps-expr env)))))
     (setf grv rv)
     rv))
 
@@ -25,7 +27,6 @@
 
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
-;(set-test-files '((1 . 3) (6 . 16)))
 (set-test-files '((14 . 22)))
 (do-test)
 

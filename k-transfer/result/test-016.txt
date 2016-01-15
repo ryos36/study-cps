@@ -1,0 +1,10 @@
+(:FIXH ((C (R) (:+ (EX-X R) (T) ((:APP EX-K (T)))))) (:APP EX-G (C EX-X)))
+:
+(:FIXH
+ ((|:C| (C R)
+   (:RECORD-REF (C 2) (EX-X)
+    ((:RECORD-REF (C 1) (EX-K)
+      ((:+ (EX-X R) (T)
+        ((:RECORD-REF (EX-K 0) (|sym0|) ((:APP |sym0| (EX-K T))))))))))))
+ (:HEAP ((:LABEL |:C|) EX-K EX-X) (C)
+  ((:RECORD-REF (EX-G 0) (|sym1|) ((:APP |sym1| (EX-G C EX-X)))))))

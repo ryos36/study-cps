@@ -123,15 +123,13 @@
 
           (if result-txt
             (let ((ok? (string= 
-                          (string-right-trim trim-string result)
-                          (string-right-trim trim-string result-txt))))
+                         (string-right-trim trim-string result)
+                         (string-right-trim trim-string result-txt))))
               (format t "~a:~a~%" name
-                    (if ok? "Passed" "Failed"))
+                      (if ok? "Passed" "Failed"))
 
               (if ok?
-                (incf *test-success-n*)
-                (if (cdr *test-files*)
-                  (sleep 1))))
+                (incf *test-success-n*)))
             (when *test-save*
               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
                 (format out "~a" result))
