@@ -2,6 +2,7 @@
 
 (defparameter *test-script-dir* nil)
 (defparameter *test-ext* nil)
+(defparameter *test-name* "test-")
 (defparameter *test-result-dir* "result/")
 (defparameter *test-files* nil)
 (defparameter *test-parse-func* nil)
@@ -32,8 +33,11 @@
 ;(1 (2 . 5) 10)
 (defun test-name (no)
   (if (numberp no)
-    (format nil "test-~3,'0d" no)
-    (format nil "test-~a" no)))
+    (format nil "~a~3,'0d" *test-name* no)
+    (multiple-value-bind (new-no len) (parse-integer no :junk-allowed t)
+      (if (and new-no (= (length no) len))
+        (format nil "~a~3,'0d" *test-name* no)
+        (format nil "~a~a" *test-name* no)))))
 
 (defun set-test-files (max-no-or-no-list)
   (setf *test-files* 
@@ -118,14 +122,16 @@
               (format t  "--------------------------------~%")))
 
           (if result-txt
-            (format t "~a:~a~%" name
-                    (if (string= 
+            (let ((ok? (string= 
                           (string-right-trim trim-string result)
-                          (string-right-trim trim-string result-txt))
-                      (progn
-                        (incf *test-success-n*)
-                        "Passed")
-                      "Failed"))
+                          (string-right-trim trim-string result-txt))))
+              (format t "~a:~a~%" name
+                    (if ok? "Passed" "Failed"))
+
+              (if ok?
+                (incf *test-success-n*)
+                (if (cdr *test-files*)
+                  (sleep 1))))
             (when *test-save*
               (with-open-file (out result-file :if-does-not-exist :create :direction :output)
                 (format out "~a" result))

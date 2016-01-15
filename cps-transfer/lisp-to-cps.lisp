@@ -268,11 +268,12 @@
           (setf wrapped-cps-expr
                 (fill-cont (call-continuation-lambda cont-lambda arg0)))
 
+          ;(print `(eval-args ,args-holder ,args ,(length fill-arg-list)))
           (mapc 
             #'(lambda (arg func)
                 (setf wrapped-cps-expr
                       (do-lisp-to-cps arg (cons func table-list))))
-            (reverse (cdr args)) (nreverse (cdr fill-arg-list)))
+            (reverse args) (nreverse (cdr fill-arg-list)))
 
           wrapped-cps-expr)))))
 

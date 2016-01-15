@@ -35,7 +35,7 @@
           ((:FIXS
             ((|sym18| (|sym19|)
               (:FIXS ((|sym16| (|sym17|) (:APP |sym14| (|sym17|))))
-               (:APP MUL3X3-J (|sym16| NEXT-J I0)))))
+               (:APP MUL3X3-J (|sym16| |sym20| I0)))))
             (:APP MUL3X3-JI (|sym18| J I0)))))))))
      (MUL3X3-I (|sym21| J0 I)
       (:FIXS ((|sym22| (|sym23|) (:APP |sym21| (|sym23|))))
