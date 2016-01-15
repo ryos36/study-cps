@@ -242,10 +242,7 @@
     ;(print `('apply-transfer ,func-name ,(variable-rename func-name context)))
 
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
-           (fill-func-name (func-name) (setf (car func-name-list) func-name) wrapped-cps-expr)
-           (fill-arg (arg) (print `(fill-arg ,arg ,new-cps-expr)) (push arg new-args) (setf (car args-list) new-args) wrapped-cps-expr))
-
-
+           (fill-func-name (func-name) (setf (car func-name-list) func-name) wrapped-cps-expr))
 
       ;(print expr)
       (let ((cont-lambda (car context))
@@ -258,7 +255,6 @@
 
         (let ((fill-arg-list
                 (maplist #'(lambda (x) (flet ((fill-arg (arg)
-                                                  (print `(fill-arg ,arg))
                                                   (setf (car x) arg)
                                                   wrapped-cps-expr))
                                            #'fill-arg)) args-holder)))
