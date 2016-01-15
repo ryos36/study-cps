@@ -1,0 +1,14 @@
+(:FIXH
+ ((F0 (K A B C)
+   (:+ (A B) (R0) ((:- (R0 R1) (R0) ((:* (R0 C) (R2) ((:APP K (R2))))))))))
+ (:APP F0 (K 1 2 3)))
+:
+(:FIXH
+ ((|:F0| (F0 K A B C)
+   (:RECORD-REF (F0 1) (R1)
+    ((:+ (A B) (R0)
+      ((:- (R0 R1) (R0)
+        ((:* (R0 C) (R2)
+          ((:RECORD-REF (K 0) (|sym0|) ((:APP |sym0| (K R2))))))))))))))
+ (:HEAP ((:LABEL |:F0|) R1) (F0)
+  ((:RECORD-REF (F0 0) (|sym1|) ((:APP |sym1| (F0 K 1 2 3)))))))
