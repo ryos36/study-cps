@@ -18,7 +18,7 @@
         ((|sym11| (|sym12|)
           (:FIXS
            ((|sym9| (|sym10|)
-             (:+ (|sym12| |sym10|) (|sym8|) ((:EXIT (|sym8|) NIL NIL)))))
+             (:+ (|sym12| |sym10|) (|sym8|) ((:APP EXIT (|sym8|))))))
            (:APP |sym14| (|sym9| 1)))))
         (:APP |sym16| (|sym11| 0)))))
      (:APP F0 (|sym13| 4)))))
@@ -26,4 +26,4 @@
 (:LET ((X 3)) (:FIX ((FX (A0) (:+ A0 X))) (:+ 3 5)))
 :
 (:FIXH ((FX (|sym17| A0) (:+ (A0 3) (|sym18|) ((:APP |sym17| (|sym18|))))))
- (:+ (3 5) (|sym19|) ((:EXIT (|sym19|) NIL NIL))))
+ (:+ (3 5) (|sym19|) ((:APP EXIT (|sym19|)))))

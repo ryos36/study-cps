@@ -18,8 +18,7 @@
       (:- (X 1) (|sym13|)
        ((:FIXS ((|sym11| (|sym12|) (:APP |sym9| (|sym12|))))
          (:APP EVEN? (|sym11| |sym13|))))))))))
- (:FIXS ((|sym14| (|sym15|) (:EXIT (|sym15|) NIL NIL)))
-  (:APP EVEN? (|sym14| 10))))
+ (:FIXS ((|sym14| (|sym15|) (:APP EXIT (|sym15|)))) (:APP EVEN? (|sym14| 10))))
 (:FIX
  ((EVEN? (X) (:IF (:= X 0) :|#T| (ODD? (:- X 1))))
   (ODD? (X) (:IF (:= X 0) :|#F| (EVEN? (:- X 1)))))
@@ -40,5 +39,4 @@
       (:- (X 1) (|sym27|)
        ((:FIXS ((|sym25| (|sym26|) (:APP |sym23| (|sym26|))))
          (:APP EVEN? (|sym25| |sym27|))))))))))
- (:FIXS ((|sym28| (|sym29|) (:EXIT (|sym29|) NIL NIL)))
-  (:APP ODD? (|sym28| 10))))
+ (:FIXS ((|sym28| (|sym29|) (:APP EXIT (|sym29|)))) (:APP ODD? (|sym28| 10))))

@@ -1,8 +1,8 @@
 (:IF :|#F| 3 5)
 :
-(:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+(:FIXS ((|sym2| (|sym3|) (:APP EXIT (|sym3|))))
  (:NEQ? (:|#F| :|#F|) NIL ((:APP |sym2| (3)) (:APP |sym2| (5)))))
 (:IF :|#T| 3 5)
 :
-(:FIXS ((|sym4| (|sym5|) (:EXIT (|sym5|) NIL NIL)))
+(:FIXS ((|sym4| (|sym5|) (:APP EXIT (|sym5|))))
  (:NEQ? (:|#T| :|#F|) NIL ((:APP |sym4| (3)) (:APP |sym4| (5)))))

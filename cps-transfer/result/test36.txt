@@ -20,5 +20,4 @@
                    (:+ (|sym12| |sym9|) (|sym7|) ((:APP |sym5| (|sym7|))))))
                  (:APP FIBO (|sym8| |sym10|)))))))
             (:APP FIBO (|sym11| |sym13|)))))))))))))
- (:FIXS ((|sym14| (|sym15|) (:EXIT (|sym15|) NIL NIL)))
-  (:APP FIBO (|sym14| 8))))
+ (:FIXS ((|sym14| (|sym15|) (:APP EXIT (|sym15|)))) (:APP FIBO (|sym14| 8))))

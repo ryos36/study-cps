@@ -12,7 +12,7 @@
              ((|sym7| (|sym6|)
                (:FIXS
                 ((|sym5| (|sym4|)
-                  (:FIXS ((|sym2| (|sym3|) (:EXIT (|sym3|) NIL NIL)))
+                  (:FIXS ((|sym2| (|sym3|) (:APP EXIT (|sym3|))))
                    (:APP :APP
                     (|sym2| |sym14| |sym12| |sym10| |sym8| |sym6| |sym4|)))))
                 (:/= (33 44) NIL (:APP |sym5| (:|#T|))

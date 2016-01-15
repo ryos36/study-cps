@@ -5,4 +5,4 @@
  (:RECORD-SET! (|sym5| 0 10) NIL
   (:RECORD-REF (|sym5| 0) (|sym4|)
    (:RECORD-REF (|sym5| 1) (|sym3|)
-    (:+ (|sym4| |sym3|) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))))))
+    (:+ (|sym4| |sym3|) (|sym2|) ((:APP EXIT (|sym2|))))))))

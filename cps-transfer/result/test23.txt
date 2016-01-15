@@ -3,7 +3,6 @@
 (:FIXS
  ((|sym5| (|sym6|)
    (:FIXS
-    ((|sym3| (|sym4|)
-      (:+ (|sym6| |sym4|) (|sym2|) ((:EXIT (|sym2|) NIL NIL)))))
+    ((|sym3| (|sym4|) (:+ (|sym6| |sym4|) (|sym2|) ((:APP EXIT (|sym2|))))))
     (:APP FUNC1 (|sym3| 2 3 4)))))
  (:APP FUNC0 (|sym5| 1)))

@@ -7,4 +7,4 @@
      ((:FIXS ((|sym5| (|sym6|) (:APP |sym3| (|sym6|)))) (:APP F (|sym5| X)))
       (:FIXS ((|sym7| (|sym8|) (:APP |sym3| (|sym8|))))
        (:APP G (|sym7| X))))))))
- (:EXIT (:UNSPECIFIED) NIL NIL))
+ (:APP EXIT (:UNSPECIFIED)))

@@ -12,4 +12,4 @@
    (:* (X Y) (|sym9|)
     ((:+ (Z G) (|sym8|)
       ((:- (|sym9| |sym8|) (|sym7|) ((:APP |sym6| (|sym7|))))))))))
- (:+ (3 5) (|sym10|) ((:EXIT (|sym10|) NIL NIL))))
+ (:+ (3 5) (|sym10|) ((:APP EXIT (|sym10|)))))

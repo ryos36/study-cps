@@ -1,18 +1,18 @@
 (:DEFINE X 3)
 :
-(:ID (3) (X) (:EXIT (:UNSPECIFIED) NIL NIL))
+(:ID (3) (X) (:APP EXIT (:UNSPECIFIED)))
 X
 :
-(:EXIT (X) NIL NIL)
+(:APP EXIT (X))
 (:DEFINE (F A B) (:- (:+ A B) X))
 :
 (FIXH
  ((F (|sym2| A B)
    (:+ (A B) (|sym4|) ((:- (|sym4| X) (|sym3|) ((:APP |sym2| (|sym3|))))))))
- (:EXIT (:UNSPECIFIED) NIL NIL))
+ (:APP EXIT (:UNSPECIFIED)))
 (F 4 5)
 :
-(:FIXS ((|sym5| (|sym6|) (:EXIT (|sym6|) NIL NIL))) (:APP F (|sym5| 4 5)))
+(:FIXS ((|sym5| (|sym6|) (:APP EXIT (|sym6|)))) (:APP F (|sym5| 4 5)))
 (:DEFINE (G X Y) (:+ X (F X Y)))
 :
 (FIXH
@@ -20,7 +20,7 @@ X
    (:FIXS
     ((|sym9| (|sym10|) (:+ (X |sym10|) (|sym8|) ((:APP |sym7| (|sym8|))))))
     (:APP F (|sym9| X Y)))))
- (:EXIT (:UNSPECIFIED) NIL NIL))
+ (:APP EXIT (:UNSPECIFIED)))
 (G 7 8)
 :
-(:FIXS ((|sym11| (|sym12|) (:EXIT (|sym12|) NIL NIL))) (:APP G (|sym11| 7 8)))
+(:FIXS ((|sym11| (|sym12|) (:APP EXIT (|sym12|)))) (:APP G (|sym11| 7 8)))

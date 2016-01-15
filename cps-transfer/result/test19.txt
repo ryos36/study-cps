@@ -7,5 +7,4 @@
      ((:>> (7 8) (|sym5|)
        ((:* (|sym8| |sym6|) (|sym4|)
          ((:+ (|sym7| |sym5|) (|sym3|)
-           ((:- (|sym4| |sym3|) (|sym2|)
-             ((:EXIT (|sym2|) NIL NIL)))))))))))))))
+           ((:- (|sym4| |sym3|) (|sym2|) ((:APP EXIT (|sym2|))))))))))))))))

@@ -88,7 +88,8 @@
 
 ;----------------------------------------------------------------
 (defun make-exit-transfer-lambda ()
-  (let* ((new-cps-expr (copy-tree `(:EXIT (ARG0) () ())))
+  (let* ((new-cps-expr (copy-tree `(:APP EXIT (ARG0))))
+ 
          (arg0-list (pickup-list new-cps-expr 'ARG0)))
     (flet ((fill-arg0 (arg0) (setf (car arg0-list) arg0)
                       new-cps-expr))

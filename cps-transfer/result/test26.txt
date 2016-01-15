@@ -4,14 +4,14 @@
  ((:* (1 3) (|sym5|)
    ((:- (2 5) (|sym4|)
      ((:HEAP (|sym6| |sym5| |sym4| 3) (|sym3|)
-       (:+ (3 |sym3|) (|sym2|) ((:EXIT (|sym2|) NIL NIL))))))))))
+       (:+ (3 |sym3|) (|sym2|) ((:APP EXIT (|sym2|)))))))))))
 (:RECORD-SET! R (:+ 0 4) (:* 10 Y))
 :
 (:+ (0 4) (|sym8|)
  ((:* (10 Y) (|sym7|)
-   ((:RECORD-SET! (R |sym8| |sym7|) NIL (:EXIT (:UNSPECIFIED) NIL NIL))))))
+   ((:RECORD-SET! (R |sym8| |sym7|) NIL (:APP EXIT (:UNSPECIFIED)))))))
 (:* (:RECORD-REF R 1) (:RECORD-REF R 2))
 :
 (:RECORD-REF (R 1) (|sym11|)
  (:RECORD-REF (R 2) (|sym10|)
-  (:* (|sym11| |sym10|) (|sym9|) ((:EXIT (|sym9|) NIL NIL)))))
+  (:* (|sym11| |sym10|) (|sym9|) ((:APP EXIT (|sym9|))))))

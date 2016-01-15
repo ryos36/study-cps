@@ -5,4 +5,4 @@
    (:- (V0 100) (|sym5|)
     ((:+ (V0 A) (|sym4|)
       ((:* (|sym5| |sym4|) (|sym3|) ((:APP |sym2| (|sym3|))))))))))
- (:EXIT (:UNSPECIFIED) NIL NIL))
+ (:APP EXIT (:UNSPECIFIED)))
