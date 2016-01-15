@@ -1,0 +1,10 @@
+(:FIXH
+ ((F0 (R) (:+ (EX-X R) (T) ((:APP EX-K (T)))))
+  (F1 (R) (:+ (EX-X R) (T) ((:APP EX-L (T))))))
+ (:APP EX-G (C EX-X)))
+:
+(:FIXH
+ ((F0 (R) (:+ (EX-X R) (T) ((:APP EX-K (T)))))
+  (F1 (R) (:+ (EX-X R) (T) ((:APP EX-L (T))))))
+ (:APP EX-G (C EX-X)))
+SAME

@@ -1,0 +1,4 @@
+(:FIXS ((C (R) (:+ (X R) (T) ((:APP K (T)))))) (:APP G (C X)))
+:
+(:FIXS ((C (R) (:+ (X R) (T) ((:APP K (T)))))) (:APP G (C X)))
+SAME

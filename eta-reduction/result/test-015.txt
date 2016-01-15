@@ -1,0 +1,16 @@
+(:FIXS
+ ((C (R)
+   (:+ (K0 R) (T)
+    ((:+ (K1 T) (T1)
+      ((:FIXS ((C0 (R) (:+ (R K1) (T2) ((:APP K (T))))))
+        (:APP G0 (C0 K2)))))))))
+ (:APP G (C X)))
+:
+(:FIXS
+ ((C (R)
+   (:+ (K0 R) (T)
+    ((:+ (K1 T) (T1)
+      ((:FIXS ((C0 (R) (:+ (R K1) (T2) ((:APP K (T))))))
+        (:APP G0 (C0 K2)))))))))
+ (:APP G (C X)))
+SAME

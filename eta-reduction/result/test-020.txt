@@ -1,0 +1,14 @@
+(:FIXH
+ ((F0 (R) (:+ (EX-F0 R) (T) ((:APP EX-F1 (T)))))
+  (F1 (KF0 A0 A1) (:+ (A0 A1) (SYM4) ((:APP KF0 (SYM4))))))
+ (:+ (EX-A EX-B) (SYM0)
+  ((:FIXH ((G0 (K0 B1) (:* (EX-G0 SYM0) (SYM1) ((:APP K0 (SYM1))))))
+    (:- (EX-C EX-D) (SYM3) ((:APP G0 (EX-K SYM3))))))))
+:
+(:FIXH
+ ((F0 (R) (:+ (EX-F0 R) (T) ((:APP EX-F1 (T)))))
+  (F1 (KF0 A0 A1) (:+ (A0 A1) (SYM4) ((:APP KF0 (SYM4))))))
+ (:+ (EX-A EX-B) (SYM0)
+  ((:FIXH ((G0 (K0 B1) (:* (EX-G0 SYM0) (SYM1) ((:APP K0 (SYM1))))))
+    (:- (EX-C EX-D) (SYM3) ((:APP G0 (EX-K SYM3))))))))
+SAME

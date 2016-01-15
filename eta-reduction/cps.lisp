@@ -1,8 +1,4 @@
 ;----------------------------------------------------------------
-(defun l ()
-  (load "cps.lisp"))
-
-;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (symbolp expr)
       (numberp expr)))
@@ -114,7 +110,6 @@
          (op (car func-body))
          (op-func-name (cadr func-body))
          (op-args (caddr func-body)))
-    ;(format t "~a ~a/ ~a ~a~%" func-name func-args op op-args)
     (if (and (eq op :app) (equal func-args op-args))
       (cons func-name op-func-name) 
       nil)))
@@ -148,7 +143,8 @@
 ;(:fix (binds*) cps)
 ;
 (defun cps-fix (expr env)
-  (let* ((binds (cadr expr))
+  (let* ((fix-op (car expr))
+         (binds (cadr expr))
          (next-expr (caddr expr))
          (new-env (make-new-env env))
          (re-binds (mapcar #'(lambda (bind) 
@@ -172,7 +168,7 @@
                             binds re-list)))
           (new-cps (walk-cps next-expr new-env)))
       (if new-binds
-        (list :fix new-binds new-cps)
+        (list fix-op new-binds new-cps)
         new-cps))))
 
 ;----------------------------------------------------------------
@@ -268,16 +264,18 @@
   (if (terminal-p expr)
     (cps-terminal expr env)
     (let ((op (car expr)))
-    (case op
-      (:fix (cps-fix expr env))
-      (:app (cps-app expr env))
-      ;(:let )
-      (:exit (cps-exit expr env))
-      (otherwise (let ((primitive-cps (lookup-primitive op)))
-                   ;(format t "primitive-cps:~a ~s~%" op primitive-cps)
-                   (if (null primitive-cps)
-                     (if (check-cps-define expr)
-                       (cps-define expr env)
-                       (cps-error-exit expr env))
-                     (do-primitive-cps expr env))))))))
+      (case op
+        (:fix (cps-fix expr env))
+        (:fixs (cps-fix expr env))
+        (:fixh (cps-fix expr env))
+        (:app (cps-app expr env))
+        ;(:let )
+        (:exit (cps-exit expr env))
+        (otherwise (let ((primitive-cps (lookup-primitive op)))
+                     ;(format t "primitive-cps:~a ~s~%" op primitive-cps)
+                     (if (null primitive-cps)
+                       (if (check-cps-define expr)
+                         (cps-define expr env)
+                         (cps-error-exit expr env))
+                       (do-primitive-cps expr env))))))))
 

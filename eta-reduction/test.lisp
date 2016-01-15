@@ -5,6 +5,7 @@
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'walk-cps)
 (defparameter *debug-mode* nil)
+;(defparameter *debug-mode* t)
 
 (let ((av (argv)))
   (setf last-arg (elt av (- (length av) 1))))
@@ -14,7 +15,8 @@
 
 ; test0 includes string , so ignore here
 
-(set-test-files '((1 . 13)))
+(set-test-files '("1" "28" "26" "27" "026" (1 . 13)))
+(set-test-files '("26" (1 . 25)))
 
 (defparameter *env* (make-env))
 (do-test)

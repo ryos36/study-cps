@@ -1,0 +1,12 @@
+(:FIXH
+ ((G0 (K0 B1)
+   (:* (EX-G0 SYM0) (SYM1) ((:+ (B1 SYM1) (EX-G1) ((:APP K0 (EX-G1)))))))
+  (G1 (K2 B2) (:+ (EX-G1 EX-G2) (SYM5) ((:APP F0 (SYM5))))))
+ (:- (EX-C EX-D) (SYM3) ((:APP G0 (EX-K SYM3)))))
+:
+(:FIXH
+ ((G0 (K0 B1)
+   (:* (EX-G0 SYM0) (SYM1) ((:+ (B1 SYM1) (EX-G1) ((:APP K0 (EX-G1)))))))
+  (G1 (K2 B2) (:+ (EX-G1 EX-G2) (SYM5) ((:APP F0 (SYM5))))))
+ (:- (EX-C EX-D) (SYM3) ((:APP G0 (EX-K SYM3)))))
+SAME
