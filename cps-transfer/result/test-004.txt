@@ -6,7 +6,7 @@ X
 (:APP EXIT (X))
 (:DEFINE (F A B) (:- (:+ A B) X))
 :
-(FIXH
+(:FIXH
  ((F (|sym2| A B)
    (:+ (A B) (|sym4|) ((:- (|sym4| X) (|sym3|) ((:APP |sym2| (|sym3|))))))))
  (:APP EXIT (:UNSPECIFIED)))
@@ -15,7 +15,7 @@ X
 (:FIXS ((|sym5| (|sym6|) (:APP EXIT (|sym6|)))) (:APP F (|sym5| 4 5)))
 (:DEFINE (G X Y) (:+ X (F X Y)))
 :
-(FIXH
+(:FIXH
  ((G (|sym7| X Y)
    (:FIXS
     ((|sym9| (|sym10|) (:+ (X |sym10|) (|sym8|) ((:APP |sym7| (|sym8|))))))

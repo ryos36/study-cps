@@ -7,11 +7,11 @@
    (:IF A (:LET ((TEMP 0)) (:DEFINE (G X) (:+ V0 11)) G) (:+ V0 100)))
   F0))
 :
-(FIXH
+(:FIXH
  ((F0 (|sym2| A)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
     (:NEQ? (A :|#F|) NIL
-     ((FIXH ((G (|sym5| X) (:+ (129 11) (|sym6|) ((:APP |sym5| (|sym6|))))))
+     ((:FIXH ((G (|sym5| X) (:+ (129 11) (|sym6|) ((:APP |sym5| (|sym6|))))))
        (:APP |sym3| (G)))
       (:+ (129 100) (|sym7|) ((:APP |sym3| (|sym7|)))))))))
  (:ID (F0) (F) (:APP EXIT (:UNSPECIFIED))))

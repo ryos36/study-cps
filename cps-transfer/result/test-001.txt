@@ -1,6 +1,6 @@
 (:DEFINE (F A B) (:+ A B))
 :
-(FIXH ((F (|sym2| A B) (:+ (A B) (|sym3|) ((:APP |sym2| (|sym3|))))))
+(:FIXH ((F (|sym2| A B) (:+ (A B) (|sym3|) ((:APP |sym2| (|sym3|))))))
  (:APP EXIT (:UNSPECIFIED)))
 (F 3 5)
 :

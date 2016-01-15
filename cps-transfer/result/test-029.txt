@@ -1,6 +1,6 @@
 (:DEFINE (F X) (:LET ((Y (FUNC0 X 1))) (:* Y 2)))
 :
-(FIXH
+(:FIXH
  ((F (|sym2| X)
    (:FIXS ((|sym4| (|sym5|) (:* (|sym5| 2) (|sym3|) ((:APP |sym2| (|sym3|))))))
     (:APP FUNC0 (|sym4| X 1)))))

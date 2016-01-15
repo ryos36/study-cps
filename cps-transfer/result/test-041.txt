@@ -12,7 +12,7 @@
      (:LET ((NEXT-I (:+ I 1))) (MUL3X3-J J0 I) (MUL3X3-I J0 NEXT-I)))))
   (MUL3X3-I 0 0)))
 :
-(FIXH
+(:FIXH
  ((MUL3X3 (|sym2| A B C)
    (:FIXH
     ((MUL3X3-JI (|sym3| J0 I0)

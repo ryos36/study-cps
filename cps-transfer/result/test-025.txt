@@ -6,7 +6,7 @@
      ((:ID (|sym2|) (X) (:APP EXIT (:UNSPECIFIED)))))))))
 (:DEFINE (FUNC0 A B C) (:+ (:* (:+ A C) (:- A B)) (:* B X)))
 :
-(FIXH
+(:FIXH
  ((FUNC0 (|sym5| A B C)
    (:+ (A C) (|sym10|)
     ((:- (A B) (|sym9|)
