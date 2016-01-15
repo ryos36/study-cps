@@ -75,11 +75,12 @@
 ;----------------------------------------------------------------
 (defun heap-transfer (expr context)
   (let* ((result-sym (cps-gensym))
-         (new-cps-expr `(:HEAP ARGS (,result-sym) CONT))
+         (new-cps-expr `(:HEAP ARGS (,result-sym) (CONT)))
+         (cont-list (pickup-list new-cps-expr 'CONT))
          (new-args nil)
          wrapped-cps-expr)
 
-    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
 
       (let ((args (reverse (cdr expr)))
@@ -99,14 +100,15 @@
 
 ;----------------------------------------------------------------
 (defun record-set!-transfer (expr context)
-  (let* ((new-cps-expr (copy-tree `(:RECORD-SET! (RECORD-NAME ARG0 ARG1) () CONT)))
+  (let* ((new-cps-expr (copy-tree `(:RECORD-SET! (RECORD-NAME ARG0 ARG1) () (CONT))))
          (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
          (arg0-list (pickup-list new-cps-expr 'ARG0))
          (arg1-list (pickup-list new-cps-expr 'ARG1))
+         (cont-list (pickup-list new-cps-expr 'CONT))
          arg0-result
          arg1-result cont-result)
 
-    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-arg1 (arg1) (setf (car arg1-list) arg1) cont-result)
            (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result)
            (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
@@ -132,14 +134,15 @@
 ;----------------------------------------------------------------
 (defun record-ref-transfer (expr context)
   (let* ((result-sym (cps-gensym))
-         (new-cps-expr (copy-tree `(:RECORD-REF (RECORD-NAME ARG0) (,result-sym) CONT)))
+         (new-cps-expr (copy-tree `(:RECORD-REF (RECORD-NAME ARG0) (,result-sym) (CONT))))
          (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
 
          (arg0-list (pickup-list new-cps-expr 'ARG0))
+         (cont-list (pickup-list new-cps-expr 'CONT))
          arg0-result
          cont-result)
 
-    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-arg0 (arg0) (setf (car arg0-list) arg0) cont-result)
            (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
 
