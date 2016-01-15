@@ -1,12 +1,24 @@
 ;----------------------------------------------------------------
 (defparameter *context* nil)
 (defparameter *debug-mode* nil)
+(defparameter *warning* t)
 (defparameter *transfer-table* nil)
 (defparameter *cps-gensym-debug* t)
 
 ;----------------------------------------------------------------
-(defun l ()
-  (load "lisp-to-cps.lisp"))
+(defun primitive-warning (func-name)
+  (if *warning*
+    (if 
+      (case func-name
+        ('define t)
+        ('if t)
+        ('fix t)
+        ('let t)
+        ('exit t)
+        (otherwise nil))
+      (progn
+        (warn (format nil "~%Warning!!!!~%Primitive???? ~a~%" func-name))
+        (sleep 3)))))
 
 ;----------------------------------------------------------------
 (defun compare-symbolp (sym)
@@ -214,6 +226,7 @@
 
 ;----------------------------------------------------------------
 (defun apply-transfer (expr context)
+  (primitive-warning (car expr))
   (let* ((return-sym (cps-gensym))
          (arg0 (cps-gensym))
          (func-name (car expr))
@@ -223,33 +236,46 @@
          (cont-list (pickup-list new-cps-expr 'CONT))
          (args-list (pickup-list new-cps-expr 'ARGS))
          (new-args nil)
+         (args (cdr expr))
          wrapped-cps-expr)
 
     ;(print `('apply-transfer ,func-name ,(variable-rename func-name context)))
 
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
            (fill-func-name (func-name) (setf (car func-name-list) func-name) wrapped-cps-expr)
-           (fill-arg (arg) (push arg new-args) wrapped-cps-expr))
+           (fill-arg (arg) (print `(fill-arg ,arg ,new-cps-expr)) (push arg new-args) (setf (car args-list) new-args) wrapped-cps-expr))
+
 
 
       ;(print expr)
-      (let ((args (reverse (cdr expr)))
+      (let ((cont-lambda (car context))
+            (table-list (cdr context))
+            (args-holder 
+               (cons return-sym
+                     (mapcar #'(lambda (x) (if (atom x) x :APP-ARGS-PLACE-HOLDER)) args))))
 
-            (cont-lambda (car context))
-            (table-list (cdr context)))
+        (setf (car args-list) args-holder)
 
-        (setf wrapped-cps-expr 
-              (do-lisp-to-cps func-name (cons #'fill-func-name table-list)))
+        (let ((fill-arg-list
+                (maplist #'(lambda (x) (flet ((fill-arg (arg)
+                                                  (print `(fill-arg ,arg))
+                                                  (setf (car x) arg)
+                                                  wrapped-cps-expr))
+                                           #'fill-arg)) args-holder)))
 
-        (setf wrapped-cps-expr
-              (fill-cont (call-continuation-lambda cont-lambda arg0)))
-        (dolist (arg args)
+          (setf wrapped-cps-expr 
+                (do-lisp-to-cps func-name (cons #'fill-func-name table-list)))
+
           (setf wrapped-cps-expr
-                (do-lisp-to-cps arg (cons #'fill-arg table-list))))
+                (fill-cont (call-continuation-lambda cont-lambda arg0)))
 
-        (push return-sym new-args)
-        (setf (car args-list) new-args)
-        wrapped-cps-expr))))
+          (mapc 
+            #'(lambda (arg func)
+                (setf wrapped-cps-expr
+                      (do-lisp-to-cps arg (cons func table-list))))
+            (reverse (cdr args)) (nreverse (cdr fill-arg-list)))
+
+          wrapped-cps-expr)))))
 
 ;----------------------------------------------------------------
 (defun func-declare-transfer (expr context)
