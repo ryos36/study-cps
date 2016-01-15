@@ -21,7 +21,7 @@
         (otherwise nil))
       (progn
         (warn (format nil "~%Warning!!!!~%Primitive???? ~a~%" func-name))
-        (sleep 3)))))
+        (sleep 1)))))
 
 ;----------------------------------------------------------------
 (defun compare-symbolp (sym)
