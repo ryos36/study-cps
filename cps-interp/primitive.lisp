@@ -78,7 +78,7 @@
 (defun cps-heap (expr env)
   (let ((args (cadr expr))
         (rv (caaddr expr))
-        (next-expr (cadddr expr)))
+        (next-expr (car (cadddr expr))))
 
     (let ((new-env (make-new-env env)))
       (set-key-value rv 
@@ -89,7 +89,7 @@
 (defun cps-record-set! (expr env)
   (let ((args (cadr expr))
         (rv (caaddr expr))
-        (next-expr (cadddr expr)))
+        (next-expr (car (cadddr expr))))
 
     (let ((list (parse-expr-terminal (car args) env))
           (pos (parse-expr-terminal (cadr args) env))
@@ -107,7 +107,7 @@
 (defun cps-stack (expr env)
   (let ((args (cadr expr))
         (rv (caaddr expr))
-        (next-expr (cadddr expr)))
+        (next-expr (car (cadddr expr))))
 
     (let ((new-env (make-new-env env)))
       (set-key-value rv 
