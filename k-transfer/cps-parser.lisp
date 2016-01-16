@@ -21,6 +21,7 @@
   (or 
     (eq :#t expr)
     (eq :#f expr)
+    (eq :unspecified expr)
     (null expr)
     (symbolp expr)
     (numberp expr)))
@@ -30,6 +31,7 @@
   (not (or 
          (eq :#t expr)
          (eq :#f expr)
+         (eq :unspecified expr)
          (null expr)
          (numberp expr)
          (and (listp expr) (eq (car expr) :label)))))
@@ -90,6 +92,7 @@
   (cond
     ((eq :#t expr) :#t)
     ((eq :#f expr) :#f)
+    ((eq :unspecified expr) :unspecified)
     ((null expr) nil)
     ((symbolp expr) (cps-symbol parser expr env))
     (t expr)))

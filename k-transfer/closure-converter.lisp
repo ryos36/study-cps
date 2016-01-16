@@ -10,7 +10,7 @@
 
 ;----------------------------------------------------------------
 ;(((:fixh . closure-sym) v0 v1 v2 ....) ...)
-; fixh-free-vars -> ((v1 . ((:fixh closure-sym0) v0 v1 v2 v3))
+; fixh-free-vars -> ((v1 . ((:fixh . closure-sym0) v0 v1 v2 v3))
 (defun env-to-free-variables (env)
   (cdar env))
 
@@ -66,7 +66,7 @@
     (let* ((func-name (make-new-func-name closure-name))
            (new-args (cons closure-name args))
 
-           (new-id `((:primitive . fixs-bind) ,func-name ,@args))
+           (new-id `((:primitive . :fixs-bind) ,func-name ,@args))
            (new-env (make-new-env parser env new-id))
            (new-next-cps (cps-parse parser next-cps new-env))
            (pop-cps `(:POP (,(+ (length free-vars) 1)) () (,new-next-cps)))
@@ -207,7 +207,7 @@
 
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
-             (new-id `((:primitive . fixs-bind) ,func-name ,@args))
+             (new-id `((:primitive . :fixh-bind) ,func-name ,@args))
              (new-env (make-new-env parser env new-id))
              (new-next-cps (copy-tree (cps-parse parser next-cps new-env)))
 
@@ -228,7 +228,6 @@
     (let ((finder-env (make-new-env finder '()))
           (func-names (mapcar #'(lambda (x) (car x)) binds)))
 
-      ;(mapc #'(lambda (bind) (cps-bind finder bind finder-env)) binds)
       (cps-binds finder binds finder-env)
       ;(print `(cps-bind-fixh ,env ,binds))
 
@@ -277,7 +276,7 @@
         (result (caddr expr))
         (next-cpss (cadddr expr)))
 
-    (let* ((new-id `((:primitive . ,op) ,@args))
+    (let* ((new-id `((:primitive . ,op) ,@result))
            (new-env (make-new-env parser env new-id))
            (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps new-env)) next-cpss)))
 
