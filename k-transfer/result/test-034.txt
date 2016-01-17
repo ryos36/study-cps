@@ -1,0 +1,25 @@
+(:FIXH ((RX (K R2) (:+ (R2 R1) (RR) ((:APP K (RR))))))
+ (:+ (N R1) (R1)
+  ((:FIXH
+    ((F0 (K A B C)
+      (:+ (A B) (R0) ((:- (R0 R1) (R3) ((:* (R4 C) (R2) ((:APP K (R3))))))))))
+    (:APP F0 (K 1 2 3))))))
+:
+(:FIXH
+ ((|:RX| (RX K R2)
+   (:RECORD-REF (RX 1) (R1)
+    ((:+ (R2 R1) (RR)
+      ((:RECORD-REF (K 0) (|sym0|) ((:APP |sym0| (K RR))))))))))
+ (:HEAP ((:LABEL |:RX|) R1) (RX)
+  ((:+ (N R1) (R1)
+    ((:FIXH
+      ((|:F0| (F0 K A B C)
+        (:RECORD-REF (F0 2) (R1)
+         ((:RECORD-REF (F0 1) (R4)
+           ((:+ (A B) (R0)
+             ((:- (R0 R1) (R3)
+               ((:* (R4 C) (R2)
+                 ((:RECORD-REF (K 0) (|sym1|)
+                   ((:APP |sym1| (K R3))))))))))))))))
+      (:HEAP ((:LABEL |:F0|) R4 R1) (F0)
+       ((:RECORD-REF (F0 0) (|sym2|) ((:APP |sym2| (F0 K 1 2 3))))))))))))

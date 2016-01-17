@@ -147,13 +147,12 @@
 :
 (:FIXH
  ((|:FACT0| (FACT0 |sym11| K N RV)
-   (:RECORD-REF (FACT0 1) (|sym22|)
-    ((:= (N 0) NIL
-      ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
-       (:- (N 1) (|sym17|)
-        ((:* (N RV) (|sym16|)
-          ((:RECORD-REF (FACT0 0) (|sym24|)
-            ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))))
+   (:= (N 0) NIL
+    ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
+     (:- (N 1) (|sym17|)
+      ((:* (N RV) (|sym16|)
+        ((:RECORD-REF (FACT0 0) (|sym24|)
+          ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))
   (|:FACT| (FACT |sym18| K N)
    (:RECORD-REF (FACT 1) (|sym25|)
     ((:RECORD-REF (|sym25| 1) (FACT0)

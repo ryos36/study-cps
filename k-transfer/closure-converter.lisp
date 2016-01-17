@@ -24,11 +24,16 @@
   (labels ((get-strict-free-variables0 (strict-free-vars env0)
               (if (null env0) strict-free-vars
                 (let* ((top-env (car env0))
+                       (key-word (caar top-env))
                        (free-vars-in-env (cdr top-env)))
 
-                  (get-strict-free-variables0
-                    (set-difference strict-free-vars free-vars-in-env)
-                    (cdr env0))))))
+                  (if (eq key-word :fixh)
+                    strict-free-vars
+
+                    (get-strict-free-variables0
+                      (set-difference strict-free-vars free-vars-in-env)
+                      (cdr env0)))))))
+
     (get-strict-free-variables0 x-free-vars env)))
 
 ;----------------------------------------------------------------
@@ -153,16 +158,15 @@
     (labels ((get-num0 (sym vars n)
                (if (null vars) :NOT-FOUND 
                  (let ((elm (car vars)))
-                   (if (eq sym elm) n
+                   (if (eq sym elm) (values n :FOUND-THE-SYM)
                      (if (and (listp elm) (eq sym (car elm)))
-                       (cdr elm)
+                       (values n (cdr elm))
                        (get-num0 sym (cdr vars) (+ n 1)))))))
 
              (do-wrap0 (sym cps-expr0)
-                (let ((n-info (get-num0 sym top-env 0)))
-                  ;(print `(atom ,n-info))
+                (multiple-value-bind (no n-info) (get-num0 sym top-env 0)
                   (if (atom n-info)
-                    `(:RECORD-REF (,closure-name ,n-info) (,sym) (,cps-expr0))
+                    `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
 
                     (let ((new-sym (cps-gensym parser))
                           (uppper-closure-name (caar n-info)) ; not used
@@ -177,6 +181,7 @@
                       (cdr free-vars1)
                            (do-wrap0 sym cps-expr1))))))
 
+      ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
     (do-wrap1 this-free-vars new-next-cps))))
 
 ;----------------------------------------------------------------
@@ -193,7 +198,6 @@
         (env-closure-name (cdaar env0))
 
         (finder (make-instance 'free-variable-finder)))
-    ;(print `(env-closure-name ,env-closure-name))
 
     (let ((finder-env (make-new-env finder '())))
 
@@ -203,7 +207,7 @@
              (env (if make-new-sym? (copy-env-with-new-sym parser env0) env0))
              (all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
-             ;(z (print `(free-variables ,free-variables)))
+             ;(z (print `(free-variables ,closure-name ,free-variables)))
 
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
@@ -229,7 +233,6 @@
           (func-names (mapcar #'(lambda (x) (car x)) binds)))
 
       (cps-binds finder binds finder-env)
-      ;(print `(cps-bind-fixh ,env ,binds))
 
       (let* ((all-variables (car finder-env))
              ;(x (print `(all-variables ,all-variables)))

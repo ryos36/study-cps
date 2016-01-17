@@ -19,7 +19,7 @@
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
-;(defparameter *debug-mode* t)
+(defparameter *debug-mode* t)
 (defun cps-gensym-reset ()
   (setf (slot-value conv 'sym-no) 0))
 
@@ -27,20 +27,6 @@
 
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
-(set-test-files '((14 . 22)))
+(set-test-files '("34" (26 . 29) (14 . 29) 32 33 34 36 37 39))
 (do-test)
 
-#|
-(setf grv0 (caar (cadddr (caar (cadddr (caar (cadddr (caar (cadddr (caddr (caadr grv)))))))))))
-
-(setf grv1 (cdar (cadddr (car (cadddr (car (cadddr (caar (cadddr grv0)))))))))
-
-(print grv1)
-(print "================")
-(print (cadadr (caadr (cddadr grv1))))
-(setf ln (cadr (caadr (cddadr grv1))))
-(print ln)
-(setf (cdr ln) 9)
-;(print (cadadr (caadr (cddadr grv1))))
-(print grv1)
-|#

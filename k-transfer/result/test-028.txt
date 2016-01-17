@@ -1,0 +1,98 @@
+(:FIXH
+ ((MUL3X3 (|sym2| A B C)
+   (:FIXH
+    ((MUL3X3-JI (|sym3| J0 I0)
+      (:* (I0 3) (|sym8|)
+       ((:RECORD-REF (A |sym8|) (|sym7|)
+         ((:RECORD-REF (B J0) (|sym6|)
+           ((:* (|sym7| |sym6|) (|sym5|)
+             ((:+ (|sym8| J0) (|sym4|)
+               ((:RECORD-SET! (|sym5| |sym4| C) NIL
+                 ((:APP |sym3| (:UNSPECIFIED)))))))))))))))
+     (MUL3X3-J (|sym9| J I0)
+      (:FIXH
+       ((MUL3X3-J-I0 (|sym10| J)
+         (:FIXS ((|sym11| (|sym12|) (:APP |sym10| (|sym12|))))
+          (:= (J 3) NIL
+           ((:APP |sym11| (:|#T|))
+            (:+ (J 1) (|sym17|)
+             ((:FIXS
+               ((|sym15| (|sym16|)
+                 (:FIXS ((|sym13| (|sym14|) (:APP |sym11| (|sym14|))))
+                  (:APP MUL3X3-J-I0 (|sym13| |sym17|)))))
+               (:APP MUL3X3-JI (|sym15| J I0))))))))))
+       (:FIXS ((|sym18| (|sym19|) (:APP |sym9| (|sym19|))))
+        (:APP MUL3X3-J-I0 (|sym18| J)))))
+     (MUL3X3-I (|sym20| I)
+      (:FIXS ((|sym21| (|sym22|) (:APP |sym20| (|sym22|))))
+       (:= (I 3) NIL
+        ((:APP |sym21| (:|#T|))
+         (:+ (I 1) (|sym27|)
+          ((:FIXS
+            ((|sym25| (|sym26|)
+              (:FIXS ((|sym23| (|sym24|) (:APP |sym21| (|sym24|))))
+               (:APP MUL3X3-I (|sym23| |sym27|)))))
+            (:APP MUL3X3-J (|sym25| I))))))))))
+    (:FIXS ((|sym28| (|sym29|) (:APP |sym2| (|sym29|))))
+     (:APP MUL3X3-I (|sym28| 0 0))))))
+ (:APP EXIT (:UNSPECIFIED)))
+:
+(:FIXH
+ ((|:MUL3X3| (MUL3X3 |sym2| A B C)
+   (:RECORD-REF (MUL3X3 8) (|sym11|)
+    ((:RECORD-REF (MUL3X3 7) (|sym13|)
+      ((:RECORD-REF (MUL3X3 6) (|sym15|)
+        ((:RECORD-REF (MUL3X3 5) (|sym18|)
+          ((:RECORD-REF (MUL3X3 4) (|sym21|)
+            ((:RECORD-REF (MUL3X3 3) (|sym23|)
+              ((:RECORD-REF (MUL3X3 2) (|sym25|)
+                ((:RECORD-REF (MUL3X3 1) (|sym28|)
+                  ((:FIXH
+                    ((|:MUL3X3-JI| (MUL3X3-JI |sym3| J0 I0)
+                      (:RECORD-REF (MUL3X3-JI 1) (|sym1|)
+                       ((:RECORD-REF (|sym1| 5) (A)
+                         ((:RECORD-REF (|sym1| 4) (B)
+                           ((:RECORD-REF (|sym1| 3) (C)
+                             ((:* (I0 3) (|sym8|)
+                               ((:RECORD-REF (A |sym8|) (|sym7|)
+                                 ((:RECORD-REF (B J0) (|sym6|)
+                                   ((:* (|sym7| |sym6|) (|sym5|)
+                                     ((:+ (|sym8| J0) (|sym4|)
+                                       ((:RECORD-SET! (|sym5| |sym4| C) NIL
+                                         ((:RECORD-REF (|sym3| 0) (|sym2|)
+                                           ((:APP |sym2|
+                                             (|sym3|
+                                              :UNSPECIFIED)))))))))))))))))))))))))
+                     (|:MUL3X3-J| (MUL3X3-J |sym9| J I0)
+                      (:RECORD-REF (MUL3X3-J 1) (|sym3|)
+                       ((:RECORD-REF (|sym3| 12) (|sym18|)
+                         ((LIST ':RECORD-REF (LIST NEW-SYM NEXTED-NO)
+                           (LIST SYM) (LIST CPS-EXPR0)))))))
+                     (|:MUL3X3-I| (MUL3X3-I |sym20| I)
+                      (:RECORD-REF (MUL3X3-I 1) (|sym19|)
+                       ((:RECORD-REF (|sym19| 8) (|sym27|)
+                         ((LIST ':RECORD-REF (LIST NEW-SYM NEXTED-NO)
+                           (LIST SYM) (LIST CPS-EXPR0))))))))
+                    (:HEAP
+                     ((:LABEL :DUMMY) MUL3X3-J MUL3X3-JI C B A MUL3X3 MUL3X3
+                      MUL3X3 MUL3X3 MUL3X3 MUL3X3 MUL3X3)
+                     (|sym0|)
+                     ((:HEAP ((:LABEL |:MUL3X3-JI|) |sym0|) (MUL3X3-JI)
+                       ((:HEAP ((:LABEL |:MUL3X3-J|) |sym0|) (MUL3X3-J)
+                         ((:HEAP ((:LABEL |:MUL3X3-I|) |sym0|) (MUL3X3-I)
+                           ((:FIXS
+                             ((|:sym28| (|sym28| |sym29|)
+                               (:RECORD-REF (|sym28| 1) (|sym2|)
+                                ((:POP (2) NIL
+                                  ((:RECORD-REF (|sym2| 0) (|sym28|)
+                                    ((:APP |sym28| (|sym2| |sym29|))))))))))
+                             (:STACK ((:LABEL |:sym28|) |sym2|) (|sym28|)
+                              ((:RECORD-REF (MUL3X3-I 0) (|sym29|)
+                                ((:APP |sym29|
+                                  (MUL3X3-I |sym28| 0
+                                   0))))))))))))))))))))))))))))))))))
+ (:HEAP
+  ((:LABEL |:MUL3X3|) |sym28| |sym25| |sym23| |sym21| |sym18| |sym15| |sym13|
+   |sym11|)
+  (MUL3X3)
+  ((:RECORD-REF (EXIT 0) (|sym30|) ((:APP |sym30| (EXIT :UNSPECIFIED)))))))

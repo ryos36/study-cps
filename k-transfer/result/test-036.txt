@@ -1,0 +1,10 @@
+(:FIXH ((F0 (K A0 A1) (:+ (A0 A1) (R) ((:APP UNKNOWN (K R))))))
+ (:APP F0 (EX-K 1 2)))
+:
+(:FIXH
+ ((|:F0| (F0 K A0 A1)
+   (:RECORD-REF (F0 1) (UNKNOWN)
+    ((:+ (A0 A1) (R)
+      ((:RECORD-REF (UNKNOWN 0) (|sym0|) ((:APP |sym0| (UNKNOWN K R))))))))))
+ (:HEAP ((:LABEL |:F0|) UNKNOWN) (F0)
+  ((:RECORD-REF (F0 0) (|sym1|) ((:APP |sym1| (F0 EX-K 1 2)))))))

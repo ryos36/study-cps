@@ -1,0 +1,31 @@
+(:FIXH
+ ((EVEN? (|sym2| X)
+   (:= (X 0) NIL
+    ((:APP |sym2| (:|#T|)) (:- (X 1) (|sym7|) ((:APP ODD? (|sym2| |sym7|)))))))
+  (ODD? (|sym8| X)
+   (:= (X 0) NIL
+    ((:APP |sym8| (:|#T|))
+     (:- (X 1) (|sym13|) ((:APP EVEN? (|sym8| |sym13|))))))))
+ (:APP EVEN? (EXIT 997)))
+:
+(:FIXH
+ ((|:EVEN?| (EVEN? |sym2| X)
+   (:RECORD-REF (EVEN? 1) (|sym1|)
+    ((:RECORD-REF (|sym1| 2) (ODD?)
+      ((:= (X 0) NIL
+        ((:RECORD-REF (|sym2| 0) (|sym2|) ((:APP |sym2| (|sym2| :|#T|))))
+         (:- (X 1) (|sym7|)
+          ((:RECORD-REF (ODD? 0) (|sym3|)
+            ((:APP |sym3| (ODD? |sym2| |sym7|)))))))))))))
+  (|:ODD?| (ODD? |sym8| X)
+   (:RECORD-REF (ODD? 1) (|sym4|)
+    ((:RECORD-REF (|sym4| 1) (EVEN?)
+      ((:= (X 0) NIL
+        ((:RECORD-REF (|sym8| 0) (|sym5|) ((:APP |sym5| (|sym8| :|#T|))))
+         (:- (X 1) (|sym13|)
+          ((:RECORD-REF (EVEN? 0) (|sym6|)
+            ((:APP |sym6| (EVEN? |sym8| |sym13|))))))))))))))
+ (:HEAP ((:LABEL :DUMMY) EVEN? ODD?) (|sym0|)
+  ((:HEAP ((:LABEL |:EVEN?|) |sym0|) (EVEN?)
+    ((:HEAP ((:LABEL |:ODD?|) |sym0|) (ODD?)
+      ((:RECORD-REF (EVEN? 0) (|sym7|) ((:APP |sym7| (EVEN? EXIT 997)))))))))))
