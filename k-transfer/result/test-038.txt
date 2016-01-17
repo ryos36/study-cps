@@ -1,0 +1,98 @@
+(:FIXH
+ ((F0 (|sym2| A B)
+   (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+    (:= (B 0) NIL
+     ((:APP |sym3| (A))
+      (:FIXS
+       ((|sym7| (|sym8|)
+         (:* (A B) (|sym6|)
+          ((:+ (|sym8| |sym6|) (|sym5|) ((:APP |sym3| (|sym5|))))))))
+       (:= (A B) NIL
+        ((:+ (A B) (|sym12|)
+          ((:- (A B) (|sym11|)
+            ((:FIXS ((|sym9| (|sym10|) (:APP |sym7| (|sym10|))))
+              (:APP F0 (|sym9| |sym12| |sym11|)))))))
+         (:* (A B) (|sym16|)
+          ((:+ (A B) (|sym15|)
+            ((:FIXS ((|sym13| (|sym14|) (:APP |sym7| (|sym14|))))
+              (:APP F0 (|sym13| |sym16| |sym15|)))))))))))))))
+ (:FIXS
+  ((|sym20| (|sym21|)
+    (:FIXS
+     ((|sym18| (|sym19|)
+       (:+ (|sym21| |sym19|) (|sym17|) ((:APP EXIT (|sym17|))))))
+     (:APP F0 (|sym18| 4 4)))))
+  (:APP F0 (|sym20| 3 5))))
+:
+(:FIXH
+ ((|:F0| (F0 |sym2| A B)
+   (:RECORD-REF (F0 4) (|sym3|)
+    ((:RECORD-REF (F0 3) (|sym7|)
+      ((:RECORD-REF (F0 2) (|sym9|)
+        ((:RECORD-REF (F0 1) (|sym13|)
+          ((:FIXS
+            ((|:sym3| (|sym3| |sym4|)
+              (:RECORD-REF (|sym3| 1) (|sym2|)
+               ((:POP (2) NIL
+                 ((:RECORD-REF (|sym2| 0) (|sym0|)
+                   ((:APP |sym0| (|sym2| |sym4|))))))))))
+            (:STACK ((:LABEL |:sym3|) |sym2|) (|sym3|)
+             ((:= (B 0) NIL
+               ((:RECORD-REF (|sym3| 0) (|sym1|) ((:APP |sym1| (|sym3| A))))
+                (:FIXS
+                 ((|:sym7| (|sym7| |sym8|)
+                   (:RECORD-REF (|sym7| 3) (A)
+                    ((:RECORD-REF (|sym7| 2) (B)
+                      ((:RECORD-REF (|sym7| 1) (|sym3|)
+                        ((:POP (4) NIL
+                          ((:* (A B) (|sym6|)
+                            ((:+ (|sym8| |sym6|) (|sym5|)
+                              ((:RECORD-REF (|sym3| 0) (|sym2|)
+                                ((:APP |sym2| (|sym3| |sym5|))))))))))))))))))
+                 (:STACK ((:LABEL |:sym7|) |sym3| B A) (|sym7|)
+                  ((:= (A B) NIL
+                    ((:+ (A B) (|sym12|)
+                      ((:- (A B) (|sym11|)
+                        ((:FIXS
+                          ((|:sym9| (|sym9| |sym10|)
+                            (:RECORD-REF (|sym9| 1) (|sym7|)
+                             ((:POP (2) NIL
+                               ((:RECORD-REF (|sym7| 0) (|sym3|)
+                                 ((:APP |sym3| (|sym7| |sym10|))))))))))
+                          (:STACK ((:LABEL |:sym9|) |sym7|) (|sym9|)
+                           ((:RECORD-REF (F0 0) (|sym4|)
+                             ((:APP |sym4|
+                               (F0 |sym9| |sym12| |sym11|)))))))))))
+                     (:* (A B) (|sym16|)
+                      ((:+ (A B) (|sym15|)
+                        ((:FIXS
+                          ((|:sym13| (|sym13| |sym14|)
+                            (:RECORD-REF (|sym13| 1) (|sym7|)
+                             ((:POP (2) NIL
+                               ((:RECORD-REF (|sym7| 0) (|sym5|)
+                                 ((:APP |sym5| (|sym7| |sym14|))))))))))
+                          (:STACK ((:LABEL |:sym13|) |sym7|) (|sym13|)
+                           ((:RECORD-REF (F0 0) (|sym6|)
+                             ((:APP |sym6|
+                               (F0 |sym13| |sym16|
+                                |sym15|)))))))))))))))))))))))))))))))
+ (:HEAP ((:LABEL |:F0|) |sym13| |sym9| |sym7| |sym3|) (F0)
+  ((:FIXS
+    ((|:sym20| (|sym20| |sym21|)
+      (:RECORD-REF (|sym20| 3) (EXIT)
+       ((:RECORD-REF (|sym20| 2) (F0)
+         ((:RECORD-REF (|sym20| 1) (|sym18|)
+           ((:POP (4) NIL
+             ((:FIXS
+               ((|:sym18| (|sym18| |sym19|)
+                 (:RECORD-REF (|sym18| 2) (|sym21|)
+                  ((:RECORD-REF (|sym18| 1) (EXIT)
+                    ((:POP (3) NIL
+                      ((:+ (|sym21| |sym19|) (|sym17|)
+                        ((:RECORD-REF (EXIT 0) (|sym7|)
+                          ((:APP |sym7| (EXIT |sym17|))))))))))))))
+               (:STACK ((:LABEL |:sym18|) EXIT |sym21|) (|sym18|)
+                ((:RECORD-REF (F0 0) (|sym8|)
+                  ((:APP |sym8| (F0 |sym18| 4 4)))))))))))))))))
+    (:STACK ((:LABEL |:sym20|) |sym18| F0 EXIT) (|sym20|)
+     ((:RECORD-REF (F0 0) (|sym9|) ((:APP |sym9| (F0 |sym20| 3 5))))))))))
