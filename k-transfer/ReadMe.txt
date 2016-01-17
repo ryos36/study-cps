@@ -50,7 +50,22 @@ closure-converter.lisp
   env は次のようになるので注意が必要
 ; FIXH の場合 ((:fixh . closure-sym) v0 v2 ....)
 ; FIXS の場合 ((:fixs ) v0 v2 ....)
-; primitive の場合 ((:primitive . <実際のop> ) v0 v2 ....)
+; ここで列挙されるのは自由変数
+; 想定しているのは FIX .... FIX....
+; と入れ子になっている場合に上位の FIX で宣言されているものは含まないように
+; すること
+; 例えば FIX ... v1 ... FIX ... v1 ....
+; この場合 v1 は再外層のクロージャで v1 が共有される。
+
+; primitive 或いはbind の場合 ((:primitive . <実際のop> ) v0 v2 ....)
+; ここで列挙されるのは宣言された変数(自由変数ではない)
+; 想定しているのは FIX ... primiteive or (FIX) bind .... FIX
+; で (bind は当然 FIX が上位にあるのだが)
+; 中間の primitive や bind 内に下位の自由変数の宣言があること。
+; たとえば FIX .... v1 ... ......FIX bind v1.... FIX .... v1
+; の場合最外層の FIX でも v1 のクロージャが生成される
+; 中間の FIX は宣言なのでクロジャーは生成されない
+; 最内層の FIX でもクロージャが生成されこれは教諭されない
 
   FIX[S/H](以下 FIX) がでてくるとまず単純に管理下の free-vars を数え上げる。
   管理下とは FIX で規定されている関数の宣言の中。
