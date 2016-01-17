@@ -212,7 +212,7 @@
              (new-next-cps (copy-tree (cps-parse parser next-cps new-env)))
 
              (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps (car env))) ; use env , it's ok
-             (new-wrapped-cps (if make-new-sym?
+             (new-wrapped-cps (if (and make-new-sym? (not (null free-variables)))
                                 (copy-tree `(:RECORD-REF (,closure-name 1) (,(cdaar env)) (,wrapped-cps)))
                                 wrapped-cps))) 
 

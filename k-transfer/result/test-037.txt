@@ -1,0 +1,165 @@
+(:FIXH
+ ((FACT (|sym2| K N)
+   (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+    (:= (N 0) NIL
+     ((:APP |sym3| (1))
+      (:- (N 1) (|sym8|)
+       ((:FIXS
+         ((|sym6| (|sym7|) (:* (N |sym7|) (|sym5|) ((:APP |sym3| (|sym5|))))))
+         (:APP FACT (|sym6| K |sym8|))))))))))
+ (:FIXS ((|sym9| (|sym10|) (:APP EXIT (|sym10|)))) (:APP FACT (|sym9| 10))))
+:
+(:FIXH
+ ((|:FACT| (FACT |sym2| K N)
+   (:RECORD-REF (FACT 2) (|sym3|)
+    ((:RECORD-REF (FACT 1) (|sym6|)
+      ((:FIXS
+        ((|:sym3| (|sym3| |sym4|)
+          (:RECORD-REF (|sym3| 1) (|sym2|)
+           ((:POP (2) NIL
+             ((:RECORD-REF (|sym2| 0) (|sym0|)
+               ((:APP |sym0| (|sym2| |sym4|))))))))))
+        (:STACK ((:LABEL |:sym3|) |sym2|) (|sym3|)
+         ((:= (N 0) NIL
+           ((:RECORD-REF (|sym3| 0) (|sym1|) ((:APP |sym1| (|sym3| 1))))
+            (:- (N 1) (|sym8|)
+             ((:FIXS
+               ((|:sym6| (|sym6| |sym7|)
+                 (:RECORD-REF (|sym6| 2) (N)
+                  ((:RECORD-REF (|sym6| 1) (|sym3|)
+                    ((:POP (3) NIL
+                      ((:* (N |sym7|) (|sym5|)
+                        ((:RECORD-REF (|sym3| 0) (|sym2|)
+                          ((:APP |sym2| (|sym3| |sym5|))))))))))))))
+               (:STACK ((:LABEL |:sym6|) |sym3| N) (|sym6|)
+                ((:RECORD-REF (FACT 0) (|sym3|)
+                  ((:APP |sym3| (FACT |sym6| K |sym8|))))))))))))))))))))
+ (:HEAP ((:LABEL |:FACT|) |sym6| |sym3|) (FACT)
+  ((:FIXS
+    ((|:sym9| (|sym9| |sym10|)
+      (:RECORD-REF (|sym9| 1) (EXIT)
+       ((:POP (2) NIL
+         ((:RECORD-REF (EXIT 0) (|sym4|) ((:APP |sym4| (EXIT |sym10|))))))))))
+    (:STACK ((:LABEL |:sym9|) EXIT) (|sym9|)
+     ((:RECORD-REF (FACT 0) (|sym5|) ((:APP |sym5| (FACT |sym9| 10))))))))))
+(:FIXH
+ ((FACT0 (|sym11| K N RV)
+   (:FIXS ((|sym12| (|sym13|) (:APP |sym11| (|sym13|))))
+    (:= (N 0) NIL
+     ((:APP |sym12| (RV))
+      (:- (N 1) (|sym17|)
+       ((:* (N RV) (|sym16|)
+         ((:FIXS ((|sym14| (|sym15|) (:APP |sym12| (|sym15|))))
+           (:APP FACT0 (|sym14| K |sym17| |sym16|)))))))))))
+  (FACT (|sym18| K N)
+   (:FIXS ((|sym19| (|sym20|) (:APP |sym18| (|sym20|))))
+    (:APP FACT0 (|sym19| K N 1)))))
+ (:FIXS ((|sym21| (|sym22|) (:APP EXIT (|sym22|)))) (:APP FACT (|sym21| 10))))
+:
+(:FIXH
+ ((|:FACT0| (FACT0 |sym11| K N RV)
+   (:RECORD-REF (FACT0 1) (|sym7|)
+    ((:RECORD-REF (|sym7| 4) (|sym12|)
+      ((:RECORD-REF (|sym7| 3) (|sym14|)
+        ((:FIXS
+          ((|:sym12| (|sym12| |sym13|)
+            (:RECORD-REF (|sym12| 1) (|sym11|)
+             ((:POP (2) NIL
+               ((:RECORD-REF (|sym11| 0) (|sym8|)
+                 ((:APP |sym8| (|sym11| |sym13|))))))))))
+          (:STACK ((:LABEL |:sym12|) |sym11|) (|sym12|)
+           ((:= (N 0) NIL
+             ((:RECORD-REF (|sym12| 0) (|sym9|) ((:APP |sym9| (|sym12| RV))))
+              (:- (N 1) (|sym17|)
+               ((:* (N RV) (|sym16|)
+                 ((:FIXS
+                   ((|:sym14| (|sym14| |sym15|)
+                     (:RECORD-REF (|sym14| 1) (|sym12|)
+                      ((:POP (2) NIL
+                        ((:RECORD-REF (|sym12| 0) (|sym10|)
+                          ((:APP |sym10| (|sym12| |sym15|))))))))))
+                   (:STACK ((:LABEL |:sym14|) |sym12|) (|sym14|)
+                    ((:RECORD-REF (FACT0 0) (|sym11|)
+                      ((:APP |sym11|
+                        (FACT0 |sym14| K |sym17| |sym16|)))))))))))))))))))))))
+  (|:FACT| (FACT |sym18| K N)
+   (:RECORD-REF (FACT 1) (|sym12|)
+    ((:RECORD-REF (|sym12| 2) (FACT0)
+      ((:RECORD-REF (|sym12| 1) (|sym19|)
+        ((:FIXS
+          ((|:sym19| (|sym19| |sym20|)
+            (:RECORD-REF (|sym19| 1) (|sym18|)
+             ((:POP (2) NIL
+               ((:RECORD-REF (|sym18| 0) (|sym13|)
+                 ((:APP |sym13| (|sym18| |sym20|))))))))))
+          (:STACK ((:LABEL |:sym19|) |sym18|) (|sym19|)
+           ((:RECORD-REF (FACT0 0) (|sym14|)
+             ((:APP |sym14| (FACT0 |sym19| K N 1)))))))))))))))
+ (:HEAP ((:LABEL :DUMMY) |sym19| FACT0 |sym14| |sym12|) (|sym6|)
+  ((:HEAP ((:LABEL |:FACT0|) |sym6|) (FACT0)
+    ((:HEAP ((:LABEL |:FACT|) |sym6|) (FACT)
+      ((:FIXS
+        ((|:sym21| (|sym21| |sym22|)
+          (:RECORD-REF (|sym21| 1) (EXIT)
+           ((:POP (2) NIL
+             ((:RECORD-REF (EXIT 0) (|sym15|)
+               ((:APP |sym15| (EXIT |sym22|))))))))))
+        (:STACK ((:LABEL |:sym21|) EXIT) (|sym21|)
+         ((:RECORD-REF (FACT 0) (|sym16|)
+           ((:APP |sym16| (FACT |sym21| 10))))))))))))))
+(:FIXH
+ ((FACT (|sym2| K N)
+   (:= (N 0) NIL
+    ((:APP |sym2| (1))
+     (:- (N 1) (|sym8|)
+      ((:FIXS
+        ((|sym6| (|sym7|) (:* (N |sym7|) (|sym5|) ((:APP |sym2| (|sym5|))))))
+        (:APP FACT (|sym6| K |sym8|)))))))))
+ (:APP FACT (EXIT 10)))
+:
+(:FIXH
+ ((|:FACT| (FACT |sym2| K N)
+   (:RECORD-REF (FACT 1) (|sym6|)
+    ((:= (N 0) NIL
+      ((:RECORD-REF (|sym2| 0) (|sym17|) ((:APP |sym17| (|sym2| 1))))
+       (:- (N 1) (|sym8|)
+        ((:FIXS
+          ((|:sym6| (|sym6| |sym7|)
+            (:RECORD-REF (|sym6| 2) (N)
+             ((:RECORD-REF (|sym6| 1) (|sym2|)
+               ((:POP (3) NIL
+                 ((:* (N |sym7|) (|sym5|)
+                   ((:RECORD-REF (|sym2| 0) (|sym18|)
+                     ((:APP |sym18| (|sym2| |sym5|))))))))))))))
+          (:STACK ((:LABEL |:sym6|) |sym2| N) (|sym6|)
+           ((:RECORD-REF (FACT 0) (|sym19|)
+             ((:APP |sym19| (FACT |sym6| K |sym8|)))))))))))))))
+ (:HEAP ((:LABEL |:FACT|) |sym6|) (FACT)
+  ((:RECORD-REF (FACT 0) (|sym20|) ((:APP |sym20| (FACT EXIT 10)))))))
+(:FIXH
+ ((FACT0 (|sym11| K N RV)
+   (:= (N 0) NIL
+    ((:APP |sym11| (RV))
+     (:- (N 1) (|sym17|)
+      ((:* (N RV) (|sym16|) ((:APP FACT0 (|sym11| K |sym17| |sym16|)))))))))
+  (FACT (|sym18| K N) (:APP FACT0 (|sym18| K N 1))))
+ (:APP FACT (EXIT 10)))
+:
+(:FIXH
+ ((|:FACT0| (FACT0 |sym11| K N RV)
+   (:RECORD-REF (FACT0 1) (|sym22|)
+    ((:= (N 0) NIL
+      ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
+       (:- (N 1) (|sym17|)
+        ((:* (N RV) (|sym16|)
+          ((:RECORD-REF (FACT0 0) (|sym24|)
+            ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))))
+  (|:FACT| (FACT |sym18| K N)
+   (:RECORD-REF (FACT 1) (|sym25|)
+    ((:RECORD-REF (|sym25| 1) (FACT0)
+      ((:RECORD-REF (FACT0 0) (|sym26|)
+        ((:APP |sym26| (FACT0 |sym18| K N 1))))))))))
+ (:HEAP ((:LABEL :DUMMY) FACT0) (|sym21|)
+  ((:HEAP ((:LABEL |:FACT0|) |sym21|) (FACT0)
+    ((:HEAP ((:LABEL |:FACT|) |sym21|) (FACT)
+      ((:RECORD-REF (FACT 0) (|sym27|) ((:APP |sym27| (FACT EXIT 10)))))))))))

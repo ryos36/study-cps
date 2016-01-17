@@ -40,6 +40,7 @@
     ;(print `(cps-bind ,func-name))
     (mapc #'(lambda(arg) 
                 (set-variable parser arg t new-env)) args)
+    (set-variable parser func-name t new-env)
 
     (let ((new-next-cps (cps-parse parser next-cps new-env)))
        (mapc #'(lambda(arg) 
@@ -49,11 +50,52 @@
       `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-binds ((parser free-variable-finder) binds env)
-  (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
-    (mapc #'(lambda(arg) 
-                (set-variable parser arg t env)) func-names)
-    (mapcar #'(lambda (bind) (cps-bind parser bind env)) binds)))
+;(def-cps-func cps-binds ((parser free-variable-finder) binds env)
+;  (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
+;    (mapc #'(lambda(arg) 
+;                (set-variable parser arg t env)) func-names)
+;    (mapcar #'(lambda (bind) (cps-bind parser bind env)) binds)))
+
+;----------------------------------------------------------------
+(def-cps-func cps-fix ((parser free-variable-finder) expr env)
+  (let ((fix-op (car expr))
+        (binds (cadr expr))
+        (next-cps (caddr expr))
+        (bind-env env)
+        (next-cps-env (make-new-env parser env)))
+
+    (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
+      (mapc #'(lambda(arg) 
+                (set-variable parser arg t new-next-cps)) func-names)
+        
+      (let ((new-binds (cps-binds parser binds bind-env))
+            (new-next-cps (cps-parse parser next-cps next-cps-env)))
+
+        `(,fix-op ,new-binds ,new-next-cps)))))
+
+;----------------------------------------------------------------
+(def-cps-func cps-fixh ((parser free-variable-finder) expr env)
+  (let ((fix-op (car expr))
+        (binds (cadr expr))
+        (next-cps (caddr expr)))
+      (mapc #'(lambda(arg) 
+                  (set-variable parser arg t env)) func-names)
+        
+    (let ((new-binds (cps-binds parser binds env))
+          (new-next-cps (cps-parse parser next-cps env)))
+
+      `(,fix-op ,new-binds ,new-next-cps))))
+
+;----------------------------------------------------------------
+(def-cps-func cps-fixs ((parser free-variable-finder) expr env)
+  (let ((fix-op (car expr))
+        (binds (cadr expr))
+        (next-cps (caddr expr)))
+        
+    (let ((new-binds (cps-binds parser binds env))
+          (new-next-cps (cps-parse parser next-cps env)))
+
+      `(,fix-op ,new-binds ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser free-variable-finder) expr env)
