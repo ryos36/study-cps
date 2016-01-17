@@ -165,7 +165,6 @@
 
 ;----------------------------------------------------------------
 (defmethod cps-parse ((parser cps-parser) expr env)
-
   (if (terminal-p expr)
     (cps-terminal parser expr env)
     (let ((op (car expr)))
