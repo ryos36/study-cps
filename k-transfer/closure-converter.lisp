@@ -91,8 +91,8 @@
       (cps-binds finder binds finder-env)
 
       (let* ((all-variables (car finder-env))
-             ;(x (print `(var ,all-variables)))
              (free-variables (filter-free-variables all-variables))
+             ;(x (print `(var ,all-variables :free ,free-variables)))
              (strict-free-vars
                (get-strict-free-variables free-variables env))
 
