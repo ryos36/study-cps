@@ -104,7 +104,9 @@
                        (free-vars-in-env (cdr top-env)))
 
                     (get-strict-free-variables0
-                      (set-difference strict-free-vars free-vars-in-env)
+                      (if (eq key-word :fixh)
+                        (set-difference strict-free-vars free-vars-in-env)
+                        strict-free-vars)
                       (cdr env0))))))
 
     (get-strict-free-variables0 x-free-vars env)))
@@ -122,10 +124,12 @@
                 (let* ((top-env (car env0))
                        (info (car top-env))
                        (info-id (car info))
-                       (free-vars-in-env (cdr top-env))
-                       (hit-vars (if (eq info-id :fixh)
-                                   (intersection free-variables0 free-vars-in-env)
-                                   '())))
+                       (free-vars-in-env 
+                         (if (eq info-id :fixh)
+                                 (cdr top-env)
+                                 '()))
+                       (hit-vars (intersection free-variables0 free-vars-in-env)))
+
 
                   (make-upper-free-vars-list0
                     (set-difference free-variables0 free-vars-in-env)
@@ -172,7 +176,7 @@
                           (uppper-closure-name (caar n-info)) ; not used
                           (nexted-no (position sym n-info)))
                       `(:RECORD-REF (,closure-name ,no) (,new-sym) (
-                          `(:RECORD-REF (,new-sym ,nexted-no) (,sym) (,cps-expr0))))))))
+                          (:RECORD-REF (,new-sym ,nexted-no) (,sym) (,cps-expr0))))))))
 
              (do-wrap1 (free-vars1 cps-expr1)
                 (if (null free-vars1) cps-expr1
