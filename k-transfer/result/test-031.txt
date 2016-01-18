@@ -19,56 +19,49 @@
 (:FIXH
  ((|:EVEN?| (EVEN? |sym2| X)
    (:RECORD-REF (EVEN? 1) (|sym1|)
-    ((:RECORD-REF (|sym1| 6) (|sym3|)
-      ((:RECORD-REF (|sym1| 5) (ODD?)
-        ((:RECORD-REF (|sym1| 4) (|sym5|)
-          ((:FIXS
-            ((|:sym3| (|sym3| |sym4|)
-              (:RECORD-REF (|sym3| 1) (|sym2|)
-               ((:POP (2) NIL
-                 ((:RECORD-REF (|sym2| 0) (|sym2|)
-                   ((:APP |sym2| (|sym2| |sym4|))))))))))
-            (:STACK ((:LABEL |:sym3|) |sym2|) (|sym3|)
-             ((:= (X 0) NIL
-               ((:RECORD-REF (|sym3| 0) (|sym3|)
-                 ((:APP |sym3| (|sym3| :|#T|))))
-                (:- (X 1) (|sym7|)
-                 ((:FIXS
-                   ((|:sym5| (|sym5| |sym6|)
-                     (:RECORD-REF (|sym5| 1) (|sym3|)
-                      ((:POP (2) NIL
-                        ((:RECORD-REF (|sym3| 0) (|sym4|)
-                          ((:APP |sym4| (|sym3| |sym6|))))))))))
-                   (:STACK ((:LABEL |:sym5|) |sym3|) (|sym5|)
-                    ((:RECORD-REF (ODD? 0) (|sym5|)
-                      ((:APP |sym5| (ODD? |sym5| |sym7|)))))))))))))))))))))))
+    ((:RECORD-REF (|sym1| 2) (ODD?)
+      ((:FIXS
+        ((|:sym3| (|sym3| |sym4|)
+          (:RECORD-REF (|sym3| 1) (|sym2|)
+           ((:POP (2) NIL
+             ((:RECORD-REF (|sym2| 0) (|sym2|)
+               ((:APP |sym2| (|sym2| |sym4|))))))))))
+        (:STACK ((:LABEL |:sym3|) |sym2|) (|sym3|)
+         ((:= (X 0) NIL
+           ((:RECORD-REF (|sym3| 0) (|sym3|) ((:APP |sym3| (|sym3| :|#T|))))
+            (:- (X 1) (|sym7|)
+             ((:FIXS
+               ((|:sym5| (|sym5| |sym6|)
+                 (:RECORD-REF (|sym5| 1) (|sym3|)
+                  ((:POP (2) NIL
+                    ((:RECORD-REF (|sym3| 0) (|sym4|)
+                      ((:APP |sym4| (|sym3| |sym6|))))))))))
+               (:STACK ((:LABEL |:sym5|) |sym3|) (|sym5|)
+                ((:RECORD-REF (ODD? 0) (|sym5|)
+                  ((:APP |sym5| (ODD? |sym5| |sym7|)))))))))))))))))))
   (|:ODD?| (ODD? |sym8| X)
    (:RECORD-REF (ODD? 1) (|sym6|)
-    ((:RECORD-REF (|sym6| 3) (|sym9|)
-      ((:RECORD-REF (|sym6| 2) (EVEN?)
-        ((:RECORD-REF (|sym6| 1) (|sym11|)
-          ((:FIXS
-            ((|:sym9| (|sym9| |sym10|)
-              (:RECORD-REF (|sym9| 1) (|sym8|)
-               ((:POP (2) NIL
-                 ((:RECORD-REF (|sym8| 0) (|sym7|)
-                   ((:APP |sym7| (|sym8| |sym10|))))))))))
-            (:STACK ((:LABEL |:sym9|) |sym8|) (|sym9|)
-             ((:= (X 0) NIL
-               ((:RECORD-REF (|sym9| 0) (|sym8|)
-                 ((:APP |sym8| (|sym9| :|#T|))))
-                (:- (X 1) (|sym13|)
-                 ((:FIXS
-                   ((|:sym11| (|sym11| |sym12|)
-                     (:RECORD-REF (|sym11| 1) (|sym9|)
-                      ((:POP (2) NIL
-                        ((:RECORD-REF (|sym9| 0) (|sym9|)
-                          ((:APP |sym9| (|sym9| |sym12|))))))))))
-                   (:STACK ((:LABEL |:sym11|) |sym9|) (|sym11|)
-                    ((:RECORD-REF (EVEN? 0) (|sym10|)
-                      ((:APP |sym10|
-                        (EVEN? |sym11| |sym13|))))))))))))))))))))))))
- (:HEAP ((:LABEL :DUMMY) |sym11| EVEN? |sym9| |sym5| ODD? |sym3|) (|sym0|)
+    ((:RECORD-REF (|sym6| 1) (EVEN?)
+      ((:FIXS
+        ((|:sym9| (|sym9| |sym10|)
+          (:RECORD-REF (|sym9| 1) (|sym8|)
+           ((:POP (2) NIL
+             ((:RECORD-REF (|sym8| 0) (|sym7|)
+               ((:APP |sym7| (|sym8| |sym10|))))))))))
+        (:STACK ((:LABEL |:sym9|) |sym8|) (|sym9|)
+         ((:= (X 0) NIL
+           ((:RECORD-REF (|sym9| 0) (|sym8|) ((:APP |sym8| (|sym9| :|#T|))))
+            (:- (X 1) (|sym13|)
+             ((:FIXS
+               ((|:sym11| (|sym11| |sym12|)
+                 (:RECORD-REF (|sym11| 1) (|sym9|)
+                  ((:POP (2) NIL
+                    ((:RECORD-REF (|sym9| 0) (|sym9|)
+                      ((:APP |sym9| (|sym9| |sym12|))))))))))
+               (:STACK ((:LABEL |:sym11|) |sym9|) (|sym11|)
+                ((:RECORD-REF (EVEN? 0) (|sym10|)
+                  ((:APP |sym10| (EVEN? |sym11| |sym13|))))))))))))))))))))
+ (:HEAP ((:LABEL :DUMMY) EVEN? ODD?) (|sym0|)
   ((:HEAP ((:LABEL |:EVEN?|) |sym0|) (EVEN?)
     ((:HEAP ((:LABEL |:ODD?|) |sym0|) (ODD?)
       ((:FIXS

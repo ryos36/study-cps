@@ -1,4 +1,0 @@
-(:+ (3 5) (R) ((:EXIT (R) NIL NIL)))
-:
-(:+ (3 5) (R) ((:EXIT (R) NIL NIL)))
-SAME

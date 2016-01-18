@@ -8,26 +8,25 @@
 :
 (:FIXS
  ((|:C| (C R)
-   (:RECORD-REF (C 6) (K0)
-    ((:RECORD-REF (C 5) (K1)
-      ((:RECORD-REF (C 4) (K)
-        ((:RECORD-REF (C 3) (G0)
-          ((:RECORD-REF (C 2) (C0)
-            ((:RECORD-REF (C 1) (K2)
-              ((:POP (7) NIL
-                ((:+ (K0 R) (T)
-                  ((:+ (K1 T) (T1)
-                    ((:FIXS
-                      ((|:C0| (C0 R)
-                        (:RECORD-REF (C0 3) (K1)
-                         ((:RECORD-REF (C0 2) (K)
-                           ((:RECORD-REF (C0 1) (T)
-                             ((:POP (4) NIL
-                               ((:+ (R K1) (T2)
-                                 ((:RECORD-REF (K 0) (|sym0|)
-                                   ((:APP |sym0| (K T))))))))))))))))
-                      (:STACK ((:LABEL |:C0|) T K K1) (C0)
-                       ((:RECORD-REF (G0 0) (|sym1|)
-                         ((:APP |sym1| (G0 C0 K2)))))))))))))))))))))))))))
- (:STACK ((:LABEL |:C|) K2 C0 G0 K K1 K0) (C)
+   (:RECORD-REF (C 5) (K0)
+    ((:RECORD-REF (C 4) (K1)
+      ((:RECORD-REF (C 3) (K)
+        ((:RECORD-REF (C 2) (G0)
+          ((:RECORD-REF (C 1) (K2)
+            ((:POP (6) NIL
+              ((:+ (K0 R) (T)
+                ((:+ (K1 T) (T1)
+                  ((:FIXS
+                    ((|:C0| (C0 R)
+                      (:RECORD-REF (C0 3) (K1)
+                       ((:RECORD-REF (C0 2) (K)
+                         ((:RECORD-REF (C0 1) (T)
+                           ((:POP (4) NIL
+                             ((:+ (R K1) (T2)
+                               ((:RECORD-REF (K 0) (|sym0|)
+                                 ((:APP |sym0| (K T))))))))))))))))
+                    (:STACK ((:LABEL |:C0|) T K K1) (C0)
+                     ((:RECORD-REF (G0 0) (|sym1|)
+                       ((:APP |sym1| (G0 C0 K2)))))))))))))))))))))))))
+ (:STACK ((:LABEL |:C|) K2 G0 K K1 K0) (C)
   ((:RECORD-REF (G 0) (|sym2|) ((:APP |sym2| (G C X)))))))
