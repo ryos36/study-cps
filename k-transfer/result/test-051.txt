@@ -37,31 +37,31 @@
                                  ((:POP (6) NIL
                                    ((:FIXH
                                      ((|:G0| (G0 |sym3| B0 B1 B2)
-                                       (:RECORD-REF (G0 2) (|sym13|)
-                                        ((:RECORD-REF (G0 1) (|sym12|)
-                                          ((:RECORD-REF (G0 :NOT-FOUND) (EX0)
-                                            ((:RECORD-REF (G0 :NOT-FOUND)
-                                              (EX-EX0)
-                                              ((:RECORD-REF (G0 :NOT-FOUND)
-                                                (FUNC)
-                                                ((:+ (|sym13| |sym12|) (|sym7|)
-                                                  ((:+ (EX0 EX-EX0) (|sym6|)
-                                                    ((:RECORD-REF (FUNC 0)
-                                                      (|sym0|)
-                                                      ((:APP |sym0|
-                                                        (FUNC |sym3| |sym7|
-                                                         |sym6|))))))))))))))))))))
-                                     (:HEAP ((:LABEL |:G0|) |sym12| |sym13|)
+                                       (:RECORD-REF (G0 3) (|sym1|)
+                                        ((:RECORD-REF (G0 2) (|sym13|)
+                                          ((:RECORD-REF (G0 1) (|sym12|)
+                                            ((:RECORD-REF (|sym1| 4) (EX0)
+                                              ((:RECORD-REF (|sym1| 2) (EX-EX0)
+                                                ((:RECORD-REF (|sym1| 1) (FUNC)
+                                                  ((:+ (|sym13| |sym12|)
+                                                    (|sym7|)
+                                                    ((:+ (EX0 EX-EX0) (|sym6|)
+                                                      ((:RECORD-REF (FUNC 0)
+                                                        (|sym0|)
+                                                        ((:APP |sym0|
+                                                          (FUNC |sym3| |sym7|
+                                                           |sym6|))))))))))))))))))))))
+                                     (:HEAP ((:LABEL |:G0|) |sym12| |sym13| F0)
                                       (G0)
-                                      ((:RECORD-REF (G0 0) (|sym1|)
-                                        ((:APP |sym1|
+                                      ((:RECORD-REF (G0 0) (|sym2|)
+                                        ((:APP |sym2|
                                           (G0 |sym2| 1 2 3)))))))))))))))))))))
                       (:STACK
                        ((:LABEL |:sym10|) FUNC EX-EX0 EX0 |sym12| |sym13|)
                        (|sym10|)
-                       ((:RECORD-REF (FUNC 0) (|sym2|)
-                         ((:APP |sym2|
+                       ((:RECORD-REF (FUNC 0) (|sym3|)
+                         ((:APP |sym3|
                            (FUNC |sym10| |sym13|
                             |sym12|)))))))))))))))))))))))))))
  (:HEAP ((:LABEL |:F0|) FUNC EX-EX0 EX1 EX0) (F0)
-  ((:RECORD-REF (F0 0) (|sym3|) ((:APP |sym3| (F0 EXIT 4 5 6)))))))
+  ((:RECORD-REF (F0 0) (|sym4|) ((:APP |sym4| (F0 EXIT 4 5 6)))))))

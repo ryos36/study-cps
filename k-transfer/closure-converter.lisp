@@ -192,7 +192,7 @@
                            (ref-sym 
                              (if stock-sym stock-sym (cps-gensym parser)))
                            (inner-cps-expr0 `(:RECORD-REF (,ref-sym ,nexted-no) (,sym) (,cps-expr0))))
-                      (print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
+                      ;(print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
                       (if (null stock-sym)
                         (setf new-symbol-pos-pairs (cons `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs)))
                       inner-cps-expr0))))
@@ -281,7 +281,7 @@
 
              (upper-free-vars-list
                (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-             ;(x (print `(fix-hs ,(copy-tree free-variables) ,(copy-tree strict-free-vars))))
+             ;(x (print `(fix-hs ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
 
              (fixh-free-vars `((:fixh . ,env-closure-sym) ,@strict-free-vars ,@upper-free-vars-list))
 

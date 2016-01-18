@@ -62,9 +62,36 @@
              ((:FIXH
                ((|:MUL3X3-J-I0| (MUL3X3-J-I0 |sym10| J)
                  (:RECORD-REF (MUL3X3-J-I0 2) (|sym9|)
-                  ((LIST ':RECORD-REF (LIST NEW-SYM NEXTED-NO) (LIST SYM)
-                    (LIST CPS-EXPR0))))))
-               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0 |sym3|) (MUL3X3-J-I0)
+                  ((:RECORD-REF (|sym9| 2) (MUL3X3-JI)
+                    ((:RECORD-REF (MUL3X3-J-I0 1) (I0)
+                      ((:FIXS
+                        ((|:sym11| (|sym11| |sym12|)
+                          (:RECORD-REF (|sym11| 1) (|sym10|)
+                           ((:POP (2) NIL
+                             ((:RECORD-REF (|sym10| 0) (|sym4|)
+                               ((:APP |sym4| (|sym10| |sym12|))))))))))
+                        (:STACK ((:LABEL |:sym11|) |sym10|) (|sym11|)
+                         ((:= (J 3) NIL
+                           ((:RECORD-REF (|sym11| 0) (|sym5|)
+                             ((:APP |sym5| (|sym11| :|#T|))))
+                            (:+ (J 1) (|sym17|)
+                             ((:FIXS
+                               ((|:sym15| (|sym15| |sym16|)
+                                 (:FIXS
+                                  ((|:sym13| (|sym13| |sym14|)
+                                    (:RECORD-REF (|sym13| 1) (|sym11|)
+                                     ((:POP (2) NIL
+                                       ((:RECORD-REF (|sym11| 0) (|sym6|)
+                                         ((:APP |sym6|
+                                           (|sym11| |sym14|))))))))))
+                                  (:STACK ((:LABEL |:sym13|) |sym11|) (|sym13|)
+                                   ((:RECORD-REF (MUL3X3-J-I0 0) (|sym7|)
+                                     ((:APP |sym7|
+                                       (MUL3X3-J-I0 |sym13| |sym17|)))))))))
+                               (:RECORD-REF (MUL3X3-JI 0) (|sym8|)
+                                ((:APP |sym8|
+                                  (MUL3X3-JI |sym15| J I0))))))))))))))))))))
+               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0) (MUL3X3-J-I0)
                 ((:FIXS
                   ((|:sym18| (|sym18| |sym19|)
                     (:RECORD-REF (|sym18| 1) (|sym9|)
