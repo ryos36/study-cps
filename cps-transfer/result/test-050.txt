@@ -1,0 +1,71 @@
+(:LET ((Y (:HEAP 19201738)))
+ (:FIX
+  ((XOR0 (BIT-N N X0 X1 RV)
+    (:IF (:= 0 BIT-N) RV
+     (:LET ((X0-BIT0 (GET-BIT0 X0)) (X1-BIT0 (GET-BIT0 X1)))
+      (XOR0 (:- BIT-N 1) (:+ N 1) (:>> X0 1) (:>> X1 1)
+       (:+ RV (:<< (XOR-BIT X0-BIT0 X1-BIT0) N))))))
+   (XOR1 (BIT-N N X0 X1 RV)
+    (:IF (:= 0 BIT-N) RV
+     (:LET
+      ((X0-BIT0 (GET-BIT0 X0)) (X1-BIT0 (GET-BIT0 X1)) (BIT-N-1 (:- BIT-N 1))
+       (N+1 (:+ N 1)) (X0>>1 (:>> X0 1)) (X1>>1 (:>> X1 1)))
+      (XOR1 BIT-N-1 N+1 X0>>1 X1>>1
+       (:+ RV (:<< (XOR-BIT X0-BIT0 X1-BIT0) N))))))
+   (XOR (BIT-N X0 X1) (XOR0 BIT-N 0 X0 X1 0)))
+  (:EXIT (XOR 32 3 5))))
+:
+(:HEAP (19201738) (|sym41|)
+ ((:FIXH
+   ((XOR0 (|sym2| BIT-N N X0 X1 RV)
+     (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+      (:= (0 BIT-N) NIL
+       ((:APP |sym3| (RV))
+        (:FIXS
+         ((|sym17| (|sym18|)
+           (:FIXS
+            ((|sym15| (|sym16|)
+              (:- (BIT-N 1) (|sym14|)
+               ((:+ (N 1) (|sym13|)
+                 ((:>> (X0 1) (|sym12|)
+                   ((:>> (X1 1) (|sym11|)
+                     ((:FIXS
+                       ((|sym9| (|sym10|)
+                         (:<< (|sym10| N) (|sym8|)
+                          ((:+ (RV |sym8|) (|sym7|)
+                            ((:FIXS ((|sym5| (|sym6|) (:APP |sym3| (|sym6|))))
+                              (:APP XOR0
+                               (|sym5| |sym14| |sym13| |sym12| |sym11|
+                                |sym7|)))))))))
+                       (:APP XOR-BIT (|sym9| |sym18| |sym16|)))))))))))))
+            (:APP GET-BIT0 (|sym15| X1)))))
+         (:APP GET-BIT0 (|sym17| X0)))))))
+    (XOR1 (|sym19| BIT-N N X0 X1 RV)
+     (:FIXS ((|sym20| (|sym21|) (:APP |sym19| (|sym21|))))
+      (:= (0 BIT-N) NIL
+       ((:APP |sym20| (RV))
+        (:FIXS
+         ((|sym34| (|sym35|)
+           (:FIXS
+            ((|sym32| (|sym33|)
+              (:- (BIT-N 1) (|sym31|)
+               ((:+ (N 1) (|sym30|)
+                 ((:>> (X0 1) (|sym29|)
+                   ((:>> (X1 1) (|sym28|)
+                     ((:FIXS
+                       ((|sym26| (|sym27|)
+                         (:<< (|sym27| N) (|sym25|)
+                          ((:+ (RV |sym25|) (|sym24|)
+                            ((:FIXS
+                              ((|sym22| (|sym23|) (:APP |sym20| (|sym23|))))
+                              (:APP XOR1
+                               (|sym22| |sym31| |sym30| |sym29| |sym28|
+                                |sym24|)))))))))
+                       (:APP XOR-BIT (|sym26| |sym35| |sym33|)))))))))))))
+            (:APP GET-BIT0 (|sym32| X1)))))
+         (:APP GET-BIT0 (|sym34| X0)))))))
+    (XOR (|sym36| BIT-N X0 X1)
+     (:FIXS ((|sym37| (|sym38|) (:APP |sym36| (|sym38|))))
+      (:APP XOR0 (|sym37| BIT-N 0 X0 X1 0)))))
+   (:FIXS ((|sym39| (|sym40|) (:APP EXIT (|sym40|))))
+    (:APP XOR (|sym39| 32 3 5))))))

@@ -1,0 +1,17 @@
+((:FIXH
+ ((F0 (|sym2| A0 A1 A2)
+   (:+ (A0 EX0) (|sym16|)
+    ((:* (A1 EX1) (|sym15|)
+      ((:- (|sym16| |sym15|) (|sym14|)
+        ((:+ (|sym14| NIL) (|sym13|)
+          ((:+ (EX0 EX1) (|sym12|)
+            ((:FIXS
+              ((|sym10| (|sym11|)
+                (:FIXH
+                 ((G0 (|sym3| B0 B1 B2)
+                   (:+ (|sym13| |sym12|) (|sym7|)
+                    ((:+ (EX0 EX-EX0) (|sym6|)
+                      ((:APP FUNC (|sym3| |sym7| |sym6|))))))))
+                 (:APP G0 (|sym2| 1 2 3)))))
+              (:APP FUNC (|sym10| |sym13| |sym12|)))))))))))))))
+ (:APP F0 (EXIT 4 5 6))))
