@@ -10,6 +10,7 @@
 (defparameter *test-print* nil)
 (defparameter *test-reset-func* nil)
 (defparameter *test-success-n* 0)
+(defparameter *test-save-n* 0)
 
 (defun min-max-no-list (min-max-list)
   (let ((min-no (car min-max-list))
@@ -130,11 +131,15 @@
 
               (if ok?
                 (incf *test-success-n*)))
-            (when *test-save*
-              (with-open-file (out result-file :if-does-not-exist :create :direction :output)
-                (format out "~a" result))
-              (format t "~a:Saved~%" name)))
+            (progn
+                (incf *test-save-n*)
+                (when *test-save*
+                  (with-open-file (out result-file :if-does-not-exist :create :direction :output)
+                    (format out "~a" result))
+                  (format t "~a:Saved~%" name))))
           ))
     *test-files*)
-  (format t "~%~a/~a~%" *test-success-n* (length *test-files*)))
+  (format t "~%~a/~a~%" *test-success-n* (length *test-files*))
+  (if (> *test-save-n* 0)
+    (format t "saved:~a~%" *test-save-n*)))
 

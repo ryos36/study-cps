@@ -216,10 +216,10 @@
 
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
-             (new-id `((:primitive . :fixh-bind) ,func-name ,@args))
-             (new-env (make-new-env parser env new-id))
+             ;(new-id `((:primitive . :fixh-bind) ,func-name ,@args))
+             ;(new-env (make-new-env parser env new-id))
 
-             (new-next-cps (copy-tree (cps-parse parser next-cps new-env)))
+             (new-next-cps (copy-tree (cps-parse parser next-cps env)))
 
              (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps (car env))) ; use env , it's ok
              (new-wrapped-cps (if (and make-new-sym? (not (null free-variables)))
@@ -255,7 +255,7 @@
 
              (upper-free-vars-list
                (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-             ;(x (print `(fix-hs ,free-variables ,strict-free-vars)))
+             ;(x (print `(fix-hs ,(copy-tree free-variables) ,(copy-tree strict-free-vars))))
 
              (fixh-free-vars `((:fixh . ,env-closure-sym) ,@strict-free-vars ,@upper-free-vars-list))
 

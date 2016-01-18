@@ -1,0 +1,399 @@
+(:HEAP (19201738) (|sym41|)
+ ((:FIXH
+   ((XOR0 (|sym2| BIT-N N X0 X1 RV)
+     (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
+      (:= (0 BIT-N) NIL
+       ((:APP |sym3| (RV))
+        (:FIXS
+         ((|sym17| (|sym18|)
+           (:FIXS
+            ((|sym15| (|sym16|)
+              (:- (BIT-N 1) (|sym14|)
+               ((:+ (N 1) (|sym13|)
+                 ((:>> (X0 1) (|sym12|)
+                   ((:>> (X1 1) (|sym11|)
+                     ((:FIXS
+                       ((|sym9| (|sym10|)
+                         (:<< (|sym10| N) (|sym8|)
+                          ((:+ (RV |sym8|) (|sym7|)
+                            ((:FIXS ((|sym5| (|sym6|) (:APP |sym3| (|sym6|))))
+                              (:APP XOR0
+                               (|sym5| |sym14| |sym13| |sym12| |sym11|
+                                |sym7|)))))))))
+                       (:APP XOR-BIT (|sym9| |sym18| |sym16|)))))))))))))
+            (:APP GET-BIT0 (|sym15| X1)))))
+         (:APP GET-BIT0 (|sym17| X0)))))))
+    (XOR1 (|sym19| BIT-N N X0 X1 RV)
+     (:FIXS ((|sym20| (|sym21|) (:APP |sym19| (|sym21|))))
+      (:= (0 BIT-N) NIL
+       ((:APP |sym20| (RV))
+        (:FIXS
+         ((|sym34| (|sym35|)
+           (:FIXS
+            ((|sym32| (|sym33|)
+              (:- (BIT-N 1) (|sym31|)
+               ((:+ (N 1) (|sym30|)
+                 ((:>> (X0 1) (|sym29|)
+                   ((:>> (X1 1) (|sym28|)
+                     ((:FIXS
+                       ((|sym26| (|sym27|)
+                         (:<< (|sym27| N) (|sym25|)
+                          ((:+ (RV |sym25|) (|sym24|)
+                            ((:FIXS
+                              ((|sym22| (|sym23|) (:APP |sym20| (|sym23|))))
+                              (:APP XOR1
+                               (|sym22| |sym31| |sym30| |sym29| |sym28|
+                                |sym24|)))))))))
+                       (:APP XOR-BIT (|sym26| |sym35| |sym33|)))))))))))))
+            (:APP GET-BIT0 (|sym32| X1)))))
+         (:APP GET-BIT0 (|sym34| X0)))))))
+    (XOR (|sym36| BIT-N X0 X1)
+     (:FIXS ((|sym37| (|sym38|) (:APP |sym36| (|sym38|))))
+      (:APP XOR0 (|sym37| BIT-N 0 X0 X1 0)))))
+   (:FIXS ((|sym39| (|sym40|) (:APP EXIT (|sym40|))))
+    (:APP XOR (|sym39| 32 3 5))))))
+:
+(:HEAP (19201738) (|sym41|)
+ ((:FIXH
+   ((|:XOR0| (XOR0 |sym2| BIT-N N X0 X1 RV)
+     (:RECORD-REF (XOR0 1) (|sym1|)
+      ((:RECORD-REF (|sym1| 3) (XOR-BIT)
+        ((:RECORD-REF (|sym1| 2) (GET-BIT0)
+          ((:FIXS
+            ((|:sym3| (|sym3| |sym4|)
+              (:RECORD-REF (|sym3| 1) (|sym2|)
+               ((:POP (2) NIL
+                 ((:RECORD-REF (|sym2| 0) (|sym2|)
+                   ((:APP |sym2| (|sym2| |sym4|))))))))))
+            (:STACK ((:LABEL |:sym3|) |sym2|) (|sym3|)
+             ((:= (0 BIT-N) NIL
+               ((:RECORD-REF (|sym3| 0) (|sym3|) ((:APP |sym3| (|sym3| RV))))
+                (:FIXS
+                 ((|:sym17| (|sym17| |sym18|)
+                   (:FIXS
+                    ((|:sym15| (|sym15| |sym16|)
+                      (:RECORD-REF (|sym15| 4) (BIT-N)
+                       ((:RECORD-REF (|sym15| 3) (N)
+                         ((:RECORD-REF (|sym15| 2) (X0)
+                           ((:RECORD-REF (|sym15| 1) (X1)
+                             ((:POP (5) NIL
+                               ((:- (BIT-N 1) (|sym14|)
+                                 ((:+ (N 1) (|sym13|)
+                                   ((:>> (X0 1) (|sym12|)
+                                     ((:>> (X1 1) (|sym11|)
+                                       ((:FIXS
+                                         ((|:sym9| (|sym9| |sym10|)
+                                           (:RECORD-REF (|sym9| 2) (N)
+                                            ((:RECORD-REF (|sym9| 1) (RV)
+                                              ((:POP (3) NIL
+                                                ((:<< (|sym10| N) (|sym8|)
+                                                  ((:+ (RV |sym8|) (|sym7|)
+                                                    ((:FIXS
+                                                      ((|:sym5| (|sym5| |sym6|)
+                                                        (:RECORD-REF (|sym5| 1)
+                                                         (|sym3|)
+                                                         ((:POP (2) NIL
+                                                           ((:RECORD-REF
+                                                             (|sym3| 0)
+                                                             (|sym4|)
+                                                             ((:APP |sym4|
+                                                               (|sym3|
+                                                                |sym6|))))))))))
+                                                      (:STACK
+                                                       ((:LABEL |:sym5|)
+                                                        |sym3|)
+                                                       (|sym5|)
+                                                       ((:RECORD-REF (XOR0 0)
+                                                         (|sym5|)
+                                                         ((:APP |sym5|
+                                                           (XOR0 |sym5| |sym14|
+                                                            |sym13| |sym12|
+                                                            |sym11|
+                                                            |sym7|)))))))))))))))))))
+                                         (:STACK ((:LABEL |:sym9|) RV N)
+                                          (|sym9|)
+                                          ((:RECORD-REF (XOR-BIT 0) (|sym6|)
+                                            ((:APP |sym6|
+                                              (XOR-BIT |sym9| |sym18|
+                                               |sym16|)))))))))))))))))))))))))))
+                    (:STACK ((:LABEL |:sym15|) X1 X0 N BIT-N) (|sym15|)
+                     ((:RECORD-REF (GET-BIT0 0) (|sym7|)
+                       ((:APP |sym7| (GET-BIT0 |sym15| X1)))))))))
+                 (:RECORD-REF (GET-BIT0 0) (|sym8|)
+                  ((:APP |sym8| (GET-BIT0 |sym17| X0)))))))))))))))))
+    (|:XOR1| (XOR1 |sym19| BIT-N N X0 X1 RV)
+     (:RECORD-REF (XOR1 1) (|sym9|)
+      ((:RECORD-REF (|sym9| 3) (XOR-BIT)
+        ((:RECORD-REF (|sym9| 2) (GET-BIT0)
+          ((:FIXS
+            ((|:sym20| (|sym20| |sym21|)
+              (:RECORD-REF (|sym20| 1) (|sym19|)
+               ((:POP (2) NIL
+                 ((:RECORD-REF (|sym19| 0) (|sym10|)
+                   ((:APP |sym10| (|sym19| |sym21|))))))))))
+            (:STACK ((:LABEL |:sym20|) |sym19|) (|sym20|)
+             ((:= (0 BIT-N) NIL
+               ((:RECORD-REF (|sym20| 0) (|sym11|)
+                 ((:APP |sym11| (|sym20| RV))))
+                (:FIXS
+                 ((|:sym34| (|sym34| |sym35|)
+                   (:FIXS
+                    ((|:sym32| (|sym32| |sym33|)
+                      (:RECORD-REF (|sym32| 4) (BIT-N)
+                       ((:RECORD-REF (|sym32| 3) (N)
+                         ((:RECORD-REF (|sym32| 2) (X0)
+                           ((:RECORD-REF (|sym32| 1) (X1)
+                             ((:POP (5) NIL
+                               ((:- (BIT-N 1) (|sym31|)
+                                 ((:+ (N 1) (|sym30|)
+                                   ((:>> (X0 1) (|sym29|)
+                                     ((:>> (X1 1) (|sym28|)
+                                       ((:FIXS
+                                         ((|:sym26| (|sym26| |sym27|)
+                                           (:RECORD-REF (|sym26| 2) (N)
+                                            ((:RECORD-REF (|sym26| 1) (RV)
+                                              ((:POP (3) NIL
+                                                ((:<< (|sym27| N) (|sym25|)
+                                                  ((:+ (RV |sym25|) (|sym24|)
+                                                    ((:FIXS
+                                                      ((|:sym22|
+                                                        (|sym22| |sym23|)
+                                                        (:RECORD-REF
+                                                         (|sym22| 1) (|sym20|)
+                                                         ((:POP (2) NIL
+                                                           ((:RECORD-REF
+                                                             (|sym20| 0)
+                                                             (|sym12|)
+                                                             ((:APP |sym12|
+                                                               (|sym20|
+                                                                |sym23|))))))))))
+                                                      (:STACK
+                                                       ((:LABEL |:sym22|)
+                                                        |sym20|)
+                                                       (|sym22|)
+                                                       ((:RECORD-REF (XOR1 0)
+                                                         (|sym13|)
+                                                         ((:APP |sym13|
+                                                           (XOR1 |sym22|
+                                                            |sym31| |sym30|
+                                                            |sym29| |sym28|
+                                                            |sym24|)))))))))))))))))))
+                                         (:STACK ((:LABEL |:sym26|) RV N)
+                                          (|sym26|)
+                                          ((:RECORD-REF (XOR-BIT 0) (|sym14|)
+                                            ((:APP |sym14|
+                                              (XOR-BIT |sym26| |sym35|
+                                               |sym33|)))))))))))))))))))))))))))
+                    (:STACK ((:LABEL |:sym32|) X1 X0 N BIT-N) (|sym32|)
+                     ((:RECORD-REF (GET-BIT0 0) (|sym15|)
+                       ((:APP |sym15| (GET-BIT0 |sym32| X1)))))))))
+                 (:RECORD-REF (GET-BIT0 0) (|sym16|)
+                  ((:APP |sym16| (GET-BIT0 |sym34| X0)))))))))))))))))
+    (|:XOR| (XOR |sym36| BIT-N X0 X1)
+     (:RECORD-REF (XOR 1) (|sym17|)
+      ((:RECORD-REF (|sym17| 1) (XOR0)
+        ((:FIXS
+          ((|:sym37| (|sym37| |sym38|)
+            (:RECORD-REF (|sym37| 1) (|sym36|)
+             ((:POP (2) NIL
+               ((:RECORD-REF (|sym36| 0) (|sym18|)
+                 ((:APP |sym18| (|sym36| |sym38|))))))))))
+          (:STACK ((:LABEL |:sym37|) |sym36|) (|sym37|)
+           ((:RECORD-REF (XOR0 0) (|sym19|)
+             ((:APP |sym19| (XOR0 |sym37| BIT-N 0 X0 X1 0)))))))))))))
+   (:HEAP ((:LABEL :DUMMY) XOR0 GET-BIT0 XOR-BIT) (|sym0|)
+    ((:HEAP ((:LABEL |:XOR0|) |sym0|) (XOR0)
+      ((:HEAP ((:LABEL |:XOR1|) |sym0|) (XOR1)
+        ((:HEAP ((:LABEL |:XOR|) |sym0|) (XOR)
+          ((:FIXS
+            ((|:sym39| (|sym39| |sym40|)
+              (:RECORD-REF (|sym39| 1) (EXIT)
+               ((:POP (2) NIL
+                 ((:RECORD-REF (EXIT 0) (|sym20|)
+                   ((:APP |sym20| (EXIT |sym40|))))))))))
+            (:STACK ((:LABEL |:sym39|) EXIT) (|sym39|)
+             ((:RECORD-REF (XOR 0) (|sym21|)
+               ((:APP |sym21| (XOR |sym39| 32 3 5))))))))))))))))))
+(:HEAP (19201738) (|sym41|)
+ ((:FIXH
+   ((XOR0 (|sym2| BIT-N N X0 X1 RV)
+     (:= (0 BIT-N) NIL
+      ((:APP |sym2| (RV))
+       (:FIXS
+        ((|sym17| (|sym18|)
+          (:FIXS
+           ((|sym15| (|sym16|)
+             (:- (BIT-N 1) (|sym14|)
+              ((:+ (N 1) (|sym13|)
+                ((:>> (X0 1) (|sym12|)
+                  ((:>> (X1 1) (|sym11|)
+                    ((:FIXS
+                      ((|sym9| (|sym10|)
+                        (:<< (|sym10| N) (|sym8|)
+                         ((:+ (RV |sym8|) (|sym7|)
+                           ((:APP XOR0
+                             (|sym2| |sym14| |sym13| |sym12| |sym11|
+                              |sym7|))))))))
+                      (:APP XOR-BIT (|sym9| |sym18| |sym16|)))))))))))))
+           (:APP GET-BIT0 (|sym15| X1)))))
+        (:APP GET-BIT0 (|sym17| X0))))))
+    (XOR1 (|sym19| BIT-N N X0 X1 RV)
+     (:= (0 BIT-N) NIL
+      ((:APP |sym19| (RV))
+       (:FIXS
+        ((|sym34| (|sym35|)
+          (:FIXS
+           ((|sym32| (|sym33|)
+             (:- (BIT-N 1) (|sym31|)
+              ((:+ (N 1) (|sym30|)
+                ((:>> (X0 1) (|sym29|)
+                  ((:>> (X1 1) (|sym28|)
+                    ((:FIXS
+                      ((|sym26| (|sym27|)
+                        (:<< (|sym27| N) (|sym25|)
+                         ((:+ (RV |sym25|) (|sym24|)
+                           ((:APP XOR1
+                             (|sym19| |sym31| |sym30| |sym29| |sym28|
+                              |sym24|))))))))
+                      (:APP XOR-BIT (|sym26| |sym35| |sym33|)))))))))))))
+           (:APP GET-BIT0 (|sym32| X1)))))
+        (:APP GET-BIT0 (|sym34| X0))))))
+    (XOR (|sym36| BIT-N X0 X1) (:APP XOR0 (|sym36| BIT-N 0 X0 X1 0))))
+   (:APP XOR (EXIT 32 3 5)))))
+:
+(:HEAP (19201738) (|sym41|)
+ ((:FIXH
+   ((|:XOR0| (XOR0 |sym2| BIT-N N X0 X1 RV)
+     (:RECORD-REF (XOR0 1) (|sym23|)
+      ((:RECORD-REF (|sym23| 3) (XOR-BIT)
+        ((:RECORD-REF (|sym23| 2) (GET-BIT0)
+          ((:= (0 BIT-N) NIL
+            ((:RECORD-REF (|sym2| 0) (|sym24|) ((:APP |sym24| (|sym2| RV))))
+             (:FIXS
+              ((|:sym17| (|sym17| |sym18|)
+                (:FIXS
+                 ((|:sym15| (|sym15| |sym16|)
+                   (:RECORD-REF (|sym15| 4) (BIT-N)
+                    ((:RECORD-REF (|sym15| 3) (N)
+                      ((:RECORD-REF (|sym15| 2) (X0)
+                        ((:RECORD-REF (|sym15| 1) (X1)
+                          ((:POP (5) NIL
+                            ((:- (BIT-N 1) (|sym14|)
+                              ((:+ (N 1) (|sym13|)
+                                ((:>> (X0 1) (|sym12|)
+                                  ((:>> (X1 1) (|sym11|)
+                                    ((:FIXS
+                                      ((|:sym9| (|sym9| |sym10|)
+                                        (:RECORD-REF (|sym9| 8) (N)
+                                         ((:RECORD-REF (|sym9| 7) (RV)
+                                           ((:RECORD-REF (|sym9| 6) (XOR0)
+                                             ((:RECORD-REF (|sym9| 5) (|sym2|)
+                                               ((:RECORD-REF (|sym9| 4)
+                                                 (|sym14|)
+                                                 ((:RECORD-REF (|sym9| 3)
+                                                   (|sym13|)
+                                                   ((:RECORD-REF (|sym9| 2)
+                                                     (|sym12|)
+                                                     ((:RECORD-REF (|sym9| 1)
+                                                       (|sym11|)
+                                                       ((:POP (9) NIL
+                                                         ((:<< (|sym10| N)
+                                                           (|sym8|)
+                                                           ((:+ (RV |sym8|)
+                                                             (|sym7|)
+                                                             ((:RECORD-REF
+                                                               (XOR0 0)
+                                                               (|sym25|)
+                                                               ((:APP |sym25|
+                                                                 (XOR0 |sym2|
+                                                                  |sym14|
+                                                                  |sym13|
+                                                                  |sym12|
+                                                                  |sym11|
+                                                                  |sym7|))))))))))))))))))))))))))))
+                                      (:STACK
+                                       ((:LABEL |:sym9|) |sym11| |sym12|
+                                        |sym13| |sym14| |sym2| XOR0 RV N)
+                                       (|sym9|)
+                                       ((:RECORD-REF (XOR-BIT 0) (|sym26|)
+                                         ((:APP |sym26|
+                                           (XOR-BIT |sym9| |sym18|
+                                            |sym16|)))))))))))))))))))))))))))
+                 (:STACK ((:LABEL |:sym15|) X1 X0 N BIT-N) (|sym15|)
+                  ((:RECORD-REF (GET-BIT0 0) (|sym27|)
+                    ((:APP |sym27| (GET-BIT0 |sym15| X1)))))))))
+              (:RECORD-REF (GET-BIT0 0) (|sym28|)
+               ((:APP |sym28| (GET-BIT0 |sym17| X0))))))))))))))
+    (|:XOR1| (XOR1 |sym19| BIT-N N X0 X1 RV)
+     (:RECORD-REF (XOR1 1) (|sym29|)
+      ((:RECORD-REF (|sym29| 3) (XOR-BIT)
+        ((:RECORD-REF (|sym29| 2) (GET-BIT0)
+          ((:= (0 BIT-N) NIL
+            ((:RECORD-REF (|sym19| 0) (|sym30|) ((:APP |sym30| (|sym19| RV))))
+             (:FIXS
+              ((|:sym34| (|sym34| |sym35|)
+                (:FIXS
+                 ((|:sym32| (|sym32| |sym33|)
+                   (:RECORD-REF (|sym32| 4) (BIT-N)
+                    ((:RECORD-REF (|sym32| 3) (N)
+                      ((:RECORD-REF (|sym32| 2) (X0)
+                        ((:RECORD-REF (|sym32| 1) (X1)
+                          ((:POP (5) NIL
+                            ((:- (BIT-N 1) (|sym31|)
+                              ((:+ (N 1) (|sym30|)
+                                ((:>> (X0 1) (|sym29|)
+                                  ((:>> (X1 1) (|sym28|)
+                                    ((:FIXS
+                                      ((|:sym26| (|sym26| |sym27|)
+                                        (:RECORD-REF (|sym26| 8) (N)
+                                         ((:RECORD-REF (|sym26| 7) (RV)
+                                           ((:RECORD-REF (|sym26| 6) (XOR1)
+                                             ((:RECORD-REF (|sym26| 5)
+                                               (|sym19|)
+                                               ((:RECORD-REF (|sym26| 4)
+                                                 (|sym31|)
+                                                 ((:RECORD-REF (|sym26| 3)
+                                                   (|sym30|)
+                                                   ((:RECORD-REF (|sym26| 2)
+                                                     (|sym29|)
+                                                     ((:RECORD-REF (|sym26| 1)
+                                                       (|sym28|)
+                                                       ((:POP (9) NIL
+                                                         ((:<< (|sym27| N)
+                                                           (|sym25|)
+                                                           ((:+ (RV |sym25|)
+                                                             (|sym24|)
+                                                             ((:RECORD-REF
+                                                               (XOR1 0)
+                                                               (|sym31|)
+                                                               ((:APP |sym31|
+                                                                 (XOR1 |sym19|
+                                                                  |sym31|
+                                                                  |sym30|
+                                                                  |sym29|
+                                                                  |sym28|
+                                                                  |sym24|))))))))))))))))))))))))))))
+                                      (:STACK
+                                       ((:LABEL |:sym26|) |sym28| |sym29|
+                                        |sym30| |sym31| |sym19| XOR1 RV N)
+                                       (|sym26|)
+                                       ((:RECORD-REF (XOR-BIT 0) (|sym32|)
+                                         ((:APP |sym32|
+                                           (XOR-BIT |sym26| |sym35|
+                                            |sym33|)))))))))))))))))))))))))))
+                 (:STACK ((:LABEL |:sym32|) X1 X0 N BIT-N) (|sym32|)
+                  ((:RECORD-REF (GET-BIT0 0) (|sym33|)
+                    ((:APP |sym33| (GET-BIT0 |sym32| X1)))))))))
+              (:RECORD-REF (GET-BIT0 0) (|sym34|)
+               ((:APP |sym34| (GET-BIT0 |sym34| X0))))))))))))))
+    (|:XOR| (XOR |sym36| BIT-N X0 X1)
+     (:RECORD-REF (XOR 1) (|sym35|)
+      ((:RECORD-REF (|sym35| 1) (XOR0)
+        ((:RECORD-REF (XOR0 0) (|sym36|)
+          ((:APP |sym36| (XOR0 |sym36| BIT-N 0 X0 X1 0))))))))))
+   (:HEAP ((:LABEL :DUMMY) XOR0 GET-BIT0 XOR-BIT) (|sym22|)
+    ((:HEAP ((:LABEL |:XOR0|) |sym22|) (XOR0)
+      ((:HEAP ((:LABEL |:XOR1|) |sym22|) (XOR1)
+        ((:HEAP ((:LABEL |:XOR|) |sym22|) (XOR)
+          ((:RECORD-REF (XOR 0) (|sym37|)
+            ((:APP |sym37| (XOR EXIT 32 3 5)))))))))))))))
