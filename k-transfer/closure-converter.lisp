@@ -158,35 +158,64 @@
 ;
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
   ;(print `(top-env ,top-env))
-  (let ((closure-name (cdar top-env)))
-    (labels ((get-num0 (sym vars n)
+  (let ((closure-name (cdar top-env))
+        (new-symbol-pos-pairs '()))
+
+    (labels ((get-pressed-num0 (sym vars n)
+              (if (null vars) :NOT-FOUND 
+                 (let ((elm (car vars)))
+                   ;(print `(eleelm ,elm ,(cdr elm)))
+                     (if (and (listp elm) (listp (cdr elm)) (eq sym (cdadr elm)))
+                       n
+                       (get-pressed-num0 sym (cdr vars) (+ n 1))))))
+
+             (get-num0 (sym vars n)
                (if (null vars) :NOT-FOUND 
                  (let ((elm (car vars)))
                    (if (eq sym elm) (values n :FOUND-THE-SYM)
                      (if (and (listp elm) (eq sym (car elm)))
-                       (values n (cdr elm))
+                       ;(values n (cdr elm))
+                       (values 
+                         (get-pressed-num0 (cdadr elm) top-env 0)
+                               (cdr elm))
                        (get-num0 sym (cdr vars) (+ n 1)))))))
 
              (do-wrap0 (sym cps-expr0)
                 (multiple-value-bind (no n-info) (get-num0 sym top-env 0)
+                  ;(print `(do-wrap0 ,sym ,no ,n-info))
                   (if (atom n-info)
                     `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
 
-                    (let ((new-sym (cps-gensym parser))
-                          (uppper-closure-name (caar n-info)) ; not used
-                          (nexted-no (position sym n-info)))
-                      `(:RECORD-REF (,closure-name ,no) (,new-sym) (
-                          (:RECORD-REF (,new-sym ,nexted-no) (,sym) (,cps-expr0))))))))
+                    (let* ((nexted-no (position sym n-info))
+                           (base-sym (cdar n-info))
+                           (stock-sym (cddr (assoc base-sym new-symbol-pos-pairs)))
+                           (ref-sym 
+                             (if stock-sym stock-sym (cps-gensym parser)))
+                           (inner-cps-expr0 `(:RECORD-REF (,ref-sym ,nexted-no) (,sym) (,cps-expr0))))
+                      (print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
+                      (if (null stock-sym)
+                        (setf new-symbol-pos-pairs (cons `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs)))
+                      inner-cps-expr0))))
 
              (do-wrap1 (free-vars1 cps-expr1)
                 (if (null free-vars1) cps-expr1
                   (let ((sym (car free-vars1)))
                     (do-wrap1
                       (cdr free-vars1)
-                           (do-wrap0 sym cps-expr1))))))
+                           (do-wrap0 sym cps-expr1)))))
+
+             (do-wrap2 (cps-expr2 new-symbol-pos-pairs0)
+                (if (null new-symbol-pos-pairs0) cps-expr2
+                  (let* ((kv (car new-symbol-pos-pairs0))
+                         (kv-kv (cdr kv))
+                         (no (car kv-kv))
+                         (ref-sym (cdr kv-kv)))
+                    (do-wrap2 
+                      `(:RECORD-REF (,closure-name ,no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
 
       ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
-    (do-wrap1 this-free-vars new-next-cps))))
+      (do-wrap2 
+        (do-wrap1 this-free-vars new-next-cps) new-symbol-pos-pairs))))
 
 ;----------------------------------------------------------------
 (defun copy-env-with-new-sym (parser env)
@@ -263,7 +292,7 @@
              (new-next-cps (cps-parse parser next-cps env))
 
              (upper-closure-list
-                 (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list))
+                 (cddr (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
              (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
              (label0 (if func-names-is-1?
                `(:LABEL ,(make-new-func-name heap-closure-sym))
