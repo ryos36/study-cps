@@ -44,6 +44,26 @@ x1-bit0 の最後だけ自由変数をとらえればいいのに
                                        ((:RECORD-REF (|sym25| 4)
                                        ....
 
+これは関数コールがあるようなケースだ。
+func(a b c)
+   call func0
+   call func0
+
+   a b cを使う
+このケースで
+
+func(a b c)
+   a b c を退避
+   call func0
+   a b c を復元
+   a b c を退避
+   call func0
+   a b c を復元
+
+   a b cを使う
+
+という意味のないことをしてしまう。処理としてはあっている。
+
 ToDo-2:cps-transfer
 イディオムに近いこのソースは
 
