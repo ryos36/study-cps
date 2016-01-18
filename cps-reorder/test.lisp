@@ -17,7 +17,7 @@
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
-(set-test-files '("24" (14 . 22)))
+(set-test-files '("25" (14 . 22)))
 (do-test)
 
 #|

@@ -139,7 +139,7 @@
                   (format t "~a:Saved~%" name))))
           ))
     *test-files*)
-  (format t "~%~a/~a~%" *test-success-n* (length *test-files*))
+  (format t "~%~a/~a~%" *test-success-n* (- (length *test-files*) *test-save-n*))
   (if (> *test-save-n* 0)
     (format t "saved:~a~%" *test-save-n*)))
 

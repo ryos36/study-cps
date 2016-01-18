@@ -117,8 +117,8 @@
          (insn-list (cdr insns-holder)))
 
       ;(print `(env ,env))
-      ;(print `(var-list ,var-list))
-      ;(print `(insn-list ,insn-list))
+      (print `(var-list ,var-list))
+      (print `(insn-list ,insn-list))
       (labels ((do-cps-block-analyzer0 (len rv)
         (if (= 0 len) (nreverse rv)
           (let* ((runnable-list
@@ -154,7 +154,6 @@
                             (runnable-depth-list
                               (mapcar #'cons runnable-list depth-list)))
 
-                       ;(print `(depth-list ,depth-list))
                        (car 
                          (reduce #'(lambda (a b)
                                    (let* ((depth-a (cdr a))
@@ -172,6 +171,8 @@
                                      (if a<b? b a)))
                                runnable-depth-list))))))
 
+            (print `hello)
+            (print `(runnable-list ,runnable-list))
             (mapc #'(lambda (insn) 
                       (setf (cadr insn) :runnable)) runnable-list)
             (cps-select-runnable parser selected-runnable var-list insn-list)
@@ -253,7 +254,9 @@
         (args (caddr expr)))
         
     (let ((new-func-name (cps-symbol parser func-name env))
-          (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args)))
+          (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) (copy-tree args)))
+
+          )
       (set-instruction :app `(:init (,func-name ,@args) nil ,expr) env)
       `(:APP ,new-func-name ,new-args))))
 
@@ -265,6 +268,7 @@
         (next-cpss (cadddr expr))
         (top-env (car env)))
 
+    (print `(op ,op))
     (mapc #'(lambda (r) (set-variable r :init env)) result)
     ; ignore (:label |x|) and number ex. 1
     (set-instruction op `(:init ,(remove-if #'(lambda (x) (not (cps-symbolp x))) args) ,result ,expr) env)
@@ -286,6 +290,6 @@
 
   (defun do-cps-block-analyzer-cps-parse (expr)
     (cps-reset-environment analyzer)
-    (let ((new-env (make-new-env analyzer env )))
+    (let ((new-env (make-new-env analyzer env)))
       (cps-parse analyzer expr new-env)
       (do-cps-block-analyzer analyzer new-env))))
