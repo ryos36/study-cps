@@ -1,0 +1,85 @@
+ToDo-1:cps-transfer
+  cps-transfer で let のケースを最適化した方がよい
+
+元のソースは
+    (:let ((x0-bit0 (get-bit0 x0))
+           (x1-bit0 (get-bit0 x1)))
+     (xor0
+      (:- bit-n 1)
+      (:+ n 1)
+      (:>> x0 1)
+      (:>> x1 1)
+      (:+ rv (:<< (xor-bit x0-bit0 x1-bit0) n))))
+だと xor にはじまり bit-n とか n x-0,x1 rv xor-bit までが自由変数で
+FIXS の入れ子を作る。
+
+        (:FIXS
+         ((|sym27| (|sym28|)
+           (:FIXS
+            ((|sym25| (|sym26|)
+
+x1-bit0 の最後だけ自由変数をとらえればいいのに
+すべてについて自由変数をとらえてしまうので
+こういうケースで異常に無駄な処理を作ってしまう。
+
+    (:FIXS
+     ((|:sym27| (|sym27| |sym28|)
+       (:RECORD-REF (|sym27| 9) (BIT-N)
+        ((:RECORD-REF (|sym27| 8) (N)
+          ((:RECORD-REF (|sym27| 7) (X0)
+            ((:RECORD-REF (|sym27| 6) (X1)
+              ((:RECORD-REF (|sym27| 5) (RV)
+                ((:RECORD-REF (|sym27| 4) (|sym13|)
+                  ((:RECORD-REF (|sym27| 3) (XOR0)
+                    ((:RECORD-REF (|sym27| 2) (XOR-BIT)
+                      ((:RECORD-REF (|sym27| 1) (GET-BIT0)
+                        ((:POP (10) NIL
+                          ((:FIXS
+                            ((|:sym25| (|sym25| |sym26|)
+                              (:RECORD-REF (|sym25| 9) (BIT-N)
+                               ((:RECORD-REF (|sym25| 8) (N)
+                                 ((:RECORD-REF (|sym25| 7) (X0)
+                                   ((:RECORD-REF (|sym25| 6) (X1)
+                                     ((:RECORD-REF (|sym25| 5) (RV)
+                                       ((:RECORD-REF (|sym25| 4)
+                                       ....
+
+ToDo-2:cps-transfer
+イディオムに近いこのソースは
+
+(:fix ((fact0 (k n rv)
+          (:if (:= n 0)
+               rv
+               (fact0 k (:- n 1) (:* n rv))))
+
+         (fact (k n)
+           (fact0 k n 1)))
+
+        (fact 10))
+
+次のように変換されてしまう
+
+(:FIXH
+ ((|:FACT0| (FACT0 |sym11| K N RV)
+   (:RECORD-REF (FACT0 1) (|sym22|)
+    ((:= (N 0) NIL
+      ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
+       (:- (N 1) (|sym17|)
+        ((:* (N RV) (|sym16|)
+          ((:RECORD-REF (FACT0 0) (|sym24|)
+            ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))))
+  (|:FACT| (FACT |sym18| K N)
+   (:RECORD-REF (FACT 1) (|sym25|)
+    ((:RECORD-REF (|sym25| 1) (FACT0)
+      ((:RECORD-REF (FACT0 0) (|sym26|)
+        ((:APP |sym26| (FACT0 |sym18| K N 1))))))))))
+ (:HEAP ((:LABEL :DUMMY) FACT0) (|sym21|)
+  ((:HEAP ((:LABEL |:FACT0|) |sym21|) (FACT0)
+    ((:HEAP ((:LABEL |:FACT|) |sym21|) (FACT)
+      ((:RECORD-REF (FACT 0) (|sym27|) ((:APP |sym27| (FACT EXIT 10)))))))))))
+
+FACT の自由変数は FACT0 だけ。FACT0 には自由変数はない。
+FACT0 を参照するのに二段階かかっている。
+最適化できなくもない。比較的頻繁に出てくるイディオムなので
+最適化した方がいいかも。=> さきおくり。
+
