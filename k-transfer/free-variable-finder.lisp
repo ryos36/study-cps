@@ -89,10 +89,14 @@
         (binds (cadr expr))
         (next-cps (caddr expr)))
         
-    (let ((new-binds (cps-binds parser binds env))
-          (new-next-cps (cps-parse parser next-cps env)))
+    (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
+      (mapc #'(lambda(arg) 
+                (set-variable parser arg t env)) func-names)
 
-      `(,fix-op ,new-binds ,new-next-cps))))
+      (let ((new-binds (cps-binds parser binds env))
+            (new-next-cps (cps-parse parser next-cps env)))
+
+        `(,fix-op ,new-binds ,new-next-cps)))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser free-variable-finder) expr env)
