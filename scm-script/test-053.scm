@@ -1,0 +1,21 @@
+((:fix ((f0 (a0 a1 a2) 
+            (:let ((l0 (:+ (:- (:+ a0 ex0) (:* a1 ex1))))
+                   (l1 (:+ ex0 ex1))
+                   (ex2 (:+ 7 ex-f0)))
+              (func l0 l1)
+              (:fix ((g0 (b0 b1 b2)
+                         (:let ((m0 (:+ ex-g0 ex0))
+                                (m1 (:+ ex2 ex3)))
+                           (:fix ((h0 (c0 c1 c2)
+                                      (:let
+                                        ((n0 (:+ ex-h0 m0))
+                                         (n1 (:+ l0 l1))
+                                         (n2 (:+ m1 ex4))
+                                         (n3 (:+ ex1 ex3))
+                                         (n4 (:+ ex2 ex4)))
+
+                                        (func n3 n1))))
+                                 (h0 l1 g0(1 2 3) m0)))))
+                    (g0 ex2 (f0 2 3) l0)))))
+       (f0 4 5 6)))
+

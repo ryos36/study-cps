@@ -9,8 +9,8 @@ X
 (:RECORD-REF (X 2) (|sym3|) ((:APP EXIT (|sym3|))))
 (:RECORD-SET! X 1 (:HEAP 4 5 6))
 :
-((:RECORD-SET! (X 1 |sym4|) NIL (#1=(:APP EXIT (:UNSPECIFIED)))) (4 5 6)
- (|sym4|) ((:ID (|sym2|) (X) #1#)))
+(:HEAP (4 5 6) (|sym4|)
+ ((:RECORD-SET! (X 1 |sym4|) NIL ((:APP EXIT (:UNSPECIFIED))))))
 (:RECORD-REF (:RECORD-REF X 1) 2)
 :
 (:RECORD-REF (X 1) (|sym6|)

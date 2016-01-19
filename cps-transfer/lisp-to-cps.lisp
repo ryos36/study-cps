@@ -5,6 +5,8 @@
 (defparameter *transfer-table* nil)
 (defparameter *cps-gensym-debug* t)
 
+(defun test-context (context)
+  (hash-table-p (car (cdr context))))
 ;----------------------------------------------------------------
 (defun primitive-warning (func-name)
   (if *warning*
@@ -50,14 +52,17 @@
 
 
 (defun variable-rename (value context)
+  ;(print `(variable-rename ,(test-context context)))
   (let ((continuation-lambda (car context)))
     (labels ((find-renamed-value (value table-list)
              (if (null table-list) 
                value
                (let ((table (car table-list)))
+                 ;(print `(table ,(listp table)))
                  (if (null table) 
                    (find-renamed-value value (cdr table-list))
                    (multiple-value-bind (renamed-value exist) (gethash value table)
+                     ;(print `(renamed-value ,renamed-value exist))
                      (if exist
                        (if (eq renamed-value t)
                          value
@@ -85,6 +90,9 @@
 
 ;----------------------------------------------------------------
 (defun terminal-transfer (expr context)
+  ;(print `(terminal-transfer ,expr))
+  ;(if (eq expr 'l-a) (print context))
+
     (let ((arg0 (variable-rename expr context))
 
           (cont-lambda (car context)))
@@ -341,6 +349,7 @@
             (table-list (cdr context)))
 
         (setf (gethash id table) t)
+        ;(print `(gethash ,id ,table ,(test-context (cons #'fill-result (cons table table-list)))))
 
         (fill-cont (call-continuation-lambda cont-lambda :unspecified))
         (do-lisp-to-cps expr0 (cons #'fill-result (cons table table-list)))))))
@@ -416,6 +425,8 @@
 
 ;----------------------------------------------------------------
 (defun do-lisp-to-cps (expr context)
+  ;(print `(do-lisp-to-cps ,expr ,(test-context context)))
+
   (if *debug-mode*
     (format t "expr:~s~%" expr))
   (if (terminal-p expr)

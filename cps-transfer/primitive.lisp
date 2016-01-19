@@ -3,6 +3,7 @@
 
 (defmacro make-two-args-primitive (func-name op)
     `(defun ,func-name (expr context)
+       ;(print `(expr ,expr))
        (let* ((result-sym (cps-gensym))
               (new-cps-expr (copy-tree `(,,op (ARG0 ARG1) (,result-sym) (CONT))))
               (cont-list (pickup-list new-cps-expr 'CONT))
@@ -75,7 +76,7 @@
 ;----------------------------------------------------------------
 (defun heap-transfer (expr context)
   (let* ((result-sym (cps-gensym))
-         (new-cps-expr `(:HEAP ARGS (,result-sym) (CONT)))
+         (new-cps-expr (copy-tree `(:HEAP ARGS (,result-sym) (CONT))))
          (cont-list (pickup-list new-cps-expr 'CONT))
          (new-args nil)
          wrapped-cps-expr)
@@ -93,7 +94,7 @@
 
       (dolist (arg args)
         (setf wrapped-cps-expr
-              (do-lisp-to-cps arg `(,#'fill-arg ,table-list))))
+              (do-lisp-to-cps arg `(,#'fill-arg . ,table-list))))
 
       (setf (cadr new-cps-expr) new-args)
       wrapped-cps-expr))))
