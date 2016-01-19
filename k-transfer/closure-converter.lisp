@@ -140,6 +140,17 @@
     (make-upper-free-vars-list0 upper-free-vars env '())))
 
 ;----------------------------------------------------------------
+; remove same name
+(defun filter-upper-closure-list (upper-closure-list)
+    (labels ((filter-upper-closure-list0 (upper-closure-list0 already-used-var)
+                (if (null upper-closure-list0) (nreverse already-used-var)
+                  (let ((sym (car upper-closure-list0)))
+                    (if (null (member sym already-used-var))
+                      (push sym already-used-var))
+                    (filter-upper-closure-list0 (cdr upper-closure-list0) already-used-var)))))
+      (filter-upper-closure-list0 upper-closure-list '())))
+
+;----------------------------------------------------------------
 (defun wrap-cps-with-heap (func-names heap-closure-sym expr)
   (labels ((wrap-cps-with-heap0 (func-names0 expr0)
              (if (null func-names0) expr0
@@ -194,7 +205,7 @@
                            (inner-cps-expr0 `(:RECORD-REF (,ref-sym ,nexted-no) (,sym) (,cps-expr0))))
                       ;(print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
                       (if (null stock-sym)
-                        (setf new-symbol-pos-pairs (cons `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs)))
+                        (push `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs))
                       inner-cps-expr0))))
 
              (do-wrap1 (free-vars1 cps-expr1)
@@ -215,7 +226,7 @@
 
       ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
       (do-wrap2 
-        (do-wrap1 this-free-vars new-next-cps) new-symbol-pos-pairs))))
+        (do-wrap1 this-free-vars new-next-cps) (nreverse new-symbol-pos-pairs)))))
 
 ;----------------------------------------------------------------
 (defun copy-env-with-new-sym (parser env)
@@ -292,7 +303,7 @@
              (new-next-cps (cps-parse parser next-cps env))
 
              (upper-closure-list
-                 (cddr (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
+                 (filter-upper-closure-list (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
              (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
              (label0 (if func-names-is-1?
                `(:LABEL ,(make-new-func-name heap-closure-sym))

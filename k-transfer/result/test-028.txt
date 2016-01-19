@@ -91,7 +91,7 @@
                                (:RECORD-REF (MUL3X3-JI 0) (|sym8|)
                                 ((:APP |sym8|
                                   (MUL3X3-JI |sym15| J I0))))))))))))))))))))
-               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0) (MUL3X3-J-I0)
+               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0 |sym3|) (MUL3X3-J-I0)
                 ((:FIXS
                   ((|:sym18| (|sym18| |sym19|)
                     (:RECORD-REF (|sym18| 1) (|sym9|)

@@ -74,7 +74,7 @@
                              ((:RECORD-REF (MUL3X3-JI 0) (|sym6|)
                                ((:APP |sym6|
                                  (MUL3X3-JI |sym15| J I0)))))))))))))))))))
-               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0) (MUL3X3-J-I0)
+               (:HEAP ((:LABEL |:MUL3X3-J-I0|) I0 |sym3|) (MUL3X3-J-I0)
                 ((:RECORD-REF (MUL3X3-J-I0 0) (|sym8|)
                   ((:APP |sym8| (MUL3X3-J-I0 |sym9| J))))))))))))
          (|:MUL3X3-I| (MUL3X3-I |sym20| I)
