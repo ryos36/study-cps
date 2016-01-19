@@ -1,6 +1,7 @@
-2015年 12月 31日 木曜日 12:10:21 JST
-    cps-transfer ほぼ決着
-    eta-reduction もちゃんとやっていた。
+2016年 1月 19日 火曜日 21:35:29 JST
+    cps-transfer  決着
+    eta-reduction 決着
+    k-transfer 決着
 
     cps-interp で動作させる
         => cps callback をつくるべき
@@ -14,7 +15,6 @@
         fix が来たらちゃんと自由変数をみて
         closure を作るのが closure 
         いまは fix の引数をつくっているだけ。
-
 
 ----------------------------------------------------------------
 ISSUES
@@ -73,7 +73,6 @@ scheme の複雑な closure にちゃんと対応しているか疑問
   copy-list であるため、情報は共有する。
 
 scheme には /= がなかった
-
     mini-scheme では
     set! とかができないが
         set! は構文糖衣でできそうな気がする。

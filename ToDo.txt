@@ -1,5 +1,46 @@
-ToDo-1:cps-transfer
-  cps-transfer で let のケースを最適化した方がよい
+
+ToDo-2:cps-transfer
+イディオムに近いこのソースは
+
+(:fix ((fact0 (k n rv)
+          (:if (:= n 0)
+               rv
+               (fact0 k (:- n 1) (:* n rv))))
+
+         (fact (k n)
+           (fact0 k n 1)))
+
+        (fact 10))
+
+次のように変換されてしまう
+
+(:FIXH
+ ((|:FACT0| (FACT0 |sym11| K N RV)
+   (:RECORD-REF (FACT0 1) (|sym22|)
+    ((:= (N 0) NIL
+      ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
+       (:- (N 1) (|sym17|)
+        ((:* (N RV) (|sym16|)
+          ((:RECORD-REF (FACT0 0) (|sym24|)
+            ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))))
+  (|:FACT| (FACT |sym18| K N)
+   (:RECORD-REF (FACT 1) (|sym25|)
+    ((:RECORD-REF (|sym25| 1) (FACT0)
+      ((:RECORD-REF (FACT0 0) (|sym26|)
+        ((:APP |sym26| (FACT0 |sym18| K N 1))))))))))
+ (:HEAP ((:LABEL :DUMMY) FACT0) (|sym21|)
+  ((:HEAP ((:LABEL |:FACT0|) |sym21|) (FACT0)
+    ((:HEAP ((:LABEL |:FACT|) |sym21|) (FACT)
+      ((:RECORD-REF (FACT 0) (|sym27|) ((:APP |sym27| (FACT EXIT 10)))))))))))
+
+FACT の自由変数は FACT0 だけ。FACT0 には自由変数はない。
+FACT0 を参照するのに二段階かかっている。
+最適化できなくもない。比較的頻繁に出てくるイディオムなので
+最適化した方がいいかも。=> さきおくり。
+
+--------------------------------------------
+DONE:cps-transfer
+  cps-transfer で let のケースを最適化したつもり
 
 元のソースは
     (:let ((x0-bit0 (get-bit0 x0))
@@ -63,43 +104,16 @@ func(a b c)
    a b cを使う
 
 という意味のないことをしてしまう。処理としてはあっている。
+そこで、
+FIXS の自由変数を つぎの FIXS が出てくるまでとした
 
-ToDo-2:cps-transfer
-イディオムに近いこのソースは
+    (:FIXS
+        ......<ここが対象>.....
+        (:FIXS
+        ......
 
-(:fix ((fact0 (k n rv)
-          (:if (:= n 0)
-               rv
-               (fact0 k (:- n 1) (:* n rv))))
+そうすることで、FIXS が単純に続くケースでは 内側の FIXS しか
+Stack に積まない。あれ～大丈夫か？
 
-         (fact (k n)
-           (fact0 k n 1)))
-
-        (fact 10))
-
-次のように変換されてしまう
-
-(:FIXH
- ((|:FACT0| (FACT0 |sym11| K N RV)
-   (:RECORD-REF (FACT0 1) (|sym22|)
-    ((:= (N 0) NIL
-      ((:RECORD-REF (|sym11| 0) (|sym23|) ((:APP |sym23| (|sym11| RV))))
-       (:- (N 1) (|sym17|)
-        ((:* (N RV) (|sym16|)
-          ((:RECORD-REF (FACT0 0) (|sym24|)
-            ((:APP |sym24| (FACT0 |sym11| K |sym17| |sym16|)))))))))))))
-  (|:FACT| (FACT |sym18| K N)
-   (:RECORD-REF (FACT 1) (|sym25|)
-    ((:RECORD-REF (|sym25| 1) (FACT0)
-      ((:RECORD-REF (FACT0 0) (|sym26|)
-        ((:APP |sym26| (FACT0 |sym18| K N 1))))))))))
- (:HEAP ((:LABEL :DUMMY) FACT0) (|sym21|)
-  ((:HEAP ((:LABEL |:FACT0|) |sym21|) (FACT0)
-    ((:HEAP ((:LABEL |:FACT|) |sym21|) (FACT)
-      ((:RECORD-REF (FACT 0) (|sym27|) ((:APP |sym27| (FACT EXIT 10)))))))))))
-
-FACT の自由変数は FACT0 だけ。FACT0 には自由変数はない。
-FACT0 を参照するのに二段階かかっている。
-最適化できなくもない。比較的頻繁に出てくるイディオムなので
-最適化した方がいいかも。=> さきおくり。
-
+FIXH や FIXS の組み合わせでいろいろなものがテストケースとして
+足りないと思う。
