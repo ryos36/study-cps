@@ -124,18 +124,16 @@
                 (let* ((top-env (car env0))
                        (info (car top-env))
                        (info-id (car info))
-                       (free-vars-in-env 
-                         (if (eq info-id :fixh)
-                                 (cdr top-env)
-                                 '()))
-                       (hit-vars (intersection free-variables0 free-vars-in-env)))
-
+                       (free-vars-in-env (cdr top-env))
+                       (free-vars-in-fixh
+                         (if (eq info-id :fixh) free-vars-in-env '()))
+                       (fixh-hit-vars (intersection free-variables0 free-vars-in-fixh)))
 
                   (make-upper-free-vars-list0
                     (set-difference free-variables0 free-vars-in-env)
                     (cdr env0)
                     (append rv 
-                            (mapcar #'(lambda (x) `(,x . ,top-env)) hit-vars)))))))
+                            (mapcar #'(lambda (x) `(,x . ,top-env)) fixh-hit-vars)))))))
 
     (make-upper-free-vars-list0 upper-free-vars env '())))
 
