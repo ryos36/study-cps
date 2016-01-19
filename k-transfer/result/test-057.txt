@@ -1,0 +1,27 @@
+(:FIXS
+ ((|sym8| (|sym9|)
+   (:FIXS
+    ((|sym6| (|sym7|)
+      (:+ (|sym9| Y0) (|sym5|)
+       ((:- (|sym7| Y1) (|sym4|) ((:APP G0 (EXIT |sym5| |sym4|))))))))
+    (:APP F0 (|sym6| X1)))))
+ (:APP F0 (|sym8| X0)))
+:
+(:FIXS
+ ((|:sym8| (|sym8| |sym9|)
+   (:FIXS
+    ((|:sym6| (|sym6| |sym7|)
+      (:RECORD-REF (|sym6| 5) (|sym9|)
+       ((:RECORD-REF (|sym6| 4) (Y0)
+         ((:RECORD-REF (|sym6| 3) (Y1)
+           ((:RECORD-REF (|sym6| 2) (G0)
+             ((:RECORD-REF (|sym6| 1) (EXIT)
+               ((:POP (6) NIL
+                 ((:+ (|sym9| Y0) (|sym5|)
+                   ((:- (|sym7| Y1) (|sym4|)
+                     ((:RECORD-REF (G0 0) (|sym0|)
+                       ((:APP |sym0|
+                         (G0 EXIT |sym5| |sym4|))))))))))))))))))))))
+    (:STACK ((:LABEL |:sym6|) EXIT G0 Y1 Y0 |sym9|) (|sym6|)
+     ((:RECORD-REF (F0 0) (|sym1|) ((:APP |sym1| (F0 |sym6| X1)))))))))
+ (:RECORD-REF (F0 0) (|sym2|) ((:APP |sym2| (F0 |sym8| X0)))))

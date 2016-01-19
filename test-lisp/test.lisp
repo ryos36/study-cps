@@ -143,5 +143,5 @@
     (if (> all-n 0)
     (format t "~%~a/~a~%" *test-success-n* all-n)))
   (if (> *test-save-n* 0)
-    (format t "saved:~a~%" *test-save-n*)))
+    (format t "~asaved:~a~%" (if *test-save* "" "NOT ") *test-save-n*)))
 

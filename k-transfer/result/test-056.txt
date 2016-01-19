@@ -1,0 +1,17 @@
+(:FIXH
+ ((F0 (|sym2| A C)
+   (:* (A 3) (|sym5|)
+    ((:- (EX0 C) (|sym4|)
+      ((:+ (|sym5| |sym4|) (|sym3|) ((:APP |sym2| (|sym3|))))))))))
+ (:APP F0 (EXIT EX0 3)))
+:
+(:FIXH
+ ((|:F0| (F0 |sym2| A C)
+   (:RECORD-REF (F0 1) (EX0)
+    ((:* (A 3) (|sym5|)
+      ((:- (EX0 C) (|sym4|)
+        ((:+ (|sym5| |sym4|) (|sym3|)
+          ((:RECORD-REF (|sym2| 0) (|sym0|)
+            ((:APP |sym0| (|sym2| |sym3|))))))))))))))
+ (:HEAP ((:LABEL |:F0|) EX0) (F0)
+  ((:RECORD-REF (F0 0) (|sym1|) ((:APP |sym1| (F0 EXIT EX0 3)))))))

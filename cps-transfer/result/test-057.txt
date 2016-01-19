@@ -1,0 +1,12 @@
+(:LET ((A (F0 X0)) (B (F0 X1))) (G0 (:+ A Y0) (:- B Y1)))
+:
+(:FIXS
+ ((|sym8| (|sym9|)
+   (:FIXS
+    ((|sym6| (|sym7|)
+      (:+ (|sym9| Y0) (|sym5|)
+       ((:- (|sym7| Y1) (|sym4|)
+         ((:FIXS ((|sym2| (|sym3|) (:APP EXIT (|sym3|))))
+           (:APP G0 (|sym2| |sym5| |sym4|)))))))))
+    (:APP F0 (|sym6| X1)))))
+ (:APP F0 (|sym8| X0)))
