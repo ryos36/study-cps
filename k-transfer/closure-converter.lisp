@@ -19,26 +19,24 @@
   (cdar env))
 
 ;----------------------------------------------------------------
-(defun wrap-cps-with-stack (func-names new-next-cps new-env)
-  (let ((free-vars (env-to-free-variables-fixs new-env)))
-    (labels ((wrap-cps-with-stack0 (func-names0 next-cps0)
-               (if (null func-names0) next-cps0
-                 (let* ((closure-name (car func-names0))
-                        (label0 `(:LABEL ,(make-new-func-name closure-name)))
-                        (stack-list (cons label0 
-                                          (copy-list free-vars))))
-                   (wrap-cps-with-stack0 (cdr func-names0) `(:STACK ,stack-list (,closure-name) (,new-next-cps)))))))
-    (wrap-cps-with-stack0 (reverse func-names) new-next-cps))))
+(defun wrap-cps-with-stack (func-names new-next-cps free-vars)
+  (labels ((wrap-cps-with-stack0 (func-names0 next-cps0)
+             (if (null func-names0) next-cps0
+               (let* ((closure-name (car func-names0))
+                      (label0 `(:LABEL ,(make-new-func-name closure-name)))
+                      (stack-list (cons label0 
+                                        (copy-list free-vars))))
+                 (wrap-cps-with-stack0 (cdr func-names0) `(:STACK ,stack-list (,closure-name) (,new-next-cps)))))))
+    (wrap-cps-with-stack0 (reverse func-names) new-next-cps)))
 
 ;----------------------------------------------------------------
-(defun wrap-cps-bind-fixs-with-record-ref (closure-name new-next-cps new-env)
+(defun wrap-cps-bind-fixs-with-record-ref (closure-name new-next-cps free-vars)
     (labels ((do-wrap (var-names0 no next-cps0)
                (if (null var-names0) next-cps0
                  (let ((var-name (car var-names0)))
                    (do-wrap (cdr var-names0) (+ no 1) 
                      `(:RECORD-REF (,closure-name ,no) (,var-name) (,next-cps0)))))))
-      (let ((free-vars (env-to-free-variables-fixs new-env)))
-        (do-wrap free-vars 1 new-next-cps))))
+      (do-wrap free-vars 1 new-next-cps)))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind-fixs ((parser closure-converter) expr env)
@@ -46,18 +44,21 @@
         (args (cadr expr))
         (next-cps (caddr expr))
 
-        (free-vars (env-to-free-variables-fixs env)))
+        (pure-free-vars (env-to-free-variables-fixs env)))
 
     (let* ((func-name (make-new-func-name closure-name))
            (new-args (cons closure-name args))
 
-           (new-next-cps (cps-parse parser next-cps env))
-           (free-vars-len (length free-vars))
-           ;(x (print `(,free-vars ,free-vars-len)))
-           (wrapped-cps (if (= free-vars-len 0)
+           (new-id `((:primitive . :fixs-bind) ,func-name ,@args))
+           (new-env (make-new-env parser env new-id))
+
+           (new-next-cps (cps-parse parser next-cps new-env))
+           (pure-free-vars-len (length pure-free-vars))
+           ;(x (print `(,pure-free-vars ,pure-free-vars-len)))
+           (wrapped-cps (if (= pure-free-vars-len 0)
                           new-next-cps
-                          (let ((pop-cps `(:POP (,(+ free-vars-len 1)) () (,new-next-cps))))
-                            (wrap-cps-bind-fixs-with-record-ref closure-name pop-cps env)))))
+                          (let ((pop-cps `(:POP (,(+ pure-free-vars-len 1)) () (,new-next-cps))))
+                            (wrap-cps-bind-fixs-with-record-ref closure-name pop-cps pure-free-vars)))))
 
              `(,func-name ,new-args ,wrapped-cps))))
 
@@ -78,14 +79,17 @@
              ;(x (print `(var ,all-variables :free ,free-variables)))
 
              (fixs-free-vars `((:fixs) ,@free-variables))
-             (env-binds (make-new-env parser env fixs-free-vars)))
+             (env-binds (make-new-env parser env fixs-free-vars))
+
+             (new-id `((:primitive . :fixs-funcs) ,@func-names))
+             (env-next-cps (make-new-env parser env new-id)))
              
         (let ((new-binds (mapcar #'(lambda (bind) (cps-bind-fixs parser bind env-binds)) binds))
-              (new-next-cps (cps-parse parser next-cps env)))
+              (new-next-cps (cps-parse parser next-cps env-next-cps)))
 
             (let ((wrapped-cps 
                     (if (null free-variables) new-next-cps
-                      (wrap-cps-with-stack func-names new-next-cps env-binds))))
+                      (wrap-cps-with-stack func-names new-next-cps free-variables))))
               `(,fix-op ,new-binds ,wrapped-cps)))))))
 
 ;----------------------------------------------------------------
@@ -247,6 +251,7 @@
 
       (let* ((make-new-sym? (eq env-closure-name :make-new-sym))
              (env (if make-new-sym? (copy-env-with-new-sym parser env0) env0))
+             (free-vars-env (car env))
              (all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
              ;(z (print `(free-variables ,closure-name ,free-variables)))
@@ -254,9 +259,12 @@
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
 
-             (new-next-cps (copy-tree (cps-parse parser next-cps env)))
+             (new-id `((:primitive . :fixh-bind) ,func-name ,@args))
+             (new-env (make-new-env parser env new-id))
 
-             (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps (car env))) ; use env , it's ok
+             (new-next-cps (copy-tree (cps-parse parser next-cps new-env)))
+
+             (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps free-vars-env))
              (new-wrapped-cps (if (and make-new-sym? (not (null free-variables)))
                                 (copy-tree `(:RECORD-REF (,closure-name 1) (,(cdaar env)) (,wrapped-cps)))
                                 wrapped-cps))) 
@@ -295,10 +303,12 @@
 
              (fixh-free-vars `((:fixh . ,env-closure-sym) ,@strict-free-vars ,@upper-free-vars-list))
 
-             (new-env (make-new-env parser env fixh-free-vars))
+             (env-bind (make-new-env parser env fixh-free-vars))
 
-             ;(zz (print `(new-env ,new-env)))
-             (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind new-env)) binds))
+             (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind env-bind)) binds))
+
+             (new-id `((:primitive . :fixh-funcs) ,@func-names))
+             (env-next-cps (make-new-env parser env new-id))
 
              (new-next-cps (cps-parse parser next-cps env))
 
@@ -316,6 +326,23 @@
 
         `(:FIXH ,new-binds ,
                 `(:HEAP ,heap-list (,heap-closure-sym) (,heap-expr)))))))
+
+;----------------------------------------------------------------
+; primitive & app
+;----------------------------------------------------------------
+;----------------------------------------------------------------
+(def-cps-func cps-primitive ((parser closure-converter) expr env)
+  (let ((op (car expr))
+        (args (cadr expr))
+        (result (caddr expr))
+        (next-cpss (cadddr expr)))
+
+    (let* ((new-id `((:primitive . ,op) ,@result))
+           (new-env (make-new-env parser env new-id))
+           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps new-env)) next-cpss)))
+
+      `(,op ,args ,result ,new-next-cpss))))
+
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser closure-converter) expr env)
