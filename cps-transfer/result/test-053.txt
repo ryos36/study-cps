@@ -1,0 +1,58 @@
+(:FIX
+ ((F0 (A0 A1 A2)
+   (:LET
+    ((L0 (:+ (:- (:+ A0 EX0) (:* A1 EX1)))) (L1 (:+ EX0 EX1))
+     (EX2 (:+ 7 EX-F0)))
+    (FUNC L0 L1)
+    (:FIX
+     ((G0 (B0 B1 B2)
+       (:LET ((M0 (:+ EX-G0 EX0)) (M1 (:+ EX2 EX3)))
+        (:FIX
+         ((H0 (C0 C1 C2)
+           (:LET
+            ((N0 (:+ EX-H0 M0)) (N1 (:+ L0 L1)) (N2 (:+ M1 EX4))
+             (N3 (:+ EX1 EX3)) (N4 (:+ EX2 EX4)))
+            (FUNC N3 N1))))
+         (H0 L1 G0 (1 2 3) M0)))))
+     (G0 EX2 (F0 2 3) L0)))))
+ (F0 4 5 6))
+:
+(:FIXH
+ ((F0 (|sym2| A0 A1 A2)
+   (:+ (A0 EX0) (|sym29|)
+    ((:* (A1 EX1) (|sym28|)
+      ((:- (|sym29| |sym28|) (|sym27|)
+        ((:+ (|sym27| NIL) (|sym26|)
+          ((:+ (EX0 EX1) (|sym25|)
+            ((:+ (7 EX-F0) (|sym24|)
+              ((:FIXS
+                ((|sym22| (|sym23|)
+                  (:FIXH
+                   ((G0 (|sym3| B0 B1 B2)
+                     (:+ (EX-G0 EX0) (|sym17|)
+                      ((:+ (|sym24| EX3) (|sym16|)
+                        ((:FIXH
+                          ((H0 (|sym4| C0 C1 C2)
+                            (:+ (EX-H0 |sym17|) (|sym11|)
+                             ((:+ (|sym26| |sym25|) (|sym10|)
+                               ((:+ (|sym16| EX4) (|sym9|)
+                                 ((:+ (EX1 EX3) (|sym8|)
+                                   ((:+ (|sym24| EX4) (|sym7|)
+                                     ((:FIXS
+                                       ((|sym5| (|sym6|)
+                                         (:APP |sym4| (|sym6|))))
+                                       (:APP FUNC
+                                        (|sym5| |sym8| |sym10|)))))))))))))))
+                          (:FIXS
+                           ((|sym14| (|sym15|)
+                             (:FIXS
+                              ((|sym12| (|sym13|) (:APP |sym3| (|sym13|))))
+                              (:APP H0 (|sym12| |sym25| G0 |sym15| |sym17|)))))
+                           (:APP 1 (|sym14| 2 3))))))))))
+                   (:FIXS
+                    ((|sym20| (|sym21|)
+                      (:FIXS ((|sym18| (|sym19|) (:APP |sym2| (|sym19|))))
+                       (:APP G0 (|sym18| |sym24| |sym21| |sym26|)))))
+                    (:APP F0 (|sym20| 2 3))))))
+                (:APP FUNC (|sym22| |sym26| |sym25|)))))))))))))))))
+ (:FIXS ((|sym30| (|sym31|) (:APP EXIT (|sym31|)))) (:APP F0 (|sym30| 4 5 6))))

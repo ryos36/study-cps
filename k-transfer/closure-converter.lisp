@@ -278,6 +278,7 @@
       (cps-binds finder binds finder-env)
 
       (let* ((all-variables (car finder-env))
+             ;(u (print `(FUNC ,@func-names :env ,env)))
              ;(x (print `(all-variables ,all-variables)))
              (func-names-is-1? (= (length func-names) 1))
              (env-closure-sym (if func-names-is-1?
@@ -288,16 +289,17 @@
                                  (cps-gensym parser)))
              (free-variables (filter-free-variables all-variables))
              (strict-free-vars
-               (get-strict-free-variables free-variables (cdr env)))
+               (get-strict-free-variables free-variables env))
 
              (upper-free-vars-list
                (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-             ;(x (print `(fix-hs ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
+             ;(x (print `(fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
 
              (fixh-free-vars `((:fixh . ,env-closure-sym) ,@strict-free-vars ,@upper-free-vars-list))
 
              (new-env (make-new-env parser env fixh-free-vars))
 
+             ;(zz (print `(new-env ,new-env)))
              (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind new-env)) binds))
 
              (new-next-cps (cps-parse parser next-cps env))
