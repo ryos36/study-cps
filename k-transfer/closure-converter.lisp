@@ -99,21 +99,30 @@
 ; free-vars -> (v0 v1 v2)
 ; env -> (((:fixh . closure-sym) v0 v2 ....) ...)
 ; result -> (v1)
-(defun get-strict-free-variables (x-free-vars env)
+(defun get-strict-free-variables (free-vars env)
 
-  (labels ((get-strict-free-variables0 (strict-free-vars env0)
-              (if (null env0) strict-free-vars
+  (labels ((get-strict-free-variables0 (strict-free-vars0 env0 saved-vars)
+              (if (null env0) (append strict-free-vars0 saved-vars)
                 (let* ((top-env (car env0))
                        (key-word (caar top-env))
                        (free-vars-in-env (cdr top-env)))
 
-                    (get-strict-free-variables0
-                      (if (eq key-word :fixh)
-                        (set-difference strict-free-vars free-vars-in-env)
-                        strict-free-vars)
-                      (cdr env0))))))
+                  (if (not (eq key-word :fixh))
+                    (setf saved-vars
+                          (append saved-vars
+                                  (intersection strict-free-vars0 free-vars-in-env))))
 
-    (get-strict-free-variables0 x-free-vars env)))
+                  ;(print `(get-strict-free-variables0 (,strict-free-vars0 ,top-env)))
+                  (get-strict-free-variables0
+                    (set-differencE strict-free-vars0 free-vars-in-env)
+                    (cdr env0)
+                    saved-vars)))))
+
+    (let ((strict-free-vars                            
+            (get-strict-free-variables0 free-vars env '())))
+
+      ; keep order
+      (remove-if #'null (mapcar #'(lambda (x) (car (member x strict-free-vars))) free-vars)))))
 
 ;----------------------------------------------------------------
 ; env -> (((:fixh . closure-sym) v0 v2 ....) ...)

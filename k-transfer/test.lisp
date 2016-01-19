@@ -4,6 +4,7 @@
 (setf conv (make-instance 'closure-converter))
 (setf *env* (make-new-env conv '()))
 (setf grv nil)
+;(defparameter *test-save* nil)
 
 (defun cps-parse-one (cps-expr env)
   (let* ((op (car cps-expr))
@@ -27,6 +28,6 @@
 
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
-(set-test-files '((14 . 24) (26 . 42) 51 "50" "53" "54"))
+(set-test-files '((14 . 24) (26 . 42) (50 . 51) (53 . 55)))
 (do-test)
 
