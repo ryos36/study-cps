@@ -59,11 +59,13 @@
                    (find-renamed-value value (cdr table-list))
                    (multiple-value-bind (renamed-value exist) (gethash value table)
                      (if exist
-                       (progn 
-                         (if (functionp continuation-lambda)
-                           (setf (gethash value table) 
-                                 (cons continuation-lambda renamed-value)))
-                         :place-holder)
+                       (if (eq renamed-value t)
+                         value
+                         (progn 
+                           (if (functionp continuation-lambda)
+                             (setf (gethash value table) 
+                                   (cons continuation-lambda renamed-value)))
+                           :place-holder))
                        (find-renamed-value value (cdr table-list)))))))))
     (cond
       ((null value) nil) 
@@ -197,6 +199,8 @@
          (func-expr (caddr fbind))
          (kont-sym (cps-gensym))
 
+         (table (make-hash-table))
+
          (return-app (copy-tree `(:APP ,kont-sym (RESULT))))
          (new-cps-expr (copy-tree `(,func-name (,kont-sym ,@args)
                                        FUNC-BODY)))
@@ -206,26 +210,36 @@
     (flet ((fill-body (func-body) (setf (car func-body-list) func-body) new-cps-expr)
            (fill-result (rv) (setf (car result-list) rv) return-app))
 
+      (setf (gethash func-name table) t)
+      (mapc #'(lambda (sym) (setf (gethash sym table) t)) args)
+
       (fill-body 
-        (do-lisp-to-cps func-expr (cons #'fill-result table-list))))))
+        (do-lisp-to-cps func-expr (cons #'fill-result (cons table table-list)))))))
 
 ;----------------------------------------------------------------
 (defun fix-transfer (expr context)
   (let ((cont-lambda (car context))
         (table-list (cdr context))
+        (table (make-hash-table))
 
         (fbinds (cadr expr))
         (fix-expr (caddr expr)))
 
-    (let* ((cps-binds (mapcar #'(lambda (fbind) 
+    (let* ((func-names (mapcar #'(lambda (fbind) (car fbind)) fbinds))
+           (new-context-for-fix-expr 
+             (cons cont-lambda (cons table table-list)))
+
+           (cps-binds (mapcar #'(lambda (fbind) 
                                   (fbind-transfer fbind table-list)) fbinds))
            (fix-expr0 (copy-tree `(FIX-EXPR))))
 
       (flet ((fill-fix-expr (expr0) (setf (car fix-expr0) expr0) fix-expr0))
         ;(print `(fix-transfer ,fix-expr ,fix-expr0 ,(cps-gensym)))
 
+        (mapc #'(lambda (sym) (setf (gethash sym table) t)) func-names)
+
         `(:FIXH ,cps-binds ,
-                           (do-lisp-to-cps fix-expr context))))))
+                           (do-lisp-to-cps fix-expr new-context-for-fix-expr))))))
 
 ;----------------------------------------------------------------
 (defun apply-transfer (expr context)
@@ -296,21 +310,29 @@
       (let ((expr-body (reverse (cddr expr)))
 
             (cont-lambda (car context))
-            (new-context (cons #'fill-result (cdr context)))
+            (table-list (cdr context))
+            (table (make-hash-table))
             body-result)
+        (let ((new-context (cons #'fill-result (cons table table-list))))
 
-        (dolist (expr0 expr-body)
-          (setf body-result (do-lisp-to-cps expr0 new-context))
-          (setf (car new-context) body-result))
+          (setf (gethash func-name table) t)
+          (mapc #'(lambda (sym) (setf (gethash sym table) t)) args)
 
-        (fill-body body-result)
+          (dolist (expr0 expr-body)
+            (setf body-result (do-lisp-to-cps expr0 new-context))
+            (setf (car new-context) body-result))
 
-        (fill-cont (do-lisp-to-cps :unspecified context))))))
+          (fill-body body-result)
+
+          (fill-cont (do-lisp-to-cps :unspecified context)))))))
 
 ;----------------------------------------------------------------
 (defun id-declare-transfer (expr context)
   (let* ((id (cadr expr))
          (new-cps-expr `(:ID (RESULT) (,id) CONT))
+
+         (table (make-hash-table))
+
          (expr0 (caddr expr)))
     (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
            (fill-result (rv) (setf (caadr new-cps-expr) rv) new-cps-expr))
@@ -318,8 +340,10 @@
       (let ((cont-lambda (car context))
             (table-list (cdr context)))
 
+        (setf (gethash id table) t)
+
         (fill-cont (call-continuation-lambda cont-lambda :unspecified))
-        (do-lisp-to-cps expr0 (cons #'fill-result table-list))))))
+        (do-lisp-to-cps expr0 (cons #'fill-result (cons table table-list)))))))
 
 ;----------------------------------------------------------------
 (defun define-transfer (expr context)
