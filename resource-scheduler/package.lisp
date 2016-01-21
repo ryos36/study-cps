@@ -12,7 +12,7 @@
     :nodes
     :initial-nodes
     :final-nodes
-    :runnable-nodes
+    :ready-nodes
 
     :node
 
@@ -27,18 +27,22 @@
     ; :status
     :ccounting
 
+    :dag-flag
+
+    :name
+
     :get-resource
-    :register-resource
-    :register-resources
+    :add-resource
+    :add-resources
     :add-node
     :build-connection
     :is-dag?
-    :initialize-runnable-nodes
-    :set-runnable
-    :reset-runnable-nodes
-    :update-runnable-nodes
-    :select-candidate-node-to-run
-    :run-node
+    :initialize-ready-nodes
+    :set-ready
+    :reset-ready-nodes
+    :update-ready-nodes
+    :select-candidate-node-to-ready
+    :apply-node
     :update-accounting
     :activate-resource
     :is-finished?

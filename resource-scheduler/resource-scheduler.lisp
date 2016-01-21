@@ -7,10 +7,11 @@
    (nodes :initform nil :accessor nodes)
    (initial-nodes :initform nil :accessor initial-nodes)
    (final-nodes :initform nil :accessor final-nodes)
-   (runnable-nodes :initform nil :accessor runnable-nodes)
+   (ready-nodes :initform nil :accessor ready-nodes)
    (dag-flag :initform nil)))
 
 ;----------------------------------------------------------------
+; stat -> :init :activate :busy :consumed
 (defclass node () 
   ((name :initarg :name :initform (gensym "node-") :accessor name)
    (instruction :initarg :instruction :accessor instruction)
@@ -22,6 +23,7 @@
    (successors :initform nil :accessor successors)))
 
 ;----------------------------------------------------------------
+; stat -> :init :ready :busy 
 (defclass resource () 
   ((name :initarg :name :accessor name)
    (status :initarg :status :initform :init :accessor status)
@@ -40,33 +42,39 @@
     (get-resource0 (resources scheduler))))
 
 ;----------------------------------------------------------------
-(defmethod register-resource ((scheduler resource-scheduler) (res resource))
-  (push res (resources scheduler)))
-
-(defmethod register-resource ((scheduler resource-scheduler) res)
-  (register-resource scheduler
-                     (make-instance 'resource :name res)))
+(defmethod add-resource ((scheduler resource-scheduler) (res resource))
+  (setf (resources scheduler) (append (resources scheduler) (list res))))
 
 ;----------------------------------------------------------------
-(defmethod register-resources ((scheduler resource-scheduler) res-lst)
-    (mapc #'(lambda (res) (register-resource scheduler res)) res-lst))
+(defmethod add-resource ((scheduler resource-scheduler) sym)
+  (let ((res (make-instance 'resource :name sym)))
+    (add-resource scheduler res)
+    res))
 
 ;----------------------------------------------------------------
-(defmethod add-node ((scheduler resource-scheduler) (node node) &optional input-resources special-resources output-resources)
-    (push node (nodes scheduler))
-    (if input-resources
-      (let ((i-res (mapcar #'(lambda (r) (get-resource scheduler r)) (if (listp input-resources) input-resources (list input-resources)))))
-        (setf (input-resources node) i-res)
+(defmethod add-resources ((scheduler resource-scheduler) res-syms)
+  (mapcar #'(lambda (sym) 
+    (let ((has-sym? (get-resource scheduler sym)))
+      (if has-sym? has-sym?
+        (add-resource scheduler sym)))) res-syms))
 
-        (if special-resources
-          (let ((s-res (mapcar #'(lambda (r) (get-resource scheduler r)) (if (listp special-resources) special-resources (list special-resources)))))
-            (setf (special-resources node) s-res)
+;----------------------------------------------------------------
+(defmethod add-node ((scheduler resource-scheduler) (node node) &optional input-syms output-syms special-syms)
+  (push node (nodes scheduler))
 
-            (if output-resources
-              (let ((o-res (mapcar #'(lambda (r) (get-resource scheduler r)) (if (listp output-resources) output-resources (list output-resources)))))
-                (setf (output-resources node) o-res)))))))
-    (update-cost node)
-    node)
+  (labels ((to-list (sym) (if (listp sym) sym (list sym))))
+    (if input-syms
+      (let ((input-res-list (add-resources scheduler (to-list input-syms))))
+        (setf (input-resources node) input-res-list)
+
+        (if output-syms
+          (let ((output-res-list (add-resources scheduler (to-list output-syms))))
+            (setf (output-resources node) output-res-list)
+
+            (if special-syms
+              (let ((special-res-list (add-resources scheduler (to-list special-syms))))
+                (setf (special-resources node) special-res-list))))))))
+  node)
 
 ;----------------------------------------------------------------
 (defmethod build-connection ((scheduler resource-scheduler))
@@ -112,50 +120,51 @@
       (eq flag :DAG)))))
 
 ;----------------------------------------------------------------
-(defmethod initialize-runnable-nodes ((scheduler resource-scheduler))
-  (let ((runnable-nodes (copy-tree (initial-nodes scheduler))))
-    ;(setf (runnable-nodes scheduler) runnable-nodes)
+(defmethod initialize-ready-nodes ((scheduler resource-scheduler))
+  (let ((ready-nodes (copy-tree (initial-nodes scheduler))))
+    ;(setf (ready-nodes scheduler) ready-nodes)
     (mapc #'(lambda (node) 
-      (set-runnable scheduler node)
+      (set-ready scheduler node)
       (let ((i-res (input-resources node)))
         (mapc #'(lambda (res)
            (activate-resource scheduler res))
               i-res)))
-          runnable-nodes)))
+          ready-nodes)))
 
 ;----------------------------------------------------------------
-(defmethod set-runnable ((scheduler resource-scheduler) (node node))
-  (let ((runnable-nodes (runnable-nodes scheduler)))
-    (setf (status node) :runnable)
-    (setf (runnable-nodes scheduler) (cons node runnable-nodes))))
+(defmethod set-ready ((scheduler resource-scheduler) (node node))
+  (let ((ready-nodes (ready-nodes scheduler)))
+    (setf (status node) :ready)
+    (setf (ready-nodes scheduler) (cons node ready-nodes))))
 
 ;----------------------------------------------------------------
-(defmethod reset-runnable-nodes ((scheduler resource-scheduler))
-  (let ((runnable-nodes (runnable-nodes scheduler)))
-    (setf (runnable-nodes scheduler) nil)))
+(defmethod reset-ready-nodes ((scheduler resource-scheduler))
+  (let ((ready-nodes (ready-nodes scheduler)))
+    (setf (ready-nodes scheduler) nil)))
 
 ;----------------------------------------------------------------
-(defmethod update-runnable-nodes ((scheduler resource-scheduler))
-  (labels ((is-runnable? (node)
+(defmethod update-ready-nodes ((scheduler resource-scheduler))
+  (labels ((is-ready? (node)
             (let ((input-resources (input-resources node))
-                  (special-resources (special-resources node))
-                  (output-resources (output-resources node)))
+                  (output-resources (output-resources node))
+                  (special-resources (special-resources node)))
+              (print `(,input-resources ,output-resources ,special-resources))
               (reduce #'(lambda (rv o-res) (and rv (not (eq (status o-res) :busy)))) output-resources :initial-value (reduce #'(lambda (rv res) (and rv (eq (status res) :active))) (append input-resources special-resources) :initial-value t)))))
 
-    (reset-runnable-nodes scheduler)
+    (reset-ready-nodes scheduler)
 
     (let ((all-nodes (nodes scheduler)))
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
-          (print `(stat ,node))
-          (if (not (eq stat :consumed))  ; :init :busy or :runnable
-            (if (is-runnable? node)
-              (set-runnable scheduler node)))))
+          ;(print `(:stat ,node ,(is-ready? node)))
+          (if (not (eq stat :consumed))  ; :init :busy or :ready
+            (if (is-ready? node)
+              (set-ready scheduler node)))))
 
              all-nodes))))
 
 ;----------------------------------------------------------------
-(defmethod select-candidate-node-to-run ((scheduler resource-scheduler))
+(defmethod select-candidate-node-to-ready ((scheduler resource-scheduler))
   (labels ((eval-cost (nodes cost resource-n)
              (if (null nodes) (cons cost resource-n)
                (let* ((node (car nodes))
@@ -166,7 +175,7 @@
                    (+ cost node-cost)
                    (+ resource-n node-cost))))))
 
-    (let ((candidate-nodes (runnable-nodes scheduler)))
+    (let ((candidate-nodes (ready-nodes scheduler)))
       (cond ((null candidate-nodes) nil)
             ((null (cdr candidate-nodes)) (car candidate-nodes)) ; len = 1
             (t 
@@ -186,13 +195,13 @@
                                 (if (< nc0-res-n nc1-res-n) nc1 nc0))))))))))))))
 
 ;----------------------------------------------------------------
-(defmethod run-node ((scheduler resource-scheduler) (node node))
+(defmethod apply-node ((scheduler resource-scheduler) (node node))
   (let ((cost (get-cost node))
         (all-resouces (get-all-resources node))
-        (runnable-nodes (runnable-nodes scheduler)))
+        (ready-nodes (ready-nodes scheduler)))
 
     (setf (status node) :consumed)
-    (setf (runnable-nodes scheduler) (delete node runnable-nodes))
+    (setf (ready-nodes scheduler) (delete node ready-nodes))
     (mapc #'(lambda (res) (set-status res :busy cost)) all-resouces)))
 
 ;----------------------------------------------------------------

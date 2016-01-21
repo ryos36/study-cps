@@ -30,13 +30,13 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-(defmethod register-vm-register ((scheduler vm-scheduler) sym)
+(defmethod add-vm-register ((scheduler vm-scheduler) sym)
   (let ((has-sym (get-resource scheduler sym)))
     (if has-sym has-sym
       (make-instance 'resource :name sym))))
 
 ;----------------------------------------------------------------
-(defmethod register-vm-registers ((scheduler vm-scheduler) reg-sym-list)
+(defmethod add-vm-registers ((scheduler vm-scheduler) reg-sym-list)
   (mapcar #'(lambda (sym)
     (register-vm-register scheduler sym)) reg-sym-list))
 
