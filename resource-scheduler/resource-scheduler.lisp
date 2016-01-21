@@ -1,3 +1,5 @@
+(in-package :sinby.cps.resource-scheduler)
+
 ;----------------------------------------------------------------
 (defclass resource-scheduler () 
   ((name :initarg :name :initform (gensym "scheduler-") :accessor name)

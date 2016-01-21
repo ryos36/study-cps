@@ -1,5 +1,4 @@
-
-ToDo-2:cps-transfer
+ToDo-1:cps-transfer
 イディオムに近いこのソースは
 
 (:fix ((fact0 (k n rv)

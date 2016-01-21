@@ -1,6 +1,10 @@
 ;----------------------------------------------------------------
-(load "../k-transfer/cps-parser.lisp")
-(load "cps-block-analyzer.lisp")
+(in-package :cps-reorder)
+
+;----------------------------------------------------------------
+;(load "../k-transfer/cps-parser.lisp")
+;(load "../resource-scheduler/resource-scheduler.lisp")
+;(load "cps-block-analyzer.lisp")
 
 ;----------------------------------------------------------------
 (defclass cps-reorder (cps-parser)
@@ -88,4 +92,3 @@
           (let ((new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
             `(,op ,args ,result ,new-next-cpss)))))))
-

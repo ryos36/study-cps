@@ -1,4 +1,9 @@
+(in-package :sinby.cps.test)
+;
+
 (setf *print-circle* t)
+
+(defparameter *test-env* nil)
 
 (defparameter *test-script-dir* nil)
 (defparameter *test-ext* nil)
@@ -96,7 +101,7 @@
           (setf result
                 (with-output-to-string (str)
                   (dolist (i lisp-test-list)
-                    (let ((rv (funcall *test-parse-func* i *env*)))
+                    (let ((rv (funcall *test-parse-func* i *test-env*)))
                       (format str "~s~%:~%~s~%" i rv)
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))

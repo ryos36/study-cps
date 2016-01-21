@@ -234,7 +234,7 @@ cps-transfer:
     だいたいで来た
     cps-transfer/ReadMe.txt を参照
 
-eta-reduction: cps-eta-reduction:
+eta-reduction:
     ちゃんと walk-cps して確認している。
     関数 check-eta-reduction をより厳密にチェックすべきか？
         optimize.lisp は walk-cps していないのでチェックが厳しい。
