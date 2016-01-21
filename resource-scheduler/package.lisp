@@ -7,8 +7,26 @@
   (:nicknames :resource-scheduler)
   (:export
     :resource-scheduler
+
+    :resources
+    :nodes
+    :initial-nodes
+    :final-nodes
+    :runnable-nodes
+
     :node
+
+    :instruction
+    :status
+    :input-resources
+    :output-resources
+    :special-resources
+    :successors
+
     :resource
+    ; :status
+    :ccounting
+
     :get-resource
     :register-resource
     :register-resources

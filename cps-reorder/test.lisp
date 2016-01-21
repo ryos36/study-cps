@@ -14,6 +14,7 @@
 (use-package :cps-parser)
 (use-package :cps-reorder)
 (use-package :cps-test)
+(use-package :vm-scheduler)
 
 (setf reorder (make-instance 'cps-reorder))
 (setf *test-env* (make-new-env reorder '()))
@@ -34,11 +35,7 @@
 (set-test-files '("25" (14 . 22)))
 (do-test)
 
-#|
-(setf reorder (make-instance 'cps-reorder))
-;(setf (reorder new-order) '(a b c))
-;(setf (get-new-order reorder) '(a b c))
-;(reset reorder)
-(print `(,(get-new-order reorder)))
-(pop-cps-expr reorder)
-|#
+
+(setf s (make-instance 'vm-scheduler))
+(print s)
+(print (resources s))

@@ -3,7 +3,7 @@
 
 ;----------------------------------------------------------------
 (defclass cps-block-analyzer (cps-parser)
-  ((scheduler :initarg :scheduler :initform (make-instance 'resource-scheduler) :accessor scheduler)))
+  ((scheduler :initarg :scheduler :initform (make-instance 'vm-scheduler) :accessor scheduler)))
 
 ;----------------------------------------------------------------
 (defmethod cps-reset-environment ((parser cps-block-analyzer))
@@ -17,6 +17,7 @@
 ;----------------------------------------------------------------
 (defmethod make-new-env ((parser cps-block-analyzer) env &optional (new-env-item (init-env)))
   (cons new-env-item env))
+
 ;----------------------------------------------------------------
 (defgeneric add-register (parser sym &optional stat))
 
@@ -61,17 +62,19 @@
         (args (cadr expr))
         (result (caddr expr))
         (next-cpss (cadddr expr))
-        (top-env (car env)))
+        (top-env (car env))
+        (scheduler (scheduler parser)))
 
     (print `(op ,op))
-    ;(mapc #'(lambda (r) (set-variable r :init env)) result)
-    ; ignore (:label |x|) and number ex. 1
-    ;(set-instruction op `(:init ,(remove-if #'(lambda (x) (not (cps-symbolp x))) args) ,result ,expr) env)
 
-    (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
-          (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
+          ; ignore (:label |x|) and number ex. 1
+    (let ((reg-syms (remove-if #'(lambda (x) (not (cps-symbolp x))) args)))
+      (add-primitive-instruction scheduler op reg-syms result)
 
-      `(,op ,new-args ,result ,new-next-cpss))))
+      (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
+            (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
+
+        `(,op ,new-args ,result ,new-next-cpss)))))
 
 ;----------------------------------------------------------------
 (defmethod do-cps-block-analyzer ((parser cps-block-analyzer) env)

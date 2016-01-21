@@ -8,7 +8,9 @@
   (:nicknames :vm-scheduler)
 
   (:export 
-    :vm-scheduler ))
+    :vm-scheduler 
+    :resources
+    ))
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.reorder
@@ -17,5 +19,4 @@
 
   (:export 
     :cps-reorder 
-    :make-new-env
     ))
