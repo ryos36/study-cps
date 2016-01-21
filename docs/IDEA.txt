@@ -1,0 +1,33 @@
+IDEA
+    (let ((io (heap-io 0xc0000000 0x1000)))
+      (fixh ((get-uart-status () (record-ref io 0))
+             (putc (c) (record-set! io 1 c))
+             (getc () (record-ref io 1))
+             (puts0 (str pos)
+                    (let ((c (record-ref str pos)))
+                      (if (= c 0)
+                        :#t
+                        (begin
+                          (putc c)
+                          (puts (str (+ pos 1)))))))
+             (puts (str) (puts0 str 0))))
+        ....
+        ....
+        (let ((hello (heap "Hello")))
+            (puts hello)))
+        ....
+
+コンパイル時に登録された io を変換。
+どうよ？
+
+IDEA その２
+    シンタックス・チェック用の汎用的なマクロ化関数を作るべき？
+    現時点では cps になった時点でシンタックスに間違いがない
+    という仮定をしている。これはこれでよい（スピードが上がるから)
+    scheme 側でシンタックスを見るべき。
+    デバッグ用にシンタックスをみる。
+    シンタックス・チェック言語って
+        構文定義を入れたら、そのコールバックが呼ばれる
+        トップ関数をつくる関数だよね。
+
+        なんかどっかにありそうなんだけど、、、
