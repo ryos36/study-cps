@@ -13,7 +13,8 @@
 
 (print rx)
 ;(activate-resource scheduler rx)
-;(activate-resource scheduler 'r1)
+(activate-resource scheduler 'acc)
+(activate-resource scheduler 'mem-ex)
 ;(activate-resource scheduler 'r20)
 
 (print r0)
@@ -36,9 +37,31 @@
 (print (is-dag? scheduler))
 (print (slot-value scheduler 'dag-flag))
 (print (is-dag? scheduler))
+
 (print (initialize-runnable-nodes scheduler))
+(print (reverse (resources scheduler)))
 (print (update-runnable-nodes scheduler))
 (print (nodes scheduler))
-(print (select-candidate-node-to-run scheduler))
+(setf sc-node (select-candidate-node-to-run scheduler))
+
 (print (mapcar #'(lambda (n) `(,(name n) ,(get-cost n))) (nodes scheduler)))
 
+(print `(here ,sc-node))
+(run-node scheduler sc-node)
+(print (nodes scheduler))
+(print (reverse (resources scheduler)))
+(update-accounting scheduler 3)
+(print (reverse (resources scheduler)))
+(print (update-runnable-nodes scheduler))
+(print `(nodes ,(nodes scheduler)))
+(print `(runnable-nodes ,(runnable-nodes scheduler)))
+(print (is-finished? scheduler))
+
+(setf sc-node (select-candidate-node-to-run scheduler))
+(print `(sc-node ,sc-node))
+(print `(nodes ,(nodes scheduler)))
+(run-node scheduler sc-node)
+(update-accounting scheduler)
+(update-runnable-nodes scheduler)
+(print (nodes scheduler))
+(print (is-finished? scheduler))

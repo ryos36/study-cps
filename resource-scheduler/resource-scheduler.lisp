@@ -11,6 +11,7 @@
 ;----------------------------------------------------------------
 (defclass node () 
   ((name :initarg :name :initform (gensym "node-") :accessor name)
+   (instruction :initarg :instruction :accessor instruction)
    (status :initarg :status :initform :init :accessor status)
    (cost-value :initarg :cost-value :initform 1)
    (input-resources :initarg :input-resources :initform nil :accessor input-resources)
@@ -22,7 +23,8 @@
 (defclass resource () 
   ((name :initarg :name :accessor name)
    (status :initarg :status :initform :init :accessor status)
-   (cost-value :initarg :cost-value :initform 1)))
+   (cost-value :initarg :cost-value :initform 1)
+   (accounting :initform 1)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -110,8 +112,9 @@
 ;----------------------------------------------------------------
 (defmethod initialize-runnable-nodes ((scheduler resource-scheduler))
   (let ((runnable-nodes (copy-tree (initial-nodes scheduler))))
-    (setf (runnable-nodes scheduler) runnable-nodes)
+    ;(setf (runnable-nodes scheduler) runnable-nodes)
     (mapc #'(lambda (node) 
+      (set-runnable scheduler node)
       (let ((i-res (input-resources node)))
         (mapc #'(lambda (res)
            (activate-resource scheduler res))
@@ -119,17 +122,35 @@
           runnable-nodes)))
 
 ;----------------------------------------------------------------
-(defmethod update-runnable-nodes ((scheduler resource-scheduler))
-  (let ((all-nodes (nodes scheduler)))
-    (mapc #'(lambda (node) 
-      (if (eq (status node) :init)
-        (let* ((all-input-resources (input-resources node))
-               (is-runnable?
-                 (reduce #'(lambda (rv res) (and rv (eq (status res) :active))) all-input-resources :initial-value t)))
-          (if is-runnable?
-            (setf (status node) :runnable)))))
+(defmethod set-runnable ((scheduler resource-scheduler) (node node))
+  (let ((runnable-nodes (runnable-nodes scheduler)))
+    (setf (status node) :runnable)
+    (setf (runnable-nodes scheduler) (cons node runnable-nodes))))
 
-          all-nodes)))
+;----------------------------------------------------------------
+(defmethod reset-runnable-nodes ((scheduler resource-scheduler))
+  (let ((runnable-nodes (runnable-nodes scheduler)))
+    (setf (runnable-nodes scheduler) nil)))
+
+;----------------------------------------------------------------
+(defmethod update-runnable-nodes ((scheduler resource-scheduler))
+  (labels ((is-runnable? (node)
+            (let ((input-resources (input-resources node))
+                  (special-resources (special-resources node))
+                  (output-resources (output-resources node)))
+              (reduce #'(lambda (rv o-res) (and rv (not (eq (status o-res) :busy)))) output-resources :initial-value (reduce #'(lambda (rv res) (and rv (eq (status res) :active))) (append input-resources special-resources) :initial-value t)))))
+
+    (reset-runnable-nodes scheduler)
+
+    (let ((all-nodes (nodes scheduler)))
+      (mapc #'(lambda (node) 
+        (let ((stat (status node)))
+          (print `(stat ,node))
+          (if (not (eq stat :consumed))  ; :init :busy or :runnable
+            (if (is-runnable? node)
+              (set-runnable scheduler node)))))
+
+             all-nodes))))
 
 ;----------------------------------------------------------------
 (defmethod select-candidate-node-to-run ((scheduler resource-scheduler))
@@ -163,6 +184,23 @@
                                 (if (< nc0-res-n nc1-res-n) nc1 nc0))))))))))))))
 
 ;----------------------------------------------------------------
+(defmethod run-node ((scheduler resource-scheduler) (node node))
+  (let ((cost (get-cost node))
+        (all-resouces (get-all-resources node))
+        (runnable-nodes (runnable-nodes scheduler)))
+
+    (setf (status node) :consumed)
+    (setf (runnable-nodes scheduler) (delete node runnable-nodes))
+    (mapc #'(lambda (res) (set-status res :busy cost)) all-resouces)))
+
+;----------------------------------------------------------------
+(defgeneric update-accounting (scheduler &optional n ))
+
+(defmethod update-accounting ((scheduler resource-scheduler)  &optional (n 1))
+  (let ((all-resources (resources scheduler)))
+    (mapc #'(lambda (res) (update-accounting res n)) all-resources)))
+
+;----------------------------------------------------------------
 (defgeneric activate-resource (scheduler res))
 
 (defmethod activate-resource ((scheduler resource-scheduler) (res resource))
@@ -173,6 +211,13 @@
   (let ((r (get-resource scheduler res)))
     (assert r)
     (activate-resource scheduler r)))
+
+;----------------------------------------------------------------
+(defmethod is-finished? ((scheduler resource-scheduler))
+  (null
+    (let ((all-nodes (nodes scheduler)))
+      (remove-if #'(lambda (stat) (eq stat :consumed))
+         (mapcar #'(lambda (node) (status node)) all-nodes)))))
 
 ;----------------------------------------------------------------
 (defmethod print-object ((scheduler resource-scheduler) stream)
@@ -204,12 +249,38 @@
      (length (output-resources node))))
 
 ;----------------------------------------------------------------
-(defmethod print-object ((node node) stream)
-  (write-string (format nil "#Node [~a ~s ~a ~a]" (name node) (status node)
-    (mapcar #'(lambda (r) (name r)) (input-resources node))
-    (mapcar #'(lambda (r) (name r)) (output-resources node))) stream))
+(defmethod get-all-resources ((node node))
+  (append
+    (input-resources node)
+    (special-resources node)
+    (output-resources node)))
 
 ;----------------------------------------------------------------
+(defmethod print-object ((node node) stream)
+  ;(let* ((insn (instruction node))
+  ;       (name (if insn insn (name node))))
+    (write-string (format nil "#Node [~a ~s ~a ~a]" (name node) (status node)
+      (mapcar #'(lambda (r) (name r)) (input-resources node))
+      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream))
+
+;----------------------------------------------------------------
+;----------------------------------------------------------------
+(defgeneric set-status (res stat &optional accounting))
+
+(defmethod set-status ((res resource) stat &optional (accounting 0))
+  (setf (status res) stat)
+  (setf (slot-value res 'accounting) accounting))
+
+;----------------------------------------------------------------
+(defmethod update-accounting ((res resource) &optional n)
+  (let* ((accounting (slot-value res 'accounting))
+         (new-value (- accounting n))
+         (stat (status res)))
+
+    (if (and (<= new-value 0) (eq stat :busy))
+      (set-status res :active 0)
+      (setf (slot-value res 'accounting) (max new-value 0)))))
+
 ;----------------------------------------------------------------
 (defmethod print-object ((res resource) stream)
   (write-string (format nil "#Resource [~a ~s]" (name res) (status res)) stream))
