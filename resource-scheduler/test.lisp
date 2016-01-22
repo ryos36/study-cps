@@ -43,6 +43,7 @@
 (print (slot-value scheduler 'dag-flag))
 (print (is-dag? scheduler))
 
+(print (initialize-activate-resources scheduler))
 (print (initialize-ready-nodes scheduler))
 (print (resources scheduler))
 (print (update-ready-nodes scheduler))
@@ -72,3 +73,4 @@
 (print `(nodes ,(nodes scheduler)))
 
 (print (is-finished? scheduler))
+(print `(ordered-nodes ,(ordered-nodes scheduler)))

@@ -5,8 +5,9 @@
 (load "../resource-scheduler/resource-scheduler.lisp")
 
 (load "package.lisp")
-(load "cps-reorder" )
 (load "vm-scheduler.lisp")
+(load "cps-block-analyzer.lisp")
+(load "cps-reorder.lisp" )
 
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
@@ -26,16 +27,15 @@
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
-;(defparameter *debug-mode* t)
+(defparameter *debug-mode* t)
 (defun cps-gensym-reset ()
   (setf (slot-value reorder 'sym-no) 0))
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
-(set-test-files '("25" (14 . 22)))
+(set-test-files '("26" (14 . 22)))
 (do-test)
 
-
-(setf s (make-instance 'vm-scheduler))
-(print s)
-(print (resources s))
+;(setf s (make-instance 'vm-scheduler))
+;(print s)
+;;(print (resources s))

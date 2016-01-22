@@ -13,7 +13,20 @@
     :sym-no
 
     :cps-gensym
+    :cps-symbolp
     :make-new-env
     :cps-primitive-p
     :cps-error-exit
+
+    :cps-terminal
+    :cps-symbol
+    :cps-bind
+    :cps-binds
+    :cps-fix
+    :cps-fixh
+    :cps-fixs
+    :cps-app
+    :cps-exit
+    :cps-primitive
+    
     :cps-parse))

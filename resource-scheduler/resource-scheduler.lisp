@@ -8,6 +8,7 @@
    (initial-nodes :initform nil :accessor initial-nodes)
    (final-nodes :initform nil :accessor final-nodes)
    (ready-nodes :initform nil :accessor ready-nodes)
+   (ordered-nodes :initform nil :accessor ordered-nodes)
    (dag-flag :initform nil)))
 
 ;----------------------------------------------------------------
@@ -56,7 +57,7 @@
   (mapcar #'(lambda (sym) 
     (let ((has-sym? (get-resource scheduler sym)))
       (if has-sym? has-sym?
-        (add-resource scheduler sym)))) res-syms))
+        (add-resource scheduler sym)))) (reverse res-syms)))
 
 ;----------------------------------------------------------------
 (defmethod add-node ((scheduler resource-scheduler) (node node) &optional input-syms output-syms special-syms)
@@ -120,6 +121,15 @@
       (eq flag :DAG)))))
 
 ;----------------------------------------------------------------
+(defmethod initialize-activate-resources ((scheduler resource-scheduler))
+  (let* ((all-resources (resources scheduler))
+         (special-or-args-or-free-syms 
+           (reduce #'set-difference 
+              (mapcar #'(lambda (n) (output-resources n))
+                      (nodes scheduler)) :initial-value all-resources)))
+    (mapcar #'(lambda (res) (activate-resource scheduler res) res) 
+        special-or-args-or-free-syms)))
+;----------------------------------------------------------------
 (defmethod initialize-ready-nodes ((scheduler resource-scheduler))
   (let ((ready-nodes (copy-tree (initial-nodes scheduler))))
     ;(setf (ready-nodes scheduler) ready-nodes)
@@ -148,7 +158,6 @@
             (let ((input-resources (input-resources node))
                   (output-resources (output-resources node))
                   (special-resources (special-resources node)))
-              (print `(,input-resources ,output-resources ,special-resources))
               (reduce #'(lambda (rv o-res) (and rv (not (eq (status o-res) :busy)))) output-resources :initial-value (reduce #'(lambda (rv res) (and rv (eq (status res) :active))) (append input-resources special-resources) :initial-value t)))))
 
     (reset-ready-nodes scheduler)
@@ -156,7 +165,6 @@
     (let ((all-nodes (nodes scheduler)))
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
-          ;(print `(:stat ,node ,(is-ready? node)))
           (if (not (eq stat :consumed))  ; :init :busy or :ready
             (if (is-ready? node)
               (set-ready scheduler node)))))
@@ -169,11 +177,12 @@
              (if (null nodes) (cons cost resource-n)
                (let* ((node (car nodes))
                       (node-cost (get-cost node))
-                      (resource-n (get-resource-size node)))
+                      (node-res-n (get-resource-size node)))
+
                  (eval-cost 
-                   (append (cdr nodes) (successors nodes))
+                   (append (cdr nodes) (successors node))
                    (+ cost node-cost)
-                   (+ resource-n node-cost))))))
+                   (+ resource-n node-res-n))))))
 
     (let ((candidate-nodes (ready-nodes scheduler)))
       (cond ((null candidate-nodes) nil)
@@ -181,7 +190,7 @@
             (t 
               (let ((node-cost-list
                  (mapcar #'(lambda (node)
-                   (cons node (eval-cost (list node)))) candidate-nodes)))
+                   (cons node (eval-cost (list node) 0 0))) candidate-nodes)))
 
                 (car
                   (reduce #'(lambda (nc0 nc1)
@@ -192,7 +201,8 @@
                             (t 
                               (let ((nc0-res-n (cddr nc0))
                                     (nc1-res-n (cddr nc1)))
-                                (if (< nc0-res-n nc1-res-n) nc1 nc0))))))))))))))
+                                (if (< nc0-res-n nc1-res-n) nc1 nc0))))))
+                          node-cost-list))))))))
 
 ;----------------------------------------------------------------
 (defmethod apply-node ((scheduler resource-scheduler) (node node))
@@ -200,6 +210,7 @@
         (all-resouces (get-all-resources node))
         (ready-nodes (ready-nodes scheduler)))
 
+    (setf (ordered-nodes scheduler) (append (ordered-nodes scheduler) (list node)))
     (setf (status node) :consumed)
     (setf (ready-nodes scheduler) (delete node ready-nodes))
     (mapc #'(lambda (res) (set-status res :busy cost)) all-resouces)))
@@ -267,12 +278,16 @@
     (output-resources node)))
 
 ;----------------------------------------------------------------
+(defmethod add-successor ((src-node node) (dst-node node))
+  (push dst-node (successors src-node)))
+
+;----------------------------------------------------------------
 (defmethod print-object ((node node) stream)
-  ;(let* ((insn (instruction node))
-  ;       (name (if insn insn (name node))))
-    (write-string (format nil "#Node [~a ~s ~a ~a]" (name node) (status node)
+  (let* ((insn (instruction node))
+         (the-name (if insn insn (name node))))
+    (write-string (format nil "#Node [~a ~s ~a ~a]" the-name (status node)
       (mapcar #'(lambda (r) (name r)) (input-resources node))
-      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream))
+      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------

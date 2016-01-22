@@ -31,6 +31,9 @@
 
     :name
 
+    :add-successor
+
+    :cost-value
     :get-resource
     :add-resource
     :add-resources
@@ -38,6 +41,7 @@
     :build-connection
     :is-dag?
     :initialize-ready-nodes
+    :initialize-activate-resources
     :set-ready
     :reset-ready-nodes
     :update-ready-nodes
@@ -46,6 +50,7 @@
     :update-accounting
     :activate-resource
     :is-finished?
+    :ordered-nodes
     :get-cost
     :update-cost
     :get-resource-size

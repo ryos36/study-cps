@@ -23,7 +23,7 @@
 
 (defmethod add-register ((parser cps-block-analyzer) sym &optional (stat :init))
     (let ((reg (make-instance 'resource :name sym :status stat)))
-      (register-resource (scheduler parser) reg)))
+      (add-resource (scheduler parser) reg)))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-block-analyzer) expr env)
@@ -47,13 +47,15 @@
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-block-analyzer) expr env)
   (let ((func-name (cadr expr))
-        (args (caddr expr)))
+        (args (caddr expr))
+        (scheduler (scheduler parser)))
         
     (let ((new-func-name (cps-symbol parser func-name env))
           (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) (copy-tree args)))
 
           )
-      ;(set-instruction :app `(:init (,func-name ,@args) nil ,expr) env)
+
+      (add-apply-instruction scheduler expr func-name args)
       `(:APP ,new-func-name ,new-args))))
 
 ;----------------------------------------------------------------
@@ -65,32 +67,49 @@
         (top-env (car env))
         (scheduler (scheduler parser)))
 
-    (print `(op ,op))
+    ; ignore (:label |x|) and number ex. 1
+    (add-primitive-instruction scheduler expr  op args result)
 
-          ; ignore (:label |x|) and number ex. 1
-    (let ((reg-syms (remove-if #'(lambda (x) (not (cps-symbolp x))) args)))
-      (add-primitive-instruction scheduler op reg-syms result)
+    (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
+          (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
-      (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
-            (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
-
-        `(,op ,new-args ,result ,new-next-cpss)))))
+      `(,op ,new-args ,result ,new-next-cpss))))
 
 ;----------------------------------------------------------------
 (defmethod do-cps-block-analyzer ((parser cps-block-analyzer) env)
-  '())
+  (let ((scheduler (scheduler parser)))
+    (build-connection scheduler)
+    (initialize-activate-resources scheduler)
+    (initialize-ready-nodes scheduler)
+
+
+    (labels ((do-cps-block-analyzer0 (n)
+              ;(print `(:do-cps-block-analyzer-cps-bind ,n ,(is-finished? scheduler)))
+               (if (is-finished? scheduler)
+                 (ordered-nodes scheduler)
+                 (let ((node (select-candidate-node-to-ready scheduler)))
+                   (if node 
+                     (apply-node scheduler node))
+
+                   (update-accounting scheduler)
+                   (update-ready-nodes scheduler)
+                   (do-cps-block-analyzer0 (+ n 1))))))
+
+      (do-cps-block-analyzer0 0))))
 
 ;----------------------------------------------------------------
-(let* ((analyzer (make-instance 'cps-block-analyzer :scheduler (make-instance 'resource-scheduler)))
-       (env (make-new-env analyzer '())))
-
-  (defun do-cps-block-analyzer-cps-bind (expr)
+(defun do-cps-block-analyzer-cps-bind (expr)
+  (let* ((analyzer (make-instance 'cps-block-analyzer))
+         (env (make-new-env analyzer '())))
     (cps-reset-environment analyzer)
     (let ((new-env (make-new-env analyzer env)))
       (cps-bind analyzer expr new-env)
-      (do-cps-block-analyzer analyzer new-env)))
+      (do-cps-block-analyzer analyzer new-env))))
 
-  (defun do-cps-block-analyzer-cps-parse (expr)
+;----------------------------------------------------------------
+(defun do-cps-block-analyzer-cps-parse (expr)
+  (let* ((analyzer (make-instance 'cps-block-analyzer))
+         (env (make-new-env analyzer '())))
     (cps-reset-environment analyzer)
     (let ((new-env (make-new-env analyzer env)))
       (cps-parse analyzer expr new-env)
