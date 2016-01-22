@@ -283,11 +283,9 @@
 
 ;----------------------------------------------------------------
 (defmethod print-object ((node node) stream)
-  (let* ((insn (instruction node))
-         (the-name (if insn insn (name node))))
-    (write-string (format nil "#Node [~a ~s ~a ~a]" the-name (status node)
+    (write-string (format nil "#Node [~a ~s ~a ~a]" (name node) (status node)
       (mapcar #'(lambda (r) (name r)) (input-resources node))
-      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream)))
+      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
