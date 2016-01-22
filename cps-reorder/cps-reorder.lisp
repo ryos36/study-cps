@@ -2,17 +2,8 @@
 (in-package :cps-reorder)
 
 ;----------------------------------------------------------------
-;(load "../k-transfer/cps-parser.lisp")
-;(load "../resource-scheduler/resource-scheduler.lisp")
-;(load "cps-block-analyzer.lisp")
-
-;----------------------------------------------------------------
 (defclass cps-reorder (cps-parser)
   (()))
-
-;----------------------------------------------------------------
-;(defmethod make-new-env ((parser cps-reorder) env &optional (new-env-item (init-env)))
-;  (cons new-env-item env))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind ((parser cps-reorder) expr env)
@@ -21,9 +12,8 @@
         (next-cps (caddr expr)))
 
     (let* ((result (do-cps-block-analyzer-cps-bind expr))
-           (new-env (make-new-env parser env result))
-           ;(x (print `(xxresult ,env ,(car new-env))))
-           (new-next-cps (cps-parse parser next-cps new-env)))
+           (new-next-cps (cps-parse parser next-cps env)))
+      (print `(:result ,result))
 
       `(,func-name ,args ,new-next-cps))))
 
@@ -92,3 +82,4 @@
           (let ((new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
             `(,op ,args ,result ,new-next-cpss)))))))
+
