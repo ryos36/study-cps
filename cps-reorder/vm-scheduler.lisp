@@ -96,23 +96,10 @@
     (mapc #'(lambda (src-insn) (add-successor src-insn apply-instruction))
           (nodes scheduler))
 
-    (mapc #'(lambda (src-insn) (print `(:successor ,(successors src-insn))))
-          (nodes scheduler))
-
     (add-node scheduler apply-instruction)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 (defmethod eval-alloc-cost ((instruction vm-instruction) instruction args results-syms)
     (+ (length args) 2))
-
-;----------------------------------------------------------------
-;(defmethod get-cost ((instruction vm-instruction))
-;  (labels ((assert-numberp (v) (assert (numberp v)) v))
-;    (let ((cost-value (slot-value instruction 'cost-value)))
-;      (assert (or (numberp cost-value) (functionp cost-value)))
-;
-;    (if (functionp cost-value)
-;      (funcall functionp instruction)
-;      (assert-numberp cost-value)))))
 

@@ -180,6 +180,8 @@
              all-nodes)
 
 
+      #|
+      ; DEBUG CODE
       (mapc #'(lambda (node) (print `(:node ,(instruction node)
                                             ,(status node)
                   ,(mapcar #'(lambda (i) (status i)) (input-resources node))
@@ -188,6 +190,7 @@
             all-nodes)
 
       (print `(:check0 ,(check-node-status scheduler)))
+      |#
 
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
@@ -200,12 +203,6 @@
 
              all-nodes)
 
-      (mapc #'(lambda (node) (print `(:node ,(instruction node)
-                                            ,(status node)
-                                            ,(copy-list (successors node)))))
-            all-nodes)
-
-      (print `(:check ,(check-node-status scheduler)))
 
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
