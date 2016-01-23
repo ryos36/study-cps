@@ -30,7 +30,7 @@
   (let ((fix-op (car expr))
         (binds (cadr expr)))
 
-    `(:DUMMY-FIX ,(mapcar #'(lambda (bind) (car bind)) binds))))
+    `(:NEXT-BLOCK ,fix-op ,(mapcar #'(lambda (bind) (car bind)) binds))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind ((parser cps-block-analyzer) expr env)
@@ -51,9 +51,7 @@
         (scheduler (scheduler parser)))
         
     (let ((new-func-name (cps-symbol parser func-name env))
-          (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) (copy-tree args)))
-
-          )
+          (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) (copy-tree args))))
 
       (add-apply-instruction scheduler expr func-name args)
       `(:APP ,new-func-name ,new-args))))
@@ -70,10 +68,16 @@
     ; ignore (:label |x|) and number ex. 1
     (add-primitive-instruction scheduler expr  op args result)
 
-    (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
-          (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
+   ;(= (length next-cpss) 1)
+    (if (not (null result))
+      (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
+            (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
-      `(,op ,new-args ,result ,new-next-cpss))))
+        `(,op ,new-args ,result ,new-next-cpss))
+
+      (if (null next-cpss)
+        '(:NO-BLOCK)
+        `(:NEXT-BLOCK ,op ,next-cpss)))))
 
 ;----------------------------------------------------------------
 (defmethod do-cps-block-analyzer ((parser cps-block-analyzer) env)

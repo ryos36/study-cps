@@ -14,6 +14,8 @@
 
     :costs
 
+    :cps-expr
+
     :add-vm-register
     :add-vm-registers
     :get-special-resource
@@ -32,5 +34,4 @@
     :cps-bind 
     :cps-primitive 
 
-    :do-cps-block-analyzer-cps-bind
     ))
