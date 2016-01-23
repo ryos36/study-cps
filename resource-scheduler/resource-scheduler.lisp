@@ -15,7 +15,7 @@
 ; stat -> :init :activate :busy :consumed
 (defclass node () 
   ((name :initarg :name :initform (gensym "node-") :accessor name)
-   (instruction :initarg :instruction :accessor instruction)
+   (instruction :initarg :instruction :initform nil :accessor instruction)
    (status :initarg :status :initform :init :accessor status)
    (cost-value :initarg :cost-value :initform 1)
    (input-resources :initarg :input-resources :initform nil :accessor input-resources)
@@ -150,7 +150,15 @@
 ;----------------------------------------------------------------
 (defmethod reset-ready-nodes ((scheduler resource-scheduler))
   (let ((ready-nodes (ready-nodes scheduler)))
-    (setf (ready-nodes scheduler) nil)))
+    (mapc #'(lambda (node) 
+              (if (eq (status node) :ready)
+                (setf (status node) :init))) ready-nodes)
+    (setf (ready-nodes scheduler) nil)
+
+    ;--
+    (mapc #'(lambda (node) 
+              (assert (not (eq (status node) :ready))))
+          (nodes scheduler))))
 
 ;----------------------------------------------------------------
 (defmethod update-ready-nodes ((scheduler resource-scheduler))
@@ -167,9 +175,60 @@
         (let ((stat (status node)))
           (if (not (eq stat :consumed))  ; :init :busy or :ready
             (if (is-ready? node)
-              (set-ready scheduler node)))))
+              (setf (status node) :candidate)))))
 
-             all-nodes))))
+             all-nodes)
+
+
+      (mapc #'(lambda (node) (print `(:node ,(instruction node)
+                                            ,(status node)
+                  ,(mapcar #'(lambda (i) (status i)) (input-resources node))
+                  ,(mapcar #'(lambda (o) (status o)) (output-resources node))
+                  ,(mapcar #'(lambda (s) (status s)) (special-resources node)))))
+            all-nodes)
+
+      (print `(:check0 ,(check-node-status scheduler)))
+
+      (mapc #'(lambda (node) 
+        (let ((stat (status node)))
+          (if (not (eq stat :consumed))  
+            (let ((successors (successors node)))
+              (mapc #'(lambda (successor-node)
+                (if (eq (status successor-node) :candidate) 
+                   (setf (status successor-node) :init)))
+                    successors )))))
+
+             all-nodes)
+
+      (mapc #'(lambda (node) (print `(:node ,(instruction node)
+                                            ,(status node)
+                                            ,(copy-list (successors node)))))
+            all-nodes)
+
+      (print `(:check ,(check-node-status scheduler)))
+
+      (mapc #'(lambda (node) 
+        (let ((stat (status node)))
+          (if (eq stat :candidate)
+            (set-ready scheduler node))))
+
+            all-nodes))))
+
+;----------------------------------------------------------------
+(defmethod check-node-status ((scheduler resource-scheduler))
+  (labels ((check-node-status0 (nodes rv)
+            (if (null nodes) (reverse rv) ; need copy of tree
+              (let* ((node (car nodes))
+                     (stat (status node))
+                     (statistic-0 (assoc stat rv)))
+
+                (if statistic-0 
+                  (setf (cdr statistic-0) (+ (cdr statistic-0) 1))
+                  (push `(,stat . 1) rv))
+
+                (check-node-status0 (cdr nodes) rv)))))
+
+    (check-node-status0 (nodes scheduler) '())))
 
 ;----------------------------------------------------------------
 (defmethod select-candidate-node-to-ready ((scheduler resource-scheduler))
@@ -283,9 +342,11 @@
 
 ;----------------------------------------------------------------
 (defmethod print-object ((node node) stream)
-    (write-string (format nil "#Node [~a ~s ~a ~a]" (name node) (status node)
+  (let* ((insn (instruction node))
+         (the-name (if insn insn (name node))))
+    (write-string (format nil "#Node [~a ~s ~a ~a]" the-name (status node)
       (mapcar #'(lambda (r) (name r)) (input-resources node))
-      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream))
+      (mapcar #'(lambda (r) (name r)) (output-resources node))) stream)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
