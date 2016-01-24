@@ -14,7 +14,6 @@
     (let* ((result (do-cps-block-analyzer-cps-bind expr))
            (new-env (make-new-env parser env result))
            (new-next-cps (cps-parse parser next-cps new-env)))
-      ;(print `(:result ,result))
 
       `(,func-name ,args ,new-next-cps))))
 
@@ -51,9 +50,9 @@
 
         (setf (car env) (cdr top-env))
 
-        (print `(pop-expr ,(name replace-insn)))
+        ;(print `(pop-expr ,(name replace-insn)))
 
-        (print `(top-env ,top-env))
+        ;(print `(top-env ,top-env))
         (if (not (= 0 (length (cdr top-env))))
           (error "reorder parse error"))
 
@@ -85,4 +84,3 @@
           (let ((new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
             `(,op ,args ,result ,new-next-cpss)))))))
-

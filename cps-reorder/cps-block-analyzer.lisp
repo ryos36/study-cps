@@ -70,7 +70,7 @@
 
    ;(= (length next-cpss) 1)
     (if (not (null result))
-      (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
+      (let* ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
             (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
         `(,op ,new-args ,result ,new-next-cpss))
@@ -86,7 +86,6 @@
     (initialize-activate-resources scheduler)
     (initialize-ready-nodes scheduler)
 
-
     (labels ((do-cps-block-analyzer0 (n)
               ;(print `(:do-cps-block-analyzer-cps-bind ,n ,(is-finished? scheduler)))
                (if (is-finished? scheduler)
@@ -99,7 +98,9 @@
                    (update-ready-nodes scheduler)
                    (do-cps-block-analyzer0 (+ n 1))))))
 
-      (do-cps-block-analyzer0 0))))
+      (let ((rv (do-cps-block-analyzer0 0)))
+        ;(print `(:result ,rv))
+        rv))))
 
 ;----------------------------------------------------------------
 (defun do-cps-block-analyzer-cps-bind (expr)

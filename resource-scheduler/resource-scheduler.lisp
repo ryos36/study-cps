@@ -6,7 +6,6 @@
    (resources :initform nil :accessor resources)
    (nodes :initform nil :accessor nodes)
    (initial-nodes :initform nil :accessor initial-nodes)
-   (final-nodes :initform nil :accessor final-nodes)
    (ready-nodes :initform nil :accessor ready-nodes)
    (ordered-nodes :initform nil :accessor ordered-nodes)
    (dag-flag :initform nil)))
@@ -81,23 +80,29 @@
 (defmethod build-connection ((scheduler resource-scheduler))
   (let (intermedium-nodes
         (all-nodes (nodes scheduler)))
-    (mapc #'(lambda (src-node)
-      (let ((o-res (output-resources src-node)))
-        (mapc #'(lambda (dst-node)
-          (let ((i-res (input-resources dst-node)))
-            (if (intersection o-res i-res)
-              (progn
-                (push dst-node intermedium-nodes)
-                (push dst-node (successors src-node))))))
 
-              all-nodes)))
-          all-nodes)
+    (let ((anchor-node (car all-nodes)))
+      (if anchor-node
+        (setf (status anchor-node) :anchor))
 
-    (setf (initial-nodes scheduler) (set-difference all-nodes intermedium-nodes))
-    (setf (final-nodes scheduler) 
-      (remove-if #'null (mapcar #'(lambda (n)
-                                    (if (null (successors n)) n)) all-nodes)))
-    ))
+      (mapc #'(lambda (src-node)
+        (let ((o-res (output-resources src-node)))
+          (mapc #'(lambda (dst-node)
+            (let ((i-res (input-resources dst-node)))
+              (if (intersection o-res i-res)
+                (progn
+                  (push dst-node intermedium-nodes)
+                  (push dst-node (successors src-node))))))
+
+                all-nodes)))
+            all-nodes)
+
+      (setf (initial-nodes scheduler) 
+            (set-difference all-nodes (cons anchor-node intermedium-nodes)))
+
+      (if anchor-node
+        (let ((new-all-nodes (cdr all-nodes)))
+          (setf (nodes scheduler) (cdr all-nodes)))))))
 
 ;----------------------------------------------------------------
 (defmethod is-dag? ((scheduler resource-scheduler))
@@ -129,6 +134,7 @@
                       (nodes scheduler)) :initial-value all-resources)))
     (mapcar #'(lambda (res) (activate-resource scheduler res) res) 
         special-or-args-or-free-syms)))
+
 ;----------------------------------------------------------------
 (defmethod initialize-ready-nodes ((scheduler resource-scheduler))
   (let ((ready-nodes (copy-tree (initial-nodes scheduler))))
@@ -173,12 +179,12 @@
     (let ((all-nodes (nodes scheduler)))
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
-          (if (not (eq stat :consumed))  ; :init :busy or :ready
+          (if (not (or (eq stat :consumed)
+                       (eq stat :anchor))) ; :init :busy or :ready
             (if (is-ready? node)
               (setf (status node) :candidate)))))
 
              all-nodes)
-
 
       #|
       ; DEBUG CODE
@@ -202,7 +208,6 @@
                     successors )))))
 
              all-nodes)
-
 
       (mapc #'(lambda (node) 
         (let ((stat (status node)))
