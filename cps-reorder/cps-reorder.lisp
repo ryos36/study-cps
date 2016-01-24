@@ -21,14 +21,16 @@
 (def-cps-func cps-fix ((parser cps-reorder) expr env)
   (let ((fix-op (car expr))
         (binds (cadr expr))
-        (next-cps (caddr expr))
-        ; use new-env to stop to reorder
-        (new-env (make-new-env parser env)))
+        (next-cps (caddr expr)))
         
-    (let ((new-binds (cps-binds parser binds new-env)))
+    ;(print `(:top-env ,(car env)))
+    (if (not (= 0 (length (cdr (car env)))))
+      (error "reorder parse error"))
+
+    (let ((new-binds (cps-binds parser binds env)))
       (let* ((result (do-cps-block-analyzer-cps-parse next-cps))
-             (new-new-env (make-new-env parser new-env result))
-             (new-next-cps (cps-parse parser next-cps new-new-env)))
+             (new-env (make-new-env parser env result))
+             (new-next-cps (cps-parse parser next-cps new-env)))
 
       `(,fix-op ,new-binds ,new-next-cps)))))
 
@@ -52,7 +54,6 @@
 
         ;(print `(pop-expr ,(name replace-insn)))
 
-        ;(print `(top-env ,top-env))
         (if (not (= 0 (length (cdr top-env))))
           (error "reorder parse error"))
 
@@ -72,6 +73,7 @@
 
         ;(if (null (car replace-insn))
           ;(print `(env ,top-env)))
+
         (setf (car env) (cdr top-env))
 
         (let ((op (car replace-expr))
@@ -80,6 +82,9 @@
               (next-cpss (cadddr expr)))
 
           ;(print `(:op ,op ,args ,result))
+          (if (and (not (= (length next-cpss) 1))
+                   (not (= 0 (length (cdr (car env))))))
+            (error "reorder parse error"))
 
           (let ((new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 

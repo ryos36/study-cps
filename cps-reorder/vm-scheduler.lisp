@@ -73,15 +73,6 @@
 
              :cps-expr cps-expr)))
 
-    #|
-    (if (eq instruction :pop)
-      (mapc #'(lambda (src-insn)
-                (if (member (instruction src-insn) 
-                            '(:record-ref :record-set! :stack :pop))
-                  (add-successor src-insn primtive-instruction)))
-            (nodes scheduler)))
-    |#
-
     (add-node scheduler primtive-instruction)))
 
 ;----------------------------------------------------------------
@@ -94,11 +85,6 @@
              :speical-resources `(,(get-resource scheduler :jump))
 
              :cps-expr cps-expr)))
-
-    #|
-    (mapc #'(lambda (src-insn) (add-successor src-insn apply-instruction))
-          (nodes scheduler))
-    |#
 
     (add-node scheduler apply-instruction)))
 

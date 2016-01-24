@@ -78,12 +78,9 @@
 
 ;----------------------------------------------------------------
 (defmethod build-connection ((scheduler resource-scheduler))
-  (let (intermedium-nodes
-        (all-nodes (nodes scheduler)))
-
-    (let ((anchor-node (car all-nodes)))
-      (if anchor-node
-        (setf (status anchor-node) :anchor))
+  (let* ((all-nodes (nodes scheduler))
+         (anchor-node (car all-nodes))
+         (intermedium-nodes (if anchor-node (list anchor-node))))
 
       (mapc #'(lambda (src-node)
         (let ((o-res (output-resources src-node)))
@@ -98,11 +95,12 @@
             all-nodes)
 
       (setf (initial-nodes scheduler) 
-            (set-difference all-nodes (cons anchor-node intermedium-nodes)))
+            (set-difference all-nodes intermedium-nodes))
 
       (if anchor-node
         (let ((new-all-nodes (cdr all-nodes)))
-          (setf (nodes scheduler) (cdr all-nodes)))))))
+          (setf (status anchor-node) :anchor)
+          (setf (nodes scheduler) (cdr all-nodes))))))
 
 ;----------------------------------------------------------------
 (defmethod is-dag? ((scheduler resource-scheduler))

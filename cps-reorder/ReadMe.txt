@@ -1,5 +1,5 @@
 =============================================
-ブロックの定義
+ブロックの定義と anchor の導入
 
 (op (args) (result) ((....))
 において result がないということは
@@ -25,6 +25,7 @@
 
 =============================================
 resource-scheduler に anchor を導入した。
+
 build-connection で最後に登録された演算を anchor とし
 全体のノードから引くことにした。anchor は位置として
 変わらないので、scheduler からとれる nodes に anchor が
@@ -32,18 +33,20 @@ build-connection で最後に登録された演算を anchor とし
 
 cps-block-analyzer の結果には anchor は現れない。
 cps-reorder で復元するときに特に矛盾はない。
+
+anchor はあまり素晴らしいアイデアではない。
+    schedule のヒントになるように successors には
+        anchor ノードが入ることがある。
+        (レジスタを見て依存関係があれば successors に入る)
+    しかし、入れ替えの対象にはならない。
+
 =============================================
-ブロックの検出が
-reorder と cps-block-analyzer で二重になっている。
 cps-block-analyzer では block の終了を発見したら
 それ以降の walk をやめる。
 
-一方、reorder では block の終了を見つけたら
-新しい環境をつくりそれ以上置き換えをしないよう
-にしている。
-reorder の方では block の終了を見つけたときには
-すでにすべての置き換えは完了しているはず。
-なので、 reorder のほうは assert にすべき
+一方、reorder の方では block の終了を見つけたときには
+すでにすべての置き換えるべき演算は pop している
+ので assert にした。
 =============================================
 すべての insn をチェックし発火可能なものを見つける。
 ある重みづけをして優先する insn を決定
