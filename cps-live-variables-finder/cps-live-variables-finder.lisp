@@ -45,7 +45,7 @@
     (setf (car env) top-env)))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-fix ((parser cps-parser) expr env)
+(def-cps-func cps-fix ((parser cps-live-variables-finder) expr env)
   (let ((fix-op (car expr))
         (binds (cadr expr))
         (next-cps (caddr expr)))
@@ -57,7 +57,7 @@
       (let ((new-binds (cps-binds parser binds env))
             (new-next-cps (cps-parse parser next-cps env)))
 
-        (copy-tree `(,fix-op ,new-binds 
+        (copy-tree `(,fix-op ,new-binds
                              (:FIX-BODY
                                (:declare ,@func-names)
                                (:use)
@@ -79,7 +79,7 @@
                            (,new-next-cps)))))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-app ((parser cps-parser) expr env)
+(def-cps-func cps-app ((parser cps-live-variables-finder) expr env)
   (let* ((func-name (cadr expr))
          (args (caddr expr))
          (use-vars-ignore-not-symbol 

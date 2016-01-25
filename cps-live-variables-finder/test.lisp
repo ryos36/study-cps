@@ -15,7 +15,8 @@
 (setf *test-env* (make-new-env live-variables-finder '() '()))
 
 (defun cps-parse-one (cps-expr env)
-  (cps-parse live-variables-finder cps-expr env))
+  (cps-parse live-variables-finder cps-expr env)
+  )
 
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")
