@@ -5,6 +5,7 @@
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.live-variables-finder
   (:use :cl :cps-parser)
+  (:import-from :cps-parser :cps-symbolp)
   (:nicknames :cps-live-variables-finder)
 
   (:export 

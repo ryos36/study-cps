@@ -12,7 +12,7 @@
 (use-package :cps-test)
 
 (setf live-variables-finder (make-instance 'cps-live-variables-finder))
-(setf *test-env* (make-new-env live-variables-finder '()))
+(setf *test-env* (make-new-env live-variables-finder '() '()))
 
 (defun cps-parse-one (cps-expr env)
   (cps-parse live-variables-finder cps-expr env))
