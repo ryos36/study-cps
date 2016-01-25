@@ -1,12 +1,12 @@
 ;----------------------------------------------------------------
-(in-package :cps-spill)
+(in-package :cps-live-variables-finder)
 
 ;----------------------------------------------------------------
-(defclass cps-spill (cps-parser)
+(defclass cps-live-variables-finder (cps-parser)
   (()))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-bind ((parser cps-spill) expr env)
+(def-cps-func cps-bind ((parser cps-live-variables-finder) expr env)
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr)))
@@ -16,7 +16,7 @@
       `(,func-name ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-primitive ((parser cps-spill) expr env)
+(def-cps-func cps-primitive ((parser cps-live-variables-finder) expr env)
   (let ((op (car expr))
         (args (cadr expr))
         (result (caddr expr))
