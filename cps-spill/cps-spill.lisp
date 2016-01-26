@@ -15,6 +15,7 @@
 
 ;----------------------------------------------------------------
 (defmethod update-next-spill-list ((parser cps-spill) op-live-vars-list spill-list)
+  (print `(:unsl ,spill-list))
   (labels ((build-spill-list (old-spill-list add-spill-vars)
             (if (null add-spill-vars)
               old-spill-list
@@ -30,9 +31,9 @@
            (last-use-vars (cdaddr live-vars-list))
            (last-use-vars-n (length last-use-vars))
            (live-vars (cdr (cadddr live-vars-list)))
-           ;(x (print `(:declare-vars ,declare-vars)))
 
            (spill-vars-list (cdr spill-list))
+           (x (print `(:spill ,spill-vars-list)))
            (used-vars (cdr (car spill-vars-list)))
            (dup-room-n-vars (cdr (cadr spill-vars-list)))
            (dup-room-n (car dup-room-n-vars))
@@ -60,9 +61,12 @@
              (if need-spill?
                (- max-n (length live-vars) (max last-use-vars-n declare-vars-n) 1)
                (- max-n current-max-n)))
+           ;(x (print `(:min ,need-spill? ,current-dup-n ,current-max-n)))
            (max-dup-n (if need-spill? max-n
                         (if (null spill-out-vars) 0
                           dup-room-n)))
+           ;(x (print `(:mmin ,need-spill? ,dup-room-n-vars)))
+           (a (assert dup-room-n))
            (next-dup-n (max (min current-dup-n max-dup-n) 0))
            (next-dup-vars (if (or (= next-dup-n 0) (= max-n current-max-n)) nil
                             (if need-spill?
@@ -72,6 +76,7 @@
 
       ;(print `(:up ,next-dup-n ,@next-dup-vars))
 
+      (print `(:next-dup-n ,next-dup-n))
       (values 
         (copy-tree
           `(:spill
@@ -98,8 +103,8 @@
                                    (new-dup-n (- (car dup-n-vars) 1))
                                    (new-dup-vars (if (= new-dup-n 0) '()
                                                    (remove var dup-vars))))
-                              (setf (cdar next-spill-list) new-used-vars)
-                              (setf (cdadr next-spill-list) 
+                              (setf (cdadr next-spill-list) new-used-vars)
+                              (setf (cdaddr next-spill-list) 
                                     (cons new-dup-n new-dup-vars))
                               var)
                             (let* ((spill-vars (cdr spill-list))
@@ -178,6 +183,7 @@
         (live-vars-pair (caar env))
         (spill-list (cadar env)))
 
+    (print `(:cps-fix ,fix-op ,spill-list))
     (let* ((fix-body-live-vars-pair (cadddr live-vars-pair))
            (next-live-vars-list (car (nth 4 fix-body-live-vars-pair)))
            (binds-live-vars (caddr live-vars-pair))
@@ -256,7 +262,7 @@
         (live-vars-pair (caar env))
         (spill-list (cadar env)))
 
-    ;(print `(:op ,op ,spill-list))
+    (print `(:op ,op ,args ,spill-list ,(copy-tree (car env))))
     (multiple-value-bind (next-spill-list need-spill?)  (update-next-spill-list parser live-vars-pair spill-list)
 
         (if need-spill?
@@ -264,6 +270,7 @@
 
         (multiple-value-bind (new-args pop-vars)
           (update-variables parser args next-spill-list)
+          (print `(:napv ,new-args ,pop-vars))
 
           (let* ((reference-wrapper-func (if pop-vars (create-reference-wrapper parser pop-vars) #'(lambda (x) x)))
                  (stack-wrapper-func (if need-spill? (create-stack-wrapper parser spill-list next-spill-list) #'(lambda (x) x)))

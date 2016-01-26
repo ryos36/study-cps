@@ -26,7 +26,7 @@
                                   (copy-tree `((:live-vars ,@result)
                                                (:spill
                                                  (:used )
-                                                 (:duplicate )
+                                                 (:duplicate 0)
                                                  (:spill-out ))))
                                   )))
 
@@ -43,5 +43,5 @@
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
-(set-test-files '("26"))
+(set-test-files '("44"))
 (do-test)
