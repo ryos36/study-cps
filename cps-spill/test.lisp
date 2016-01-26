@@ -1,6 +1,9 @@
 (load "../k-transfer/package.lisp")
 (load "../k-transfer/cps-parser.lisp")
 
+(load "../cps-live-variables-finder/package.lisp")
+(load "../cps-live-variables-finder/cps-live-variables-finder.lisp")
+
 (load "package.lisp")
 (load "cps-spill.lisp" )
 
@@ -8,14 +11,26 @@
 (load "../test-lisp/test.lisp")
 
 (use-package :cps-parser)
-(use-package :cps-spill)
+;(use-package :cps-spill)
 (use-package :cps-test)
 
-(setf spill (make-instance 'cps-spill))
+(setf spill (make-instance 'cps-spill:cps-spill))
+(setf finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
 (setf *test-env* (make-new-env spill '()))
 
 (defun cps-parse-one (cps-expr env)
-  (cps-parse spill cps-expr env))
+  (let* ((finder-env (make-new-env finder '() '()))
+         (result (cps-parse finder cps-expr finder-env))
+         (spill-env (make-new-env spill '() 
+                                  (copy-tree `((:live-vars ,@result)
+                                               (:spill
+                                                 (:used )
+                                                 (:duplicate )
+                                                 (:spill-out ))))
+                                  )))
+
+    (cps-parse spill cps-expr spill-env)
+    ))
 
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")
