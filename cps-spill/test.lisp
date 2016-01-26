@@ -11,7 +11,7 @@
 (load "../test-lisp/test.lisp")
 
 (use-package :cps-parser)
-;(use-package :cps-spill)
+(use-package :cps-spill)
 (use-package :cps-test)
 
 (setf spill (make-instance 'cps-spill:cps-spill))
@@ -42,5 +42,5 @@
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
-(set-test-files '("26" (14 . 22)))
+(set-test-files '("26"))
 (do-test)

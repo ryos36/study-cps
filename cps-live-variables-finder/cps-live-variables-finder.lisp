@@ -50,46 +50,40 @@
         (binds (cadr expr))
         (next-cps (caddr expr)))
 
-    (let ((func-names (mapcar #'(lambda (bind) (car bind)) binds)))
-        
-      (add-vars parser (copy-list func-names) nil env)
+    ;(add-vars parser (copy-list func-names) nil env)
 
-      (let ((new-binds (cps-binds parser binds env))
-            (new-next-cps (cps-parse parser next-cps env)))
+    (let ((new-binds (cps-binds parser binds env))
+          (new-next-cps (cps-parse parser next-cps env)))
 
-        (copy-tree `(,fix-op ,new-binds
-                             (:FIX-BODY
-                               (:declare ,@func-names)
-                               (:use)
-                               (:live)
-                               (,new-next-cps))))))))
+      (copy-tree `(,fix-op ,new-binds
+                           (:FIX-BODY
+                             (:declare)
+                             (:use)
+                             (:live)
+                             (,new-next-cps)))))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind ((parser cps-live-variables-finder) expr env)
-  (let ((func-name (car expr))
-        (args (cadr expr))
+  (let ((args (cadr expr))
         (next-cps (caddr expr))
         (another-env (make-new-env parser '() '())))
 
-    (let ((declare-vars `(,func-name ,@args)))
-      (add-vars parser (copy-list declare-vars) nil another-env)
-      (let* ((new-next-cps (cps-parse parser next-cps another-env)))
+    (add-vars parser (copy-list args) nil another-env)
+    (let* ((new-next-cps (cps-parse parser next-cps another-env)))
 
-        (copy-list `(:BIND (:declare ,@declare-vars) (:use) (:live)
-                           (,new-next-cps)))))))
+      (copy-list `(:BIND (:declare ,@args) (:use) (:live)
+                         (,new-next-cps))))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-live-variables-finder) expr env)
-  (let* ((func-name (cadr expr))
-         (args (caddr expr))
+  (let* ((args (caddr expr))
          (use-vars-ignore-not-symbol 
-           (remove-if #'(lambda (x) (not (cps-symbolp x))) args))
-         (use-vars `(,func-name ,@use-vars-ignore-not-symbol)))
+           (remove-if #'(lambda (x) (not (cps-symbolp x))) args)))
         
       ;(print `(:use-vars ,args :uv ,use-vars))
       ;(update-live-variables nil use-vars env)
 
-      (copy-tree `(:APP (:declare) (:use ,@use-vars) (:live )))))
+      (copy-tree `(:APP (:declare) (:use ,@use-vars-ignore-not-symbol) (:live )))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser cps-live-variables-finder) expr env)
