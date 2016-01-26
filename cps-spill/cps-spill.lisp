@@ -12,6 +12,7 @@
        (:used )
        (:duplicate 0) ; (:duplicate n vars...) 
        (:spill-out ))))
+
 ;----------------------------------------------------------------
 (defmethod update-next-spill-list ((parser cps-spill) op-live-vars-list spill-list)
   (labels ((build-spill-list (old-spill-list add-spill-vars)
@@ -80,6 +81,83 @@
         need-spill?))))
 
 ;----------------------------------------------------------------
+(defmethod update-variables ((parser cps-spill) vars next-spill-list)
+  (let ((vars-list (cdr next-spill-list))
+        pop-vars)
+    (print `(uv ,vars ,next-spill-list))
+    (values
+      (mapcar #'(lambda (var)
+                  (if (not (cps-symbolp var)) var
+                    (let ((used-vars (cdar vars-list))
+                          (dup-n-vars (cdadr vars-list))
+                          (spill-list (cdr (caddr vars-list))))
+
+                      (if (find var used-vars) var
+                        (let ((dup-vars (cdr dup-n-vars)))
+                          (if (find var dup-vars)
+                            (let* ((new-used-vars (cons var used-vars))
+                                   (new-dup-n (- (car dup-n-vars) 1))
+                                   (new-dup-vars (if (= new-dup-n 0) '()
+                                                   (remove var dup-vars))))
+                              (setf (cdar next-spill-list) new-used-vars)
+                              (setf (cdadr next-spill-list) 
+                                    (cons new-dup-n new-dup-vars))
+                              var)
+                            (let* ((spill-vars (cdr spill-list))
+                                   (pos (position var (reverse spill-vars))))
+                              (if pos 
+                                (let ((new-sym (cps-gensym parser)))
+                                  (push (copy-list 
+                                          `(:pop-vars (,(caar spill-list) ,pos)
+                                                 (,new-sym))) pop-vars)
+                                  new-sym)
+                                var ))))))))
+              vars)
+      pop-vars)))
+
+
+;----------------------------------------------------------------
+;----------------------------------------------------------------
+(defmethod create-stack-wrapper ((parser cps-spill) pop-vars old-spill-list new-spill-list)
+  (labels ((create-reference-wrapper0 (pop-vars0 rv)
+             (if (null pop-vars0) rv
+               (let ((one-pop-var (copy-tree (car pop-vars0))))
+                 (setf (cdddr one-pop-var) (copy-tree '((CONT))))
+                 (setf (car one-pop-var) :RECORD-REF)
+                 (push one-pop-var rv)
+                 (create-reference-wrapper0 (cdr pop-vars0) rv)))))
+
+    (let* ((old-spill-vars (cddr (cadddr old-spill-list)))
+           (new-spill-out-list (cadddr new-spill-list))
+           (new-spill-vars (cddr new-spill-out-list))
+           (new-spill-syms (cadr new-spill-out-list))
+           (the-spill-sym (car new-spill-syms))
+           (add-spill-vars (last new-spill-list (- (length new-spill-list) 
+                                                   (length old-spill-list))))
+           (stack-cps (copy-tree `(:STACK ,(reverse add-spill-vars) 
+                                          (,the-spill-sym) (CONT))))
+           (cont-list (pickup-list stack-cps 'CONT))
+           (ref-cps (create-reference-wrapper0 pop-vars '()))
+           (next-cps
+             (if ref-cps (let ((top-ref-cps (car ref-cps))
+                               (top-ref-list (pickup-list top-ref-cps 'CONT)))
+                           (labels ((create-reference-wrapper1 (ref-cps0 rv)
+                                       (if (null ref-cps0) rv
+                                         (let* ((item (car ref-cps0))
+                                                (cont-list (cadddr item)))
+                                           (setf (car cont-list) rv)
+                                           (create-reference-wrapper1
+                                             (cdr ref-cps0)
+                                             item )))))
+                             (create-reference-wrapper1 ref-cps stack-cps)))
+               stack-cps)))
+
+      (flet ((stack-place-holder-func (cont)
+                (setf (car cont-list) cont)
+                stack-cps))
+
+        #'stack-place-holder-func))))
+
 ;----------------------------------------------------------------
 (def-cps-func cps-fix ((parser cps-spill) expr env)
   (let ((fix-op (car expr))
@@ -139,41 +217,6 @@
 
       `(,func-name ,args ,new-next-cps))))
 
-;----------------------------------------------------------------
-(defmethod update-variables ((parser cps-spill) vars next-spill-list)
-  (let ((vars-list (cdr next-spill-list))
-        ref-vars)
-    (print `(uv ,vars ,next-spill-list))
-    (values
-      (mapcar #'(lambda (var)
-                  (if (not (cps-symbolp var)) var
-                    (let ((used-vars (cdar vars-list))
-                          (dup-n-vars (cdadr vars-list))
-                          (spill-list (cdr (caddr vars-list))))
-
-                      (if (find var used-vars) var
-                        (let ((dup-vars (cdr dup-n-vars)))
-                          (if (find var dup-vars)
-                            (let* ((new-used-vars (cons var used-vars))
-                                   (new-dup-n (- (car dup-n-vars) 1))
-                                   (new-dup-vars (if (= new-dup-n 0) '()
-                                                   (remove var dup-vars))))
-                              (setf (cdar next-spill-list) new-used-vars)
-                              (setf (cdadr next-spill-list) 
-                                    (cons new-dup-n new-dup-vars))
-                              var)
-                            (let* ((spill-vars (cdr spill-list))
-                                   (pos (position var (reverse spill-vars))))
-                              (if pos 
-                                (let ((new-sym (cps-gensym parser)))
-                                  (push (copy-list 
-                                          `(:ref (,(caar spill-list) ,pos)
-                                                 (,new-sym))) ref-vars)
-                                  new-sym)
-                                var ))))))))
-              vars)
-      ref-vars)))
-
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-parser) expr env)
@@ -188,6 +231,7 @@
       ;    (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args)))
       (print `(:app-new-args ,new-args))
       `(:APP ,new-func-name ,new-args))))
+
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser cps-spill) expr env)
   (let ((op (car expr))
@@ -203,14 +247,18 @@
 
         (if need-spill?
           (print `(:update-result ,next-spill-list ,need-spill?)))
-        (let* ((new-args (update-variables parser args next-spill-list))
-               (next-live-vars-list (nth 5 live-vars-pair))
-               (x (print `(:new-args ,new-args)))
-               (new-next-cpss (mapcar #'(lambda (cps next-live-vars) 
-                                          (let ((new-env (make-new-env parser env 
-                                                                       `((:live-vars ,@next-live-vars)
-                                                                         ,next-spill-list))))
-                                            (cps-parse parser cps new-env)))
-                                      next-cpss next-live-vars-list)))
 
-          `(,op ,new-args ,result ,new-next-cpss)))))
+        (multiple-value-bind (new-args pop-vars)
+          (update-variables parser args next-spill-list)
+
+          (let* ((stack-wrapper-func (if need-spill? (create-stack-wrapper pop-vars spill-list next-spill-list) #'(lambda (x) x)))
+                 (next-live-vars-list (nth 5 live-vars-pair))
+                 (new-next-cpss (mapcar #'(lambda (cps next-live-vars) 
+                                            (let ((new-env (make-new-env parser env 
+                                                                         `((:live-vars ,@next-live-vars)
+                                                                           ,next-spill-list))))
+                                              (cps-parse parser cps new-env)))
+                                        next-cpss next-live-vars-list)))
+
+            (funcall stack-wrapper-func
+                     `(,op ,new-args ,result ,new-next-cpss)))))))

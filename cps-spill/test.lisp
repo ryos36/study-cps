@@ -1,5 +1,6 @@
 (load "../k-transfer/package.lisp")
 (load "../k-transfer/cps-parser.lisp")
+(load "../k-transfer/utils.lisp")
 
 (load "../cps-live-variables-finder/package.lisp")
 (load "../cps-live-variables-finder/cps-live-variables-finder.lisp")

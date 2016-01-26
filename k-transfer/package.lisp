@@ -29,4 +29,7 @@
     :cps-exit
     :cps-primitive
     
-    :cps-parse))
+    :cps-parse
+
+    :make-cxr-route
+    :pickup-list))
