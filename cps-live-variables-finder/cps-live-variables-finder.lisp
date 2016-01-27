@@ -82,8 +82,8 @@
 
     (add-vars parser (copy-list args) nil another-env)
     (let* ((new-next-cps (cps-parse parser next-cps another-env))
-           (top-list-of-top-env (caar another-env))
-           (live-tag-vars (cadddr top-list-of-top-env))
+           (top-item-of-top-env (caar another-env))
+           (live-tag-vars (cadddr top-item-of-top-env))
            (live-vars (cdr live-tag-vars)))
       ;(print `(:live---------- ,live-tag-vars ,live-vars))
 
