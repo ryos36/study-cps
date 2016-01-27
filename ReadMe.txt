@@ -10,21 +10,32 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
 ってかこのまま common lisp 上でいいのか？
 
 ----------------------------------------------------------------
-2016年 1月 21日 木曜日 18:19:45 JST
+2016年 1月 27日 水曜日 14:27:40 JST
 進捗
+    今後は VM コードの生成へと進む
+
+    将来的には GC や float/double のサイズが問題になることは明らか。
+    boxing(boxed?) するのか？
+    ML や GHC(Haskellのコンパイラ) を参考にすべき？
+    Standard ML of New Jersey を参考にすべき？
+
+    中途半端な cl のパッケージ化がなされている
+
     lisp インタプリタ => とりあえず完成
     cps-interp    => closure をちゃんと実装していない
     cps-transfer  => とりあえず完成
     eta-reduction => とりあえず完成
     k-transfer    => とりあえず完成
     resource-scheduler => ベースとしては完成
-    cps-reorder   => 実装中
+    cps-reorder   => とりえあえず完成
+    cps-live-variables-finder => とりあえず完成
+    cps-spill => とりあえず完成
 
 今後
-    スピル対応
     VM 対応
     ARM 対応
     NEON 対応
+        浮動小数点のために型推定が必要になる？
     PolyPhony IR 対応
     IROHA 対応
 
@@ -77,6 +88,7 @@ cps-transfer:
     cps-transfer/ReadMe.txt を参照
 
 eta-reduction:
+    ηリダクションの最適化をする
     ちゃんと walk-cps して確認している。
     関数 check-eta-reduction をより厳密にチェックすべきか？
         optimize.lisp は walk-cps していないのでチェックが厳しい。
@@ -86,9 +98,26 @@ eta-reduction:
     これはこれでおしまい。
     関数 n-reduction は削除してよい。
 
-rec-opt
-    ;'(FB (0 1) (1 1) (N (+ (FB (- n 1)) (FB (- n 2)))))
-    の最適化
-    FIBO に似た形の関数を最適化して末尾呼び出しにしようという試み
-    アイデアだけ
+resource-scheduler
+    リソース管理用のクラス
+    リストスケジューリングを採用
+    汎用的にしようと思ったがかなり場当たり的
 
+cps-reorder
+    ブロック内のインストラクションの順序入れ替え
+    ヒューリスティックな方法
+    resource-scheduler を使っている。そのため O(N^2) だぜ
+
+cps-live-variables-finder
+    変数の生き死にをブロックごとに見つける。
+    free variables を見つけるルーチンがすでにあるのに、、、
+
+cps-spill
+    スピル処理
+    cps-live-variables-finder を利用。そのため O(N^2) だぜ
+    FIXH で宣言された引数をすべて spill の対象にしている
+    引数も生き死にを調べて、つかっていない引数は対象に
+    含めないようにしないと、f(a0 a1 ... an) で n が spill の
+    対象数を超えると何も考えずに spill してしまう。
+----------------------------------------------------------------
+ひとりごと、vm-scheme
