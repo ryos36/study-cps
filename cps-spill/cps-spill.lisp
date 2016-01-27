@@ -15,7 +15,7 @@
 
 ;----------------------------------------------------------------
 (defmethod update-next-spill-list ((parser cps-spill) op-live-vars-list spill-list)
-  (print `(:unsl ,spill-list))
+  ;(print `(:unsl ,spill-list))
   (labels ((build-spill-list (old-spill-list add-spill-vars)
             (if (null add-spill-vars)
               old-spill-list
@@ -35,7 +35,7 @@
            (last-use-vars-n (length last-use-vars))
 
            (spill-vars-list (cdr spill-list))
-           (x (print `(:spill ,spill-vars-list)))
+           ;(x (print `(:spill ,spill-vars-list)))
            (used-vars (cdr (car spill-vars-list)))
            (dup-room-n-vars (cdr (cadr spill-vars-list)))
            (dup-room-n (car dup-room-n-vars))
@@ -78,7 +78,7 @@
 
       ;(print `(:up ,next-dup-n ,@next-dup-vars))
 
-      (print `(:next-dup-n ,next-dup-n))
+      ;(print `(:next-dup-n ,next-dup-n))
       (values 
         (copy-tree
           `(:spill
@@ -185,7 +185,7 @@
         (live-vars-pair (caar env))
         (spill-list (cadar env)))
 
-    (print `(:cps-fix ,fix-op ,spill-list))
+    ;(print `(:cps-fix ,fix-op ,spill-list))
     (let* ((fix-body-live-vars-pair (cadddr live-vars-pair))
            (next-live-vars-list (car (nth 4 fix-body-live-vars-pair)))
            (binds-live-vars (caddr live-vars-pair))

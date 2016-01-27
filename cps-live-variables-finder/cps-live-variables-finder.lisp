@@ -8,7 +8,7 @@
 ;----------------------------------------------------------------
 (defmethod update-live-variables ((parser cps-live-variables-finder) vars env)
   (labels ((update-live-variables0 (vars0 top-env0)
-             (print `(:top-env0 ,(car top-env0) ,vars))
+             ;(print `(:top-env0 ,(car top-env0) ,vars))
              (if (or (null vars0) (null top-env0)) t
                (let* ((op-vars (car top-env0))
                       (vars-list (cdr op-vars))
@@ -20,18 +20,18 @@
                       (add-live-vars (union to-live-vars live-declare-vars)))
 
                  (assert (null (intersection to-live-vars live-declare-vars)))
-                 (print `(:vars ,vars :declare ,declare-vars :=> ,live-declare-vars))
-                 (print `(:to-live-vars ,to-live-vars))
-                 (print `(:add-live-vars ,add-live-vars))
+                 ;(print `(:vars ,vars :declare ,declare-vars :=> ,live-declare-vars))
+                 ;(print `(:to-live-vars ,to-live-vars))
+                 ;(print `(:add-live-vars ,add-live-vars))
                  (if (or to-live-vars add-live-vars)
                    (let* ((live-tag-vars (caddr vars-list))
                           (live-vars (cdr live-tag-vars))
                           (add-new-live-vars (set-difference add-live-vars live-vars)))
-                     (print `(:live-vars ,live-vars :+ ,add-new-live-vars))
+                     ;(print `(:live-vars ,live-vars :+ ,add-new-live-vars))
                      (if add-new-live-vars
                        (setf (cdr live-tag-vars) (append add-new-live-vars live-vars)))
-                     (print `(:live-tag-vars ,live-tag-vars))
-                     (print `(:env ,env))
+                     ;(print `(:live-tag-vars ,live-tag-vars))
+                     ;(print `(:env ,env))
                  ;(assert nil)
                      (setf (cdr use-vars) (set-difference (cdr use-vars) to-live-vars))))
                  (update-live-variables0 next-vars0 (cdr top-env0)))))
@@ -85,7 +85,7 @@
            (top-list-of-top-env (caar another-env))
            (live-tag-vars (cadddr top-list-of-top-env))
            (live-vars (cdr live-tag-vars)))
-      (print `(:live---------- ,live-tag-vars ,live-vars))
+      ;(print `(:live---------- ,live-tag-vars ,live-vars))
 
       (copy-list `(:BIND (:declare ,@args) (:use) (:live ,@live-vars)
                          (,new-next-cps))))))
@@ -114,7 +114,7 @@
           (remove-if #'(lambda (x) (not (cps-symbolp x))) args)))
 
       (update-live-variables parser use-vars-ignore-not-symbol env)
-    (print `(:cps-primitive ,op ,args ,env))
+    ;(print `(:cps-primitive ,op ,args ,env))
       (add-vars parser result use-vars-ignore-not-symbol env))
 
 

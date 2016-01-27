@@ -22,7 +22,11 @@
 (defun cps-parse-one (cps-expr env)
   (let* ((finder-env (make-new-env finder '() '()))
          (result (cps-parse finder cps-expr finder-env))
-         (codegen-env (make-new-env codegen '() ))) ;+ result
+         (codegen-env (make-new-env codegen '()
+                                    (copy-tree `((:live-vars ,@result)
+                                                 (:codegen
+                                                   (:register (make-list (max-n codegen)))
+                                                   (:app-info)))))))
     (cps-parse codegen cps-expr codegen-env)))
 
 (defparameter *test-script-dir* "../cps-script/" )
