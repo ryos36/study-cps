@@ -262,15 +262,16 @@
         (live-vars-pair (caar env))
         (spill-list (cadar env)))
 
-    (print `(:op ,op ,args ,spill-list ,(copy-tree (car env))))
+    ;(print `(:op ,op ,args ,spill-list ,(copy-tree (car env))))
     (multiple-value-bind (next-spill-list need-spill?)  (update-next-spill-list parser live-vars-pair spill-list)
 
+        #|
         (if need-spill?
           (print `(:update-result ,next-spill-list ,need-spill?)))
+        |#
 
         (multiple-value-bind (new-args pop-vars)
           (update-variables parser args next-spill-list)
-          (print `(:napv ,new-args ,pop-vars))
 
           (let* ((reference-wrapper-func (if pop-vars (create-reference-wrapper parser pop-vars) #'(lambda (x) x)))
                  (stack-wrapper-func (if need-spill? (create-stack-wrapper parser spill-list next-spill-list) #'(lambda (x) x)))
