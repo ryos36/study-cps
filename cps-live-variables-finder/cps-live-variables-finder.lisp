@@ -62,7 +62,8 @@
         (binds (cadr expr))
         (next-cps (caddr expr)))
 
-    ;(add-vars parser (copy-list func-names) nil env)
+    ; no meaning
+    (add-vars parser (mapcar #'(lambda (bind) (car bind)) binds)  nil env)
 
     (let ((new-binds (cps-binds parser binds env))
           (new-next-cps (cps-parse parser next-cps env)))
