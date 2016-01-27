@@ -26,11 +26,13 @@
 
     (let* ((max-n (max-n parser))
            (live-vars-list (cdr op-live-vars-list))
-           (declare-vars (cdadr live-vars-list))
+           (live-vars (cdr (cadddr live-vars-list)))
+
+           (all-declare-vars (cdadr live-vars-list))
+           (declare-vars (intersection all-declare-vars live-vars))
            (declare-vars-n (length declare-vars))
            (last-use-vars (cdaddr live-vars-list))
            (last-use-vars-n (length last-use-vars))
-           (live-vars (cdr (cadddr live-vars-list)))
 
            (spill-vars-list (cdr spill-list))
            (x (print `(:spill ,spill-vars-list)))
@@ -41,7 +43,7 @@
            (spill-out-list (cdr (caddr spill-vars-list)))
            (spill-out-vars (cdr spill-vars-list))
 
-           (current-used-vars (union used-vars (union last-use-vars live-vars)))
+           (current-used-vars (union used-vars (union last-use-vars (set-difference live-vars declare-vars))))
            (next-n (+ (length (set-difference current-used-vars last-use-vars))
                       (if (< last-use-vars-n declare-vars-n)
                         (- declare-vars-n last-use-vars-n)

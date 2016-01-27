@@ -6,21 +6,33 @@
   (()))
 
 ;----------------------------------------------------------------
-(def-cps-func update-live-variables ((parser cps-live-variables-finder) vars env)
+(defmethod update-live-variables ((parser cps-live-variables-finder) vars env)
   (labels ((update-live-variables0 (vars0 top-env0)
+             (print `(:top-env0 ,(car top-env0) ,vars))
              (if (or (null vars0) (null top-env0)) t
                (let* ((op-vars (car top-env0))
                       (vars-list (cdr op-vars))
                       (declare-vars (car vars-list))
                       (next-vars0 (set-difference vars0 (cdr declare-vars)))
                       (use-vars (cadr vars-list))
-                      (to-live-vars (intersection vars0 (cdr use-vars))))
+                      (to-live-vars (intersection vars0 (cdr use-vars)))
+                      (live-declare-vars (intersection vars0 (cdr declare-vars)))
+                      (add-live-vars (union to-live-vars live-declare-vars)))
 
-                 ;(print `(:to-live-vars ,to-live-vars))
-                 (if to-live-vars
-                   (let ((live-vars (caddr vars-list)))
-                     ;(print `(:live-vars ,live-vars))
-                     (setf (cdr live-vars) (append to-live-vars (cdr live-vars)))
+                 (assert (null (intersection to-live-vars live-declare-vars)))
+                 (print `(:vars ,vars :declare ,declare-vars :=> ,live-declare-vars))
+                 (print `(:to-live-vars ,to-live-vars))
+                 (print `(:add-live-vars ,add-live-vars))
+                 (if (or to-live-vars add-live-vars)
+                   (let* ((live-tag-vars (caddr vars-list))
+                          (live-vars (cdr live-tag-vars))
+                          (add-new-live-vars (set-difference add-live-vars live-vars)))
+                     (print `(:live-vars ,live-vars :+ ,add-new-live-vars))
+                     (if add-new-live-vars
+                       (setf (cdr live-tag-vars) (append add-new-live-vars live-vars)))
+                     (print `(:live-tag-vars ,live-tag-vars))
+                     (print `(:env ,env))
+                 ;(assert nil)
                      (setf (cdr use-vars) (set-difference (cdr use-vars) to-live-vars))))
                  (update-live-variables0 next-vars0 (cdr top-env0)))))
 
@@ -33,7 +45,7 @@
     (update-live-variables1 env)))
 
 ;----------------------------------------------------------------
-(def-cps-func add-vars ((parser cps-live-variables-finder) declare-vars use-vars env)
+(defmethod add-vars ((parser cps-live-variables-finder) declare-vars use-vars env)
   (let ((top-env (car env))
         (use-vars-ignore-not-symbol 
           (remove-if #'(lambda (x) (not (cps-symbolp x))) use-vars)))
@@ -69,9 +81,13 @@
         (another-env (make-new-env parser '() '())))
 
     (add-vars parser (copy-list args) nil another-env)
-    (let* ((new-next-cps (cps-parse parser next-cps another-env)))
+    (let* ((new-next-cps (cps-parse parser next-cps another-env))
+           (top-list-of-top-env (caar another-env))
+           (live-tag-vars (cadddr top-list-of-top-env))
+           (live-vars (cdr live-tag-vars)))
+      (print `(:live---------- ,live-tag-vars ,live-vars))
 
-      (copy-list `(:BIND (:declare ,@args) (:use) (:live)
+      (copy-list `(:BIND (:declare ,@args) (:use) (:live ,@live-vars)
                          (,new-next-cps))))))
 
 ;----------------------------------------------------------------
@@ -94,9 +110,13 @@
         (top-env (car env))
         branches)
 
-    (update-live-variables parser args env)
-    (add-vars parser result args env)
-    ;(print `(:cps-primitive ,top-env))
+    (let ((use-vars-ignore-not-symbol 
+          (remove-if #'(lambda (x) (not (cps-symbolp x))) args)))
+
+      (update-live-variables parser use-vars-ignore-not-symbol env)
+    (print `(:cps-primitive ,op ,args ,env))
+      (add-vars parser result use-vars-ignore-not-symbol env))
+
 
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
           (new-next-cpss (mapcar #'(lambda (cps) 
