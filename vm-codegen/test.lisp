@@ -24,7 +24,7 @@
   (let* ((finder-env (make-new-env finder '() '()))
          (result (cps-parse finder cps-expr finder-env))
          (codegen-env (make-new-env codegen '()
-                                    (copy-tree `((:live-vars ,@result)
+                                    (copy-tree `((:live-vars ,result)
                                                  (:codegen
                                                    (:register ,(make-list (max-n codegen)))
                                                    (:app-info)))))))
