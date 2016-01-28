@@ -8,5 +8,9 @@
   (:nicknames :vm-codegen)
 
   (:export 
-    :vm-codegen))
+    :vm-codegen
+
+    :max-n
+
+    :find-app-for-branch-prediction ))
 

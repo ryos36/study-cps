@@ -25,7 +25,7 @@
          (codegen-env (make-new-env codegen '()
                                     (copy-tree `((:live-vars ,@result)
                                                  (:codegen
-                                                   (:register (make-list (max-n codegen)))
+                                                   (:register ,(make-list (max-n codegen)))
                                                    (:app-info)))))))
     (cps-parse codegen cps-expr codegen-env)))
 

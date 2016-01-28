@@ -6,6 +6,52 @@
   (()))
 
 ;----------------------------------------------------------------
+(defparameter *tag-template*
+  `(:op (:declare |...|) 
+        (:use |...|)
+        (:live |...|)
+
+        (CONT |...|)))
+
+(defparameter *tag-position*
+  (mapcar #'(lambda (t-target)
+              (if (atom t-target)
+                nil
+                (let ((tag-applicant (car t-target)))
+                  (if (consp tag-applicant)
+                    nil
+                    (let ((tag tag-applicant))
+                      tag))))) *tag-template* ))
+
+;----------------------------------------------------------------
+(defmacro create-get-vars-list-method (func-name class-object target-tag-list)
+  (let ((target-pos-list (mapcar #'(lambda (tag) (position tag *tag-position*)) target-tag-list)))
+    `(defmethod ,func-name (,class-object vars-expr)
+       (mapcar #'(lambda (pos) (cdr (nth pos vars-expr)))
+               ',target-pos-list ))))
+
+;----------------------------------------------------------------
+(create-get-vars-list-method get-vars (parser cps-live-variables-finder)
+                             (:declare :use :live))
+
+;----------------------------------------------------------------
+(defmacro create-get-tagged-list-method (func-name class-object target-tag)
+  (let ((target-pos (position target-tag *tag-position*)))
+    `(defmethod ,func-name (,class-object vars-expr)
+       (nth ,target-pos vars-expr))))
+
+;----------------------------------------------------------------
+(defmacro create-get-tagged-list-method-from-tag-list (tag-list)
+  `(progn
+     ,@(mapcar #'(lambda (tag)
+        (let* ((func-name-string (format nil "GET-~a-TAGGED-LIST" tag))
+               (func-name (intern func-name-string)))
+          `(create-get-tagged-list-method ,func-name (parser cps-live-variables-finder) ,tag))) tag-list)))
+
+;----------------------------------------------------------------
+(create-get-tagged-list-method-from-tag-list (:declare :use :live))
+
+;----------------------------------------------------------------
 (defmethod update-live-variables ((parser cps-live-variables-finder) vars env)
   (labels ((update-live-variables0 (vars0 top-env0)
              ;(print `(:top-env0 ,(car top-env0) ,vars))
@@ -97,10 +143,10 @@
          (use-vars-replace-not-symbol 
            (mapcar #'(lambda (x) (if (cps-symbolp x) x :NO-SYMBOL)) args)))
         
-      ;(print `(:use-vars ,args :uv ,use-vars))
-      ;(update-live-variables nil use-vars env)
+    ;(print `(:use-vars ,args :uv ,use-vars))
+    ;(update-live-variables nil use-vars env)
 
-      (copy-tree `(:APP (:declare) (:use ,@use-vars-replace-not-symbol) (:live )))))
+    (copy-tree `(:APP (:declare) (:use ,@use-vars-replace-not-symbol) (:live )))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser cps-live-variables-finder) expr env)

@@ -10,5 +10,8 @@
 
   (:export 
     :cps-live-variables-finder 
+
+    :get-vars
+    :get-declare-tagged-list 
     ))
 
