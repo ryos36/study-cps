@@ -4,7 +4,7 @@
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.vm-codegen
-  (:use :cl :cps-parser)
+  (:use :cl :cps-parser :cps-live-variables-finder)
   (:nicknames :vm-codegen)
 
   (:export 
@@ -13,5 +13,7 @@
     :max-n
 
     :get-final-codes 
+    :print-codes
+
     :find-app-for-branch-prediction ))
 

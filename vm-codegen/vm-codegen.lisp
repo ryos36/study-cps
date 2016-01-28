@@ -32,9 +32,23 @@
     (slot-value codegen 'codes)))
 
 ;----------------------------------------------------------------
+(defmethod print-codes ((codegen vm-codegen))
+  (dolist (insn (get-final-codes codegen))
+    (format t "~s~%" insn)))
+
+;----------------------------------------------------------------
+;----------------------------------------------------------------
 (defmethod make-jump-instruction ((codegen vm-codegen) sym)
   (copy-tree `(:jump (:attribute) ,sym))) 
 
+;----------------------------------------------------------------
+(defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
+  (let* ((args-status (mapcar #'(lambda (a) (if (find a live-args) 1 0)) args))
+         (reg-status (append args-status (make-list (- (max-n codegen) (length args)) :initial-element 0))))
+
+    (copy-tree `(:live-reg (:attribute) ,heap-size ,reg-status)))) 
+
+;----------------------------------------------------------------
 ;----------------------------------------------------------------
 (defmethod find-app-for-branch-prediction ((codegen vm-codegen) free-vars-expr)
   (let (rv)
@@ -83,24 +97,14 @@
         (next-cps (caddr expr))
 
         (live-vars-tagged-list (caar env))
-        (codegen-tagged-list (cadar env))
-        (heap-parser (heap-parser codegen)))
+        (codegen-tagged-list (cadar env)))
 
-    (let ((app-info-list (find-app-for-branch-prediction codegen (cdr live-vars-tagged-list))))
-      (add-app-info codegen codegen-tagged-list app-info-list)
-      (reset-size heap-parser)
-      (cps-fix heap-parser expr env)
-    (print `(:cps-fix ,codegen-tagged-list ,(heap-size heap-parser) ,(cps-gensym codegen) ,(cps-gensym codegen t)))
-    )    
-    (print `(:lvtl ,(cddr live-vars-tagged-list)))
-
-    (let ((next-env (pop-one-make-new-env codegen env
-                                          #'(lambda (e)
-                                              (car 
-                                                   (nth 4
-                                                     (cadddr
-                                                       (caar e)))))))
-          (bind-env (make-new-env codegen
+    ;(print `(cps-fix ,fix-op, (cadddr live-vars-tagged-list)))
+    (let ((next-env (make-new-env codegen
+                                  env
+                                  `((:live-vars ,(cadddr live-vars-tagged-list))
+                                    ,codegen-tagged-list)))
+          (binds-env (make-new-env codegen
                                    env
                                    `((:live-vars ,(caddr live-vars-tagged-list))
                                      ,codegen-tagged-list))))
@@ -108,37 +112,59 @@
       (if (use-jump-for-fix codegen)
         (let* ((label-sym (cps-gensym codegen t))
                (jump-insn (add-code codegen (make-jump-instruction codegen label-sym)))
-               (new-binds (cps-binds codegen binds bind-env))
-               (x (print `(:n-cps ,next-cps)))
+               (new-binds (cps-binds codegen binds binds-env))
                (label-insn (add-code codegen label-sym))
                (new-next-cps (cps-parse codegen next-cps next-env)))
           `(,fix-op ,new-binds ,new-next-cps))
         (let ((new-next-cps (cps-parse codegen next-cps next-env)))
-          (new-binds (cps-binds codegen binds bind-env))
+          (new-binds (cps-binds codegen binds binds-env))
           `(,fix-op ,new-binds ,new-next-cps))))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-binds ((codegen vm-codegen) binds env)
   (let* ((live-vars-tagged-list (caar env))
-         (binds-live-list (cdr live-vars-tagged-list))
+         (binds-live-list (cadr live-vars-tagged-list))
          (codegen-tagged-list (cadar env)))
 
      (mapcar #'(lambda (bind live-vars)
                  (let ((new-env (make-new-env codegen
                                               env
-                                              `((:live-vars ,@live-vars)
+                                              `((:live-vars ,live-vars)
                                                 ,codegen-tagged-list))))
                    (cps-bind codegen bind new-env))) binds binds-live-list)))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-bind ((parser cps-parser) expr env)
+(def-cps-func cps-bind ((codegen vm-codegen) expr env)
   (let ((func-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
 
         (live-vars-tagged-list (caar env))
-        (codegen-tagged-list (cadar env)))
+        (codegen-tagged-list (cadar env))
+        (heap-parser (heap-parser codegen))
 
-    (let ((new-next-cps (cps-parse parser next-cps env)))
+        (finder (live-variables-finder codegen)))
 
-      `(,func-name ,args ,new-next-cps))))
+    (let* ((bind-vars-info (cadr live-vars-tagged-list))
+           (app-info-list (find-app-for-branch-prediction codegen bind-vars-info))
+           (live-tagged-list (cadddr bind-vars-info))
+           (live-vars (cdr live-tagged-list)))
+
+      (add-app-info codegen codegen-tagged-list app-info-list)
+      (reset-size heap-parser)
+      (cps-bind heap-parser expr env)
+      (print `(:app-info ,app-info-list))
+      (print `(:cps-bind :d ,args :l ,live-vars))
+      (add-code codegen (make-live-reg-instruction codegen (heap-size heap-parser) args
+        (reduce #'union 
+            (mapcar #'(lambda (app-info) (print `(:ai ,app-info) )(cdr app-info)) app-info-list) :initial-value live-vars )))
+     ; (print-codes codegen)
+
+    ; (print `(:next ,(car (nth 4 bind-vars-info))))
+    (let* ((next-env (make-new-env codegen
+                                   env
+                                   `((:live-vars ,(car (nth 4 bind-vars-info)))
+                                     ,codegen-tagged-list)))
+          (new-next-cps (cps-parse codegen next-cps next-env)))
+
+      `(,func-name ,args ,new-next-cps)))))

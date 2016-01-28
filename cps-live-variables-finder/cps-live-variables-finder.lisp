@@ -141,11 +141,12 @@
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((parser cps-live-variables-finder) expr env)
   (let* ((args (caddr expr))
+         (use-vars-ignore-not-symbol 
+           (remove-if #'(lambda (x) (not (cps-symbolp x))) args))
          (use-vars-replace-not-symbol 
            (mapcar #'(lambda (x) (if (cps-symbolp x) x :NO-SYMBOL)) args)))
         
-    ;(print `(:use-vars ,args :uv ,use-vars))
-    ;(update-live-variables nil use-vars env)
+    (update-live-variables parser use-vars-ignore-not-symbol env)
 
     (copy-tree `(:APP (:declare) (:use ,@use-vars-replace-not-symbol) (:live )))))
 
