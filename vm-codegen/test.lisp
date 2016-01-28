@@ -7,6 +7,7 @@
 
 (load "package.lisp")
 (load "vm-codegen.lisp" )
+(load "heap-parser.lisp" )
 
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
@@ -15,8 +16,8 @@
 (use-package :vm-codegen)
 (use-package :cps-test)
 
-(setf codegen (make-instance 'vm-codegen:vm-codegen))
 (setf finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
+(setf codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder))
 (setf *test-env* (make-new-env codegen '()))
 
 (defun cps-parse-one (cps-expr env)
@@ -27,6 +28,7 @@
                                                  (:codegen
                                                    (:register ,(make-list (max-n codegen)))
                                                    (:app-info)))))))
+
     (cps-parse codegen cps-expr codegen-env)))
 
 (defparameter *test-script-dir* "../cps-script/" )
@@ -41,3 +43,5 @@
 
 (set-test-files '("44"))
 (do-test)
+(dolist (insn (get-final-codes codegen))
+  (format t "~s~%" insn))

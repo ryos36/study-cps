@@ -11,7 +11,7 @@
         (:use |...|)
         (:live |...|)
 
-        (CONT |...|)))
+        (:CONT-LIST)))
 
 (defparameter *tag-position*
   (mapcar #'(lambda (t-target)
@@ -50,6 +50,7 @@
 
 ;----------------------------------------------------------------
 (create-get-tagged-list-method-from-tag-list (:declare :use :live))
+(create-get-tagged-list-method get-cont-list (parser cps-live-variables-finder) :CONT-LIST)
 
 ;----------------------------------------------------------------
 (defmethod update-live-variables ((parser cps-live-variables-finder) vars env)

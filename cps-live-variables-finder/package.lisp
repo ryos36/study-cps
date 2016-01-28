@@ -13,5 +13,6 @@
 
     :get-vars
     :get-declare-tagged-list 
+    :get-cont-list
     ))
 
