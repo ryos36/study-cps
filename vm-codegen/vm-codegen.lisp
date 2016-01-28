@@ -99,6 +99,28 @@
         (live-vars-tagged-list (caar env))
         (codegen-tagged-list (cadar env)))
 
+#|
+    (let* ((fix-list (cadr live-vars-tagged-list))
+           (fix-id (car fix-list))
+           (b-list (cadr fix-list))
+           (b-len (length b-list))
+           (b-dec-list (mapcar #'(lambda (b) 
+                                   (list (car b) 
+                                         (cadr b)
+                                         (car (caar (cddddr b)))))
+                               b-list))
+           (fix-body (caddr fix-list))
+           (fix-body-id (car fix-body))
+           (next-id (caaar (cddddr fix-body))))
+
+      (print `(:cps-fix ,fix-op 
+                        :fix-id ,fix-id 
+                        :bind ,b-len ,b-dec-list 
+                        :fix-body-id ,fix-body-id 
+                        :next ,next-id))
+      (print `(:lvtl , (cadr live-vars-tagged-list)))
+      (assert codegen-tagged-list))
+|#
 
     (let* ((fix-list (cadr live-vars-tagged-list))
            (fix-body (caddr fix-list))
@@ -136,7 +158,6 @@
                                              env
                                              `((:live-vars ,live-vars)
                                                ,codegen-tagged-list))))
-                  (print `(:cdd ,(cadar new-env)))
                   (cps-bind codegen bind new-env))) binds binds-live-list)))
 
 ;----------------------------------------------------------------
@@ -151,8 +172,6 @@
 
         (finder (live-variables-finder codegen)))
 
-    (print `(:cdd ,(cadar env)))
-    (print `(:cps-bind :func-name ,func-name ,(null codegen-tagged-list)))
     (assert codegen-tagged-list)
     (let* ((bind-vars-info (cadr live-vars-tagged-list))
            (app-info-list (find-app-for-branch-prediction codegen bind-vars-info))
@@ -170,7 +189,6 @@
                                    env
                                    `((:live-vars ,(car (nth 4 bind-vars-info)))
                                      ,codegen-tagged-list)))
-             (x (print `(:top-env ,(car next-cps) ,(car next-env))))
              (new-next-cps (cps-parse codegen next-cps next-env)))
 
       `(,func-name ,args ,new-next-cps)))))
