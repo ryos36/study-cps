@@ -1,4 +1,6 @@
-;;; Sinby Corp. 2016
+;
+; Sinby Corp. 2016
+;
 
 (in-package :cl-user)
 
@@ -35,3 +37,23 @@
 
     :make-cxr-route
     :pickup-list))
+
+;----------------------------------------------------------------
+(defpackage :sinby.cps.free-variable-finder
+  (:use :cl :cps-parser)
+  (:nicknames :cps-free-variable-finder)
+
+  (:export 
+    :free-variable-finder
+
+    :filter-free-variables
+    ))
+
+;----------------------------------------------------------------
+(defpackage :sinby.cps.closure-converter
+  (:use :cl :cps-parser :cps-free-variable-finder)
+  (:nicknames :cps-closure-converter)
+
+  (:export 
+    :closure-converter
+    ))

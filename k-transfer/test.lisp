@@ -1,7 +1,20 @@
+(load "package.lisp")
+(load "cps-parser.lisp")
+(load "utils.lisp")
+
+(load "package.lisp")
+(load "free-variable-finder.lisp")
 (load "closure-converter.lisp")
+
+(load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
 
-(setf conv (make-instance 'closure-converter))
+(use-package :cps-parser)
+(use-package :cps-free-variable-finder)
+(use-package :cps-closure-converter)
+(use-package :cps-test)
+
+(setf conv (make-instance 'cps-closure-converter:closure-converter))
 (setf *env* (make-new-env conv '()))
 (setf grv nil)
 ;(defparameter *test-save* nil)
@@ -16,6 +29,7 @@
     (setf grv rv)
     rv))
 
+(defparameter *test-script-dir* "../vm-codegen/cps-script/" )
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
@@ -29,5 +43,6 @@
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
 (set-test-files '((14 . 24) (26 . 42) (50 . 57)))
+(set-test-files '((1 . 4)))
 (do-test)
 

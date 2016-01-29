@@ -1,5 +1,5 @@
 ;----------------------------------------------------------------
-(load "cps-parser.lisp")
+(in-package :sinby.cps.free-variable-finder)
 
 ;----------------------------------------------------------------
 (defclass free-variable-finder (cps-parser)

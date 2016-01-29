@@ -1,4 +1,5 @@
-(load "free-variable-finder.lisp")
+;----------------------------------------------------------------
+(in-package :sinby.cps.closure-converter)
 
 ;----------------------------------------------------------------
 (defclass closure-converter (cps-parser)
