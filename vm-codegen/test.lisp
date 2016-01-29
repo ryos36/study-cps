@@ -42,7 +42,7 @@
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("1" "2" "3" "4"))
+(set-test-files '("3" "4" "2" "1"))
 (do-test)
 (dolist (insn (get-final-codes codegen))
   (format t "~s~%" insn))

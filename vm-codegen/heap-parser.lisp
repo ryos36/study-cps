@@ -27,9 +27,9 @@
         (next-cpss (cadddr expr)))
 
     (if (eq op :heap)
-      (add-heap-size (length args))
+      (add-heap-size parser (length args))
       (if (eq op :stack)
-        (add-stack-size (length args))))
+        (add-stack-size parser (length args))))
 
     (call-next-method)))
 
