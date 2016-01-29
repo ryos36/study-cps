@@ -31,5 +31,7 @@
     
     :cps-parse
 
+    :compare-primitivep 
+
     :make-cxr-route
     :pickup-list))

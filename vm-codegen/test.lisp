@@ -31,7 +31,7 @@
 
     (cps-parse codegen cps-expr codegen-env)))
 
-(defparameter *test-script-dir* "../cps-script/" )
+(defparameter *test-script-dir* "./cps-script/" )
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
@@ -41,7 +41,7 @@
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
-(set-test-files '("44"))
+(set-test-files '("32" "42" "29" "41"))
 (do-test)
 (dolist (insn (get-final-codes codegen))
   (format t "~s~%" insn))
