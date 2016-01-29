@@ -14,7 +14,7 @@
 (use-package :cps-closure-converter)
 (use-package :cps-test)
 
-(setf conv (make-instance 'cps-closure-converter:closure-converter))
+(setf conv (make-instance 'cps-closure-converter:closure-converter :sym-name "k-sym"))
 (setf *env* (make-new-env conv '()))
 (setf grv nil)
 ;(defparameter *test-save* nil)
@@ -29,8 +29,8 @@
     (setf grv rv)
     rv))
 
-(defparameter *test-script-dir* "../vm-codegen/cps-script/" )
 (defparameter *test-script-dir* "../cps-script/" )
+(defparameter *test-script-dir* "../vm-codegen/cps-script/" )
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
