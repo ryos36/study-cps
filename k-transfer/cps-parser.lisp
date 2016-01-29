@@ -3,7 +3,8 @@
 
 ;----------------------------------------------------------------
 (defclass cps-parser () 
-  ((sym-no :initform 0 :initarg :sym-no)))
+  ((sym-no :initform 0 :initarg :sym-no)
+   (sym-name :initform "sym" :initarg :sym-name)))
 
 ;----------------------------------------------------------------
 (defgeneric make-new-env (parser env &optional new-env-item )
@@ -11,7 +12,9 @@
 
 ;----------------------------------------------------------------
 (defmethod cps-gensym ((parser cps-parser) &optional is-label)
-  (let ((rv (intern (format nil "~asym~a" (if is-label ":" "") (slot-value parser 'sym-no)))))
+  (let ((rv (intern (format nil "~a~a~a" (if is-label ":" "")
+                            (slot-value parser 'sym-name)
+                            (slot-value parser 'sym-no)))))
     (incf (slot-value parser 'sym-no))
     rv))
 

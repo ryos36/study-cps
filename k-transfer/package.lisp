@@ -13,6 +13,7 @@
     :def-cps-func
 
     :sym-no
+    :sym-name
 
     :cps-gensym
     :cps-symbolp

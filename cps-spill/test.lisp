@@ -15,7 +15,7 @@
 (use-package :cps-spill)
 (use-package :cps-test)
 
-(setf spill (make-instance 'cps-spill:cps-spill))
+(setf spill (make-instance 'cps-spill:cps-spill :sym-name "s-sim"))
 (setf finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
 (setf *test-env* (make-new-env spill '()))
 
