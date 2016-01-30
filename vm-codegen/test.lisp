@@ -17,7 +17,7 @@
 (use-package :cps-test)
 
 (setf finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
-(setf codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder))
+(setf codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label"))
 (setf *test-env* (make-new-env codegen '()))
 
 (defun cps-parse-one (cps-expr env)
@@ -42,7 +42,7 @@
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("3" "4" "2" "1"))
+(set-test-files '("1" "3" "4" "2" "1"))
 (do-test)
 (dolist (insn (get-final-codes codegen))
   (format t "~s~%" insn))
