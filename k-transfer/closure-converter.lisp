@@ -98,7 +98,7 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 ; free-vars -> (v0 v1 v2)
-; env -> (((:fixh . closure-sym) v0 v2 ....) ...)
+; env -> (((:fixh func-names) v0 v2 ....) ...)
 ; result -> (v1)
 (defun get-strict-free-variables (free-vars env)
 
@@ -126,9 +126,9 @@
       (remove-if #'null (mapcar #'(lambda (x) (car (member x strict-free-vars))) free-vars)))))
 
 ;----------------------------------------------------------------
-; env -> (((:fixh . closure-sym) v0 v2 ....) ...)
-;          -> ((v3 . (:fixh . closure-sym-0) ... v3 ...)
-;              (v4 . (:fixh . closure-sym-1) ... v4 ...))
+; env -> (((:fixh func-names) v0 v2 ....) ...)
+;          -> ((v3 . (:fixh closure-sym-0 pos) ... v3 ...)
+;              (v4 . (:fixh closure-sym-1 pos) ... v4 ...))
 ;
 ; only search :fixh free variables
 
@@ -173,19 +173,21 @@
   (wrap-cps-with-heap0 (reverse func-names) expr)))
 
 ;----------------------------------------------------------------
-; top-env -> ((:fixh . closure-sym) v0 v1 v2 ....
-;                          (v3 . ((:fixh . closure-sym-0)  ... v3 ... ))
-;                          (v4 . ((:fixh . closure-sym-0)  ... v4 ... ))
-;                          (v5 . ((:fixh . closure-sym-0)  ... v5 ... )))
+; top-env -> ((:fixh func-name pos) v0 v1 v2 ....
+;                          (v3 . ((:fixh closure-name pos) .. v3 ... ))
+;                          (v4 . ((:fixh closure-name pos) .. v4 ... ))
+;                          (v5 . ((:fixh closure-name pos) .. v5 ... )))
 ;           or :fixs :primitive
 ;
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
-  ;(print `(top-env ,top-env))
-  (let ((closure-name (cdar top-env))
+  (print `(:top-env ,top-env))
+  (let ((closure-name (cadar top-env))
+        (func-pos (caddar top-env))
         (new-symbol-pos-pairs '()))
+  (print `(:closure-name ,closure-name ,func-pos))
 
     (labels ((get-pressed-num0 (sym vars n)
-              (if (null vars) :NOT-FOUND 
+              (if (null vars) :NOT-FOUND
                  (let ((elm (car vars)))
                    ;(print `(eleelm ,elm ,(cdr elm)))
                      (if (and (listp elm) (listp (cdr elm)) (eq sym (cdadr elm)))
@@ -206,19 +208,24 @@
              (do-wrap0 (sym cps-expr0)
                 (multiple-value-bind (no n-info) (get-num0 sym top-env 0)
                   ;(print `(do-wrap0 ,sym ,no ,n-info))
-                  (if (atom n-info)
-                    `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
+                  (assert (not (eq no :NOT-FOUND)))
+                  (print `(,no :+ ,func-pos :=> :new-no))
+                  (let ((new-no (+ no func-pos)))
+                    (if (atom n-info)
+                      `(:RECORD-REF (,closure-name ,new-no) (,sym) (,cps-expr0))
 
-                    (let* ((nexted-no (position sym n-info))
-                           (base-sym (cdar n-info))
-                           (stock-sym (cddr (assoc base-sym new-symbol-pos-pairs)))
-                           (ref-sym 
-                             (if stock-sym stock-sym (cps-gensym parser)))
-                           (inner-cps-expr0 `(:RECORD-REF (,ref-sym ,nexted-no) (,sym) (,cps-expr0))))
-                      ;(print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
-                      (if (null stock-sym)
-                        (push `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs))
-                      inner-cps-expr0))))
+                      (let* ((nexted-no (position sym n-info))
+                             (base-sym (cadar n-info))
+                             (n-info-func-pos (caddar n-info))
+                             (new-nexted-no (+ nexted-no n-info-func-pos))
+                             (stock-sym (cddr (assoc base-sym new-symbol-pos-pairs)))
+                             (ref-sym 
+                               (if stock-sym stock-sym (cps-gensym parser)))
+                             (inner-cps-expr0 `(:yRECORD-REF (,ref-sym ,new-nexted-no) (,sym) (,cps-expr0))))
+                        ;(print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
+                        (if (null stock-sym)
+                          (push `(,base-sym . (,new-no . ,ref-sym)) new-symbol-pos-pairs))
+                        inner-cps-expr0)))))
 
              (do-wrap1 (free-vars1 cps-expr1)
                 (if (null free-vars1) cps-expr1
@@ -231,10 +238,10 @@
                 (if (null new-symbol-pos-pairs0) cps-expr2
                   (let* ((kv (car new-symbol-pos-pairs0))
                          (kv-kv (cdr kv))
-                         (no (car kv-kv))
+                         (new-no (car kv-kv))
                          (ref-sym (cdr kv-kv)))
                     (do-wrap2 
-                      `(:RECORD-REF (,closure-name ,no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
+                      `(:xRECORD-REF (,closure-name ,new-no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
 
       ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
       (do-wrap2 
@@ -247,11 +254,10 @@
     new-env))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-bind-fixh ((parser closure-converter) expr env0)
+(def-cps-func cps-bind-fixh ((parser closure-converter) expr env)
   (let ((closure-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
-        (env-closure-name (cdaar env0))
 
         (finder (make-instance 'free-variable-finder)))
 
@@ -259,9 +265,7 @@
 
       (cps-bind finder expr finder-env)
 
-      (let* ((make-new-sym? (eq env-closure-name :make-new-sym))
-             (env (if make-new-sym? (copy-env-with-new-sym parser env0) env0))
-             (free-vars-env (car env))
+      (let* ((free-vars-env (car env))
              (all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
              ;(z (print `(free-variables ,closure-name ,free-variables)))
@@ -274,12 +278,9 @@
 
              (new-next-cps (copy-tree (cps-parse parser next-cps new-env)))
 
-             (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps free-vars-env))
-             (new-wrapped-cps (if (and make-new-sym? (not (null free-variables)))
-                                (copy-tree `(:RECORD-REF (,closure-name 1) (,(cdaar env)) (,wrapped-cps)))
-                                wrapped-cps))) 
+             (wrapped-cps (wrap-cps-bind-fixh-with-record-ref parser free-variables new-next-cps free-vars-env))) 
 
-          `(,func-name ,new-args ,new-wrapped-cps)))))
+          `(,func-name ,new-args ,wrapped-cps)))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fixh ((parser closure-converter) expr env)
@@ -311,11 +312,11 @@
                (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
              ;(x (print `(fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
 
-             (fixh-free-vars `((:fixh . ,env-closure-sym) ,@strict-free-vars ,@upper-free-vars-list))
-
-             (env-bind (make-new-env parser env fixh-free-vars))
-
-             (new-binds (mapcar #'(lambda (bind) (cps-bind-fixh parser bind env-bind)) binds))
+             (new-binds (mapcar #'(lambda (bind)
+                                    (let* ((func-name (car bind))
+                                           (fixh-free-vars `((:fixh ,func-name ,(position func-name func-names)) ,@strict-free-vars ,@upper-free-vars-list))
+                                           (env-bind (make-new-env parser env fixh-free-vars)))
+                                      (cps-bind-fixh parser bind env-bind))) binds))
 
              (new-id `((:primitive . :fixh-funcs) ,@func-names))
              (env-next-cps (make-new-env parser env new-id))
