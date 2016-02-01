@@ -10,8 +10,10 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
 ってかこのまま common lisp 上でいいのか？
 
 ----------------------------------------------------------------
-2016年 1月 27日 水曜日 14:27:40 JST
+2016年 2月  2日 火曜日 00:06:00 JST
 進捗
+    k-transfer ある程度デバッグで来た
+    record-offs に対応した。docment がまだ追いついていない。
     今後は VM コードの生成へと進む
 
     将来的には GC や float/double のサイズが問題になることは明らか。
@@ -31,8 +33,9 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
     cps-live-variables-finder => とりあえず完成
     cps-spill => とりあえず完成
 
+    vm-codegen => VM 対応中
+
 今後
-    VM 対応
     ARM 対応
     NEON 対応
         浮動小数点のために型推定が必要になる？

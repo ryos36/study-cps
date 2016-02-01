@@ -26,6 +26,7 @@ free-variable-finder.lisp
   のようになる。
   子供に FIX があるかどうか問題にしない。
   親の FIX に関連してがかならず heap あるいは stack をつくるため。
+  なぜかここだけ tagged-list じゃない
 
   次のケースで問題があったので、一部、階層的な env を取り入れた。
 
@@ -65,7 +66,7 @@ free-variable-finder.lisp
 closure-converter.lisp
   上とは違う方法で変数を管理
   env は次のようになるので注意が必要
-; FIXH の場合 ((:fixh . closure-sym) v0 v2 ....)
+; FIXH の場合 ((:fixh . closure-sym) (:fixh . closure-sym) ... v0 v2 ....)
 ; FIXS の場合 ((:fixs ) v0 v2 ....)
 ; ここで列挙されるのは自由変数
 ; 想定しているのは FIX .... FIX....
@@ -114,17 +115,79 @@ cps 変換されると define -> fixh, fix -> fixh, let -> 置き換え
   recored-ref は関数内の先頭ですべてのクロージャ内の宣言している。
   FIXS ではすべて使われるはずなので使われないことをチェックしていない。
   FIXH では使われていない変数は recored-ref しないようチェックしている。
-  
+
   使う際には fixs の場合はすぐに bind のなかでレジスタに復元して pop する。
 
-  fixh ならさらにその一つの bind のなかで free-vars を探し
-  bind 内の先頭で record-ref する。app は最後まで行かないとないので
+  FIXH では各 binds の関数で共通の領域を record-offs をつかいずらして
+  使うようにしている。たとえば、f0 g0 があり、自由変数が v0 v1 なら
+  <label :f0> <label :g0> v0 v1 
+  がクロージャーとして heap 領域を持つ。
+  f0 からは v0 は record-ref の offset 2 の変数となるつまり
+  (record-ref (f0 2) (v0) (....
+  g0 からは v0 は record-ref の offset 1 の変数となる。
+  
+  各関数が参照していた場合は複雑になる。相互参照でない場合は
+  参照を考慮してクロージャの順序がが決まる。
+  例えば fact が fact0 を使うなら
+  <label :fact> <label :fact0> v0 v1
+  となり、fact 内で fact0 は record-off で参照可能となる。
+  (record-off (fact 1) (fact0) (....
+
+　そのために FIXH では free-vars を使い各 binds の関数の参照関係を把握して
+  いる。
+
+  また、各関数が相互参照している場合は record-set! も使う必要がある。
+  典型的だが効率の悪い odd? even? の相互参照は
+  <label :odd?> <label :even?> :#f が最初ヒープにとられる。
+  :#f は odd? を入れたいところだが、まだ生成されていないので入れようがない。
+  (heap (<label :odd?> <label :even?> :#f) (odd?) (....
+  となり
+  (recored-set! (odd? 2 odd?) () (....
+  で完成する。
+  
+  fixh ならさらにその一つの各 bind のなかで free-vars を探し
+  bind 内の先頭で record-ref あるいは record-offs をする。
   ここで record-ref してもスレッド対応を考えてもそれでよい。
 　もし、厳密には致したいなら OS などで mutex を使わなくてはならないが
 　コンパイラの仕事ではないので対応しない。
 
+  たとえば、最終的に (:app fact (n))
+  のような場合、fact が binds で宣下されていた場合、
+  は自由変数ではないがクロージャ変換として heap でそのクロージャを作る。
+  これらの binds 時の関数は生成される変数なので record-off で生成する。
+  使われない変数は生成しない。
+
+  上記のサイクリックに使う場合の record-set! で代入すべきシンボルは
+  使われる場合は record-off で生成済みなので、そのシンボルを使うが、
+  使わない場合は新たにシンボルをつくる。つまり
+  (record-offs (closure <n>) (|new-sym|)
+    ((record-set! (|new-sym| <m> closure) (...
+  のケースと
+  (record-offs (closure <n>) (fact0)
+    ((record-set! (fact0 <m> closure) (...
+  のケースが存在する
+
   どのタイミングで参照される"べき"かはコンパイラは知りようがないので
   FIXで定義される関数本体の最初で record-ref して問題ない。
+　が最適化の余地は残る例えば、、、
+==============================================(はじまり)
+APP が record-ref を要求し
+record-ref が自由変数を持つとき
+
+次のようなコード生成をする
+
+(|:FACT| (FACT |sym18| K N)
+  (:RECORD-OFF (FACT 1) (FACT0) ;<= FACT0 が自由変数のため FIXH で生成された部分
+    ((:RECORD-REF (FACT0 0) (|k-sym3|) ;<= APP によって生成された部分
+      ((:APP |k-sym3| (FACT0 |sym18| K N 1))))))))
+
+これはさらに最適化可能
+
+(|:FACT| (FACT |sym18| K N)
+  ((:RECORD-REF (FACT 1) (|k-sym3|) ;<= 統合可能
+    ((:APP |k-sym3| (FACT0 |sym18| K N 1))))))))
+==============================================(おしまい)
+
   record-ref は遅延させて参照した方がよい場合もあるだろうが、
 　これらはのちのスケジューリングで最適化されるのでここでは考慮しない。
 
@@ -138,14 +201,26 @@ cps 変換されると define -> fixh, fix -> fixh, let -> 置き換え
   で v0 v1 が free-vars なら
   (heap ((:dummy) v0 v1) (|sym0|) ((....)))
   が生成される。さらに f0 と f1 のクロージャが生成され
-  (heap ((:dummy v0 v1) (|sym0|)
-    ((heap ((:label |f0|) |sym0|) (f0)
-      ((heap ((:label |f1|) |sym0|) (f1)
-         ((..FIX本体..))))))))
+
+  (heap ((:label |f0|) (:label |f1|) v0 v1) (f0) (...
+  (record-off (f0 1) (f1) (...
   となる。
-  なお 関数が一つであった場合は 1つにする最適化をしている。
-  (heap ((:label |f0-only|) v0 v1) (f0-only)
-     ((..FIX本体..)))
+  これで関数が1つでも２つ以上でもおなじようにでも対応できる。
+
+  bind 側では ((:fixh . f0) (:fixh . f1) v0 v1)という情報がわたるので、
+  f0 が f1 を参照しようとした場合は
+  (record-offs (f0 1) (f0) (...
+  で v0 の場合は 
+  (record-ref (f0 2) (v0) (...
+  となり record-offs と record-ref をうまく切り分けるようにしている。
+
+  相互参照の場合は ((:fixh . odd?) (:fix . even?) odd?) がわたるので
+  odd? が even? を参照する場合は
+  (record-offs (odd 1) (even?) (...
+  で even? が参照する場合は
+  (record-ref (even? 1) (odd?) (...
+  #う～ん。よくよく考えると record-offs にマイナスを許せばよかったのか。
+  #そうすると相互参照を解析する必要もなかったのか、、、、
 
   上位に FIXH があった場合はさらに複雑になるここでは簡略化して説明する
   (FIXH ((f0 (a0 a1) (..... v0 .....)))

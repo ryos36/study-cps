@@ -98,7 +98,7 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 ; free-vars -> (v0 v1 v2)
-; env -> (((:fixh closure-name pos) v0 v2 ....) ...)
+; env -> (((:fixh . closure-name pos) v0 v2 ....) ...)
 ; result -> (v1)
 (defun get-strict-free-variables (free-vars env)
 
@@ -126,9 +126,9 @@
       (remove-if #'null (mapcar #'(lambda (x) (car (member x strict-free-vars))) free-vars)))))
 
 ;----------------------------------------------------------------
-; env -> (((:fixh closure-name pos) v0 v2 ....) ...)
-;          -> ((v3 . (:fixh closure-name pos) ... v3 ...)
-;              (v4 . (:fixh closure-name pos) ... v4 ...))
+; env -> (((:fixh . closure-name) v0 v2 ....) ...)
+;          -> ((v3 . (:fixh . closure-name) ... v3 ...)
+;              (v4 . (:fixh . closure-name) ... v4 ...))
 ;
 ; only search :fixh free variables
 
