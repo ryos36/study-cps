@@ -217,7 +217,7 @@
                     `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
 
                     (if (eq :fixh (car n-info))
-                      `(:RECORD-OFF (,closure-name ,no) (,sym) (,cps-expr0))
+                      `(:RECORD-OFFS (,closure-name ,no) (,sym) (,cps-expr0))
 
                       (let* ((nexted-no (position sym n-info))
                              ;(x (print `(:caddar-n-info ,n-info)))

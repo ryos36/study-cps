@@ -46,7 +46,7 @@
                              ((:APP |k-sym1|
                                (|sym3| :UNSPECIFIED)))))))))))))))))))))))
          (|:MUL3X3-J| (MUL3X3-J |sym9| J I0)
-          (:RECORD-OFF (MUL3X3-J 1) (MUL3X3-JI)
+          (:RECORD-OFFS (MUL3X3-J 1) (MUL3X3-JI)
            ((:FIXH
              ((|:MUL3X3-J-I0| (MUL3X3-J-I0 |sym10| J)
                (:RECORD-REF (MUL3X3-J-I0 2) (|k-sym5|)
@@ -76,7 +76,7 @@
               ((:RECORD-REF (MUL3X3-J-I0 0) (|k-sym6|)
                 ((:APP |k-sym6| (MUL3X3-J-I0 |sym9| J))))))))))
          (|:MUL3X3-I| (MUL3X3-I |sym20| I)
-          (:RECORD-OFF (MUL3X3-I 1) (MUL3X3-J)
+          (:RECORD-OFFS (MUL3X3-I 1) (MUL3X3-J)
            ((:= (I 3) NIL
              ((:RECORD-REF (|sym20| 0) (|k-sym7|)
                ((:APP |k-sym7| (|sym20| :|#T|))))

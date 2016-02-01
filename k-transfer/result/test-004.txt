@@ -57,7 +57,7 @@
         ((:RECORD-REF (|sym2| 0) (|k-sym1|)
           ((:APP |k-sym1| (|sym2| |sym3|)))))))))
     (|:GET-BIT0| (GET-BIT0 |sym5| X)
-     (:RECORD-OFF (GET-BIT0 1) (CLEAR-BIT0)
+     (:RECORD-OFFS (GET-BIT0 1) (CLEAR-BIT0)
       ((:FIXS
         ((|:sym7| (|sym7| |sym8|)
           (:RECORD-REF (|sym7| 2) (X)
@@ -74,8 +74,8 @@
       ((:RECORD-REF (|sym9| 0) (|k-sym4|) ((:APP |k-sym4| (|sym9| 0))))
        (:RECORD-REF (|sym9| 0) (|k-sym5|) ((:APP |k-sym5| (|sym9| 1)))))))
     (|:XOR0| (XOR0 |sym12| BIT-N N X0 X1 RV)
-     (:RECORD-OFF (XOR0 3) (XOR-BIT)
-      ((:RECORD-OFF (XOR0 1) (GET-BIT0)
+     (:RECORD-OFFS (XOR0 3) (XOR-BIT)
+      ((:RECORD-OFFS (XOR0 1) (GET-BIT0)
         ((:= (0 BIT-N) NIL
           ((:RECORD-REF (|sym12| 0) (|k-sym6|) ((:APP |k-sym6| (|sym12| RV))))
            (:FIXS
@@ -132,12 +132,12 @@
             (:RECORD-REF (GET-BIT0 0) (|k-sym10|)
              ((:APP |k-sym10| (GET-BIT0 |sym27| X0))))))))))))
     (|:XOR| (XOR |sym29| BIT-N X0 X1)
-     (:RECORD-OFF (XOR 1) (XOR0)
+     (:RECORD-OFFS (XOR 1) (XOR0)
       ((:RECORD-REF (XOR0 0) (|k-sym11|)
         ((:APP |k-sym11| (XOR0 |sym29| BIT-N 0 X0 X1 0)))))))
     (|:RAND| (RAND |sym32|)
      (:RECORD-REF (RAND 6) (|sym45|)
-      ((:RECORD-OFF (RAND 1) (XOR)
+      ((:RECORD-OFFS (RAND 1) (XOR)
         ((:RECORD-REF (|sym45| 0) (|sym42|)
           ((:<< (|sym42| 13) (|sym41|)
             ((:FIXS

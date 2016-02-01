@@ -10,7 +10,7 @@
 :
 (:FIXH
  ((|:EVEN?| (EVEN? |sym2| X)
-   (:RECORD-OFF (EVEN? 1) (ODD?)
+   (:RECORD-OFFS (EVEN? 1) (ODD?)
     ((:= (X 0) NIL
       ((:RECORD-REF (|sym2| 0) (|k-sym1|) ((:APP |k-sym1| (|sym2| :|#T|))))
        (:- (X 1) (|sym7|)
