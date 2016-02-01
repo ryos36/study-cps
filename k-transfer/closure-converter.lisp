@@ -163,16 +163,15 @@
       (filter-upper-closure-list0 upper-closure-list '())))
 
 ;----------------------------------------------------------------
-; top-env -> ((:fixh closure-name pos) v0 v1 v2 ....
-;                          (v3 . ((:fixh closure-name pos) .. v3 ... ))
-;                          (v4 . ((:fixh closure-name pos) .. v4 ... ))
-;                          (v5 . ((:fixh closure-name pos) .. v5 ... )))
+; top-env -> ((:fixh . closure-name) (:fixh . closure-name) ... v0 v1 v2 ....
+;                          (v3 . ((:fixh . closure-name) .. v3 ... ))
+;                          (v4 . ((:fixh . closure-name) .. v4 ... ))
+;                          (v5 . ((:fixh . closure-name) .. v5 ... )))
 ;           or :fixs :primitive
 ;
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
   ;(print `(:top-env ,top-env))
-  (let ((closure-name (cadar top-env))
-        (func-pos (caddar top-env))
+  (let ((closure-name (cdar top-env))
         (new-symbol-pos-pairs '()))
   ;(print `(:closure-name ,closure-name ,func-pos))
 
@@ -195,26 +194,41 @@
                                (cdr elm))
                        (get-num0 sym (cdr vars) (+ n 1)))))))
 
+             (get-off-num (sym vars n)
+               (print `(:get-off-num ,sym ,vars ,n))
+               (assert vars)
+               (let ((check-fixh-tagged-list (car vars)))
+                 (if (not (consp check-fixh-tagged-list))
+                   (get-num0 sym vars n)
+
+                   ;found (fixh . closure-name)
+                   (let ((k-sym (cdr check-fixh-tagged-list)))
+                     (if (eq k-sym sym)
+                       (values n check-fixh-tagged-list)
+                       (get-off-num sym (cdr vars) (+ n 1)))))))
+
+
              (do-wrap0 (sym cps-expr0)
-                (multiple-value-bind (no n-info) (get-num0 sym top-env 0)
-                  ;(print `(do-wrap0 ,sym ,no ,n-info))
+                (multiple-value-bind (no n-info) (get-off-num sym top-env 0)
+                  (print `(:do-wrap0 ,sym ,no ,n-info))
                   (assert (not (eq no :NOT-FOUND)))
                   ;(print `(,no :+ ,func-pos :=> :new-no))
-                  (let ((new-no (+ no func-pos)))
-                    (if (atom n-info)
-                      `(:RECORD-REF (,closure-name ,new-no) (,sym) (,cps-expr0))
+                  (if (atom n-info)
+                    `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
+
+                    (if (eq :fixh (car n-info))
+                      `(:RECORD-OFF (,closure-name ,no) (,sym) (,cps-expr0))
 
                       (let* ((nexted-no (position sym n-info))
                              (base-sym (cadar n-info))
                              (n-info-func-pos (caddar n-info))
-                             (new-nexted-no (+ nexted-no n-info-func-pos))
                              (stock-sym (cddr (assoc base-sym new-symbol-pos-pairs)))
                              (ref-sym 
                                (if stock-sym stock-sym (cps-gensym parser)))
-                             (inner-cps-expr0 `(:yRECORD-REF (,ref-sym ,new-nexted-no) (,sym) (,cps-expr0))))
+                             (inner-cps-expr0 `(:RECORD-REF (,ref-sym ,nexted-no) (,sym) (,cps-expr0))))
                         ;(print `(stock-sym ,sym ,(copy-tree stock-sym) ,new-symbol-pos-pairs))
                         (if (null stock-sym)
-                          (push `(,base-sym . (,new-no . ,ref-sym)) new-symbol-pos-pairs))
+                          (push `(,base-sym . (,no . ,ref-sym)) new-symbol-pos-pairs))
                         inner-cps-expr0)))))
 
              (do-wrap1 (free-vars1 cps-expr1)
@@ -231,7 +245,7 @@
                          (new-no (car kv-kv))
                          (ref-sym (cdr kv-kv)))
                     (do-wrap2 
-                      `(:xRECORD-REF (,closure-name ,new-no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
+                      `(:RECORD-REF (,closure-name ,new-no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
 
       ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
       (do-wrap2 
@@ -239,6 +253,7 @@
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind-fixh ((parser closure-converter) expr env)
+  (print `(:cps-bind-fixh ,expr :env ,(car env)))
   (let ((closure-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
@@ -252,7 +267,7 @@
       (let* ((free-vars-env (car env))
              (all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
-             ;(z (print `(free-variables ,closure-name ,free-variables)))
+             (z (print `(:free-variables ,closure-name ,free-variables)))
 
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
@@ -350,12 +365,12 @@
                 (union src free-vars :test #'equal)) r-env-list))
 
 ;----------------------------------------------------------------
-(defmethod make-wrapped-record-offs ((parser closure-converter) k-sym r-func-names off-vars next-cps)
+(defmethod make-wrapped-record-offs ((parser closure-converter) k-sym func-names off-vars next-cps)
   (labels ((make-wrapped-record-offs0 (off-vars0 next-cps0)
             (if (null off-vars0) next-cps0
               (let* ((sym (car off-vars0))
-                     (offset-n (position sym r-func-names)))
-                (print `(:off-n ,offset-n ,off-vars :=> ,r-func-names))
+                     (offset-n (position sym func-names)))
+                (print `(:off-n ,offset-n ,off-vars :=> ,func-names))
                 (assert (not (= 0 offset-n)))
                 (make-wrapped-record-offs0 (cdr off-vars0)
                   `(:RECORD-OFFS (,k-sym ,offset-n) (,sym) (,next-cps0)))))))
@@ -421,11 +436,20 @@
 
                (upper-free-vars-list
                  (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-               (x (print `(fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
+               (x (print `(:fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
+               (fixh-list (mapcar #'(lambda (f) `(:fixh . ,f)) new-func-names))
+               (x (print `(:fixh-list ,fixh-list)))
+               (strict-free-vars-without-func-names
+                 (set-difference strict-free-vars func-names))
 
                (new-binds (mapcar #'(lambda (bind)
                                       (let* ((func-name (car bind))
-                                             (fixh-free-vars `((:fixh ,func-name ,(position func-name func-names)) ,@strict-free-vars ,@upper-free-vars-list))
+                                             (updated-fixh-list
+                                               (member func-name fixh-list :test #'(lambda (sym lst) (eq sym (cdr lst)))))
+                                             (fixh-free-vars `(,@updated-fixh-list
+                                                               ,@ref-vars
+                                                               ,@strict-free-vars-without-func-names
+                                                               ,@upper-free-vars-list))
                                              (env-bind (make-new-env parser env fixh-free-vars)))
                                         (cps-bind-fixh parser bind env-bind))) binds))
 
@@ -439,17 +463,16 @@
                (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
                (x (print `(:uc ,upper-closure-list ,closure-list)))
 
-               (ciclic-vars (mapcar #'(lambda (x) (cps-gensym parser)) ref-vars))
-               (r-new-func-names (reverse new-func-names))
-               (heap-list (append (mapcar #'(lambda (func-name) (make-new-func-name func-name)) r-new-func-names) (make-list (length ref-vars) :initial-element :#f) closure-list))
+               (heap-list (append (mapcar #'(lambda (func-name) `(:LABEL ,(make-new-func-name func-name))) new-func-names) (make-list (length ref-vars) :initial-element :#f) (set-difference closure-list func-names)))
                (next-all-variables (car next-finder-env))
                (next-free-variables (filter-free-variables next-all-variables))
                (next-free-funcs (intersection next-free-variables func-names))
-               (top-sym (car r-new-func-names))
+e              (top-sym (car new-func-names))
                (k-sym (if (find top-sym next-free-funcs) top-sym (cps-gensym parser)))
-               (wrapped-record-offs-cps (if next-free-funcs (make-wrapped-record-offs parser k-sym (reverse func-names) next-free-funcs new-next-cps) new-next-cps))
-               (wrapped-heap-cps (if ref-vars (make-wrapped-heap parser k-sym ref-vars r-func-names next-free-funcs wrapped-record-offs-cps) wrapped-record-offs-cps))
-
+               (next-free-funcs-without-k-sym (remove k-sym next-free-funcs))
+               (x (print `(:nfree ,next-free-funcs :fn ,func-names)))
+               (wrapped-record-offs-cps (if next-free-funcs (make-wrapped-record-offs parser k-sym func-names next-free-funcs-without-k-sym new-next-cps) new-next-cps))
+               (wrapped-heap-cps (if ref-vars (make-wrapped-heap parser k-sym ref-vars func-names next-free-funcs-without-k-sym wrapped-record-offs-cps) wrapped-record-offs-cps))
 
                (heap-cps
                  `(:HEAP ,heap-list (,k-sym) (,wrapped-heap-cps))))
