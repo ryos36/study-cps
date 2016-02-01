@@ -5,7 +5,6 @@
 (load "package.lisp")
 (load "free-variable-finder.lisp")
 (load "closure-converter.lisp")
-;(load "t-sort.lisp")
 
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
@@ -16,7 +15,7 @@
 (use-package :cps-test)
 
 (setf conv (make-instance 'cps-closure-converter:closure-converter :sym-name "k-sym"))
-(setf *env* (make-new-env conv '()))
+(setf *test-env* (make-new-env conv '()))
 (setf grv nil)
 ;(defparameter *test-save* nil)
 

@@ -1,5 +1,9 @@
-(load "lisp-to-cps.lisp")
+(load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
+
+(use-package :cps-test)
+
+(load "lisp-to-cps.lisp")
 
 (defparameter *test-script-dir* "../scm-script/" )
 (defparameter *test-ext* ".scm")
@@ -24,6 +28,6 @@
 
 (set-test-files '((1 . 57)))
 
-(defparameter *env* (make-exit-continuous))
+(defparameter *test-env* (make-exit-continuous))
 (do-test)
 

@@ -1,5 +1,8 @@
-(load "cps.lisp")
+(load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
+
+(use-package :cps-test)
+(load "cps.lisp")
 
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")
@@ -17,5 +20,5 @@
 
 (set-test-files '((1 . 28) 31 37 38 40 42 50 51 (53 . 57)))
 
-(defparameter *env* (make-env))
+(defparameter *test-env* (make-env))
 (do-test)

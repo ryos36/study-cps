@@ -420,7 +420,8 @@
 
            (:heap . ,#'heap-transfer)
            (:record-set! . ,#'record-set!-transfer)
-           (:record-ref . ,#'record-ref-transfer)))
+           (:record-ref . ,#'record-ref-transfer)
+           (:record-offs . ,#'record-offs-transfer)))
     table))
 
 ;----------------------------------------------------------------

@@ -162,6 +162,35 @@
         (do-lisp-to-cps record-name (cons #'fill-record-name table-list))))))
 
 ;----------------------------------------------------------------
+(defun record-offs-transfer (expr context)
+  (let* ((result-sym (cps-gensym))
+         (new-cps-expr (copy-tree `(:RECORD-OFFS (RECORD-NAME ARG0) (,result-sym) (CONT))))
+         (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
+
+         (arg0-list (pickup-list new-cps-expr 'ARG0))
+         (cont-list (pickup-list new-cps-expr 'CONT))
+         arg0-result
+         cont-result)
+
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+           (fill-arg0 (arg0) (setf (car arg0-list) arg0) cont-result)
+           (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
+
+      (let ((record-name (cadr expr))
+            (arg0 (caddr expr))
+
+            (cont-lambda (car context))
+            (table-list (cdr context)))
+
+        (setf cont-result
+              (fill-cont (call-continuation-lambda cont-lambda result-sym)))
+
+        (setf arg0-result
+              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))
+
+        (do-lisp-to-cps record-name (cons #'fill-record-name table-list))))))
+
+;----------------------------------------------------------------
 #|
 (defun old-+-two (expr context)
   (let* ((result-sym (cps-gensym))

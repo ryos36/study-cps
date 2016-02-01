@@ -53,6 +53,7 @@
                       (:heap . t)
                       (:record-set! . t)
                       (:record-ref . t)
+                      (:record-offs . t)
                       (:stack . t)
                       (:pop . t))))
 
