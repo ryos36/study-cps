@@ -1,3 +1,23 @@
+ToDo-1:k-transfer
+
+APP が record-ref を要求し
+record-ref が自由変数を持つとき
+
+次のようなコード生成をする
+
+(|:FACT| (FACT |sym18| K N)
+  (:RECORD-OFF (FACT 1) (FACT0) ;<= FACT0 が自由変数のため FIXH で生成された部分
+    ((:RECORD-REF (FACT0 0) (|k-sym3|) ;<= APP によって生成された部分
+      ((:APP |k-sym3| (FACT0 |sym18| K N 1))))))))
+
+これはさらに最適化可能
+
+(|:FACT| (FACT |sym18| K N)
+  ((:RECORD-REF (FACT 1) (|k-sym3|) ;<= 統合可能
+    ((:APP |k-sym3| (FACT0 |sym18| K N 1))))))))
+
+
+----------------------------------------------------------------
 ToDo-1:cps-transfer
 イディオムに近いこのソースは
 

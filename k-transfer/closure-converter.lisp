@@ -173,7 +173,7 @@
   ;(print `(:top-env ,top-env))
   (let ((closure-name (cdar top-env))
         (new-symbol-pos-pairs '()))
-  ;(print `(:closure-name ,closure-name ,func-pos))
+  (print `(:wrap-cps-bind-fixh-with-record-ref ,this-free-vars, new-next-cps))
 
     (labels ((get-pressed-num0 (sym vars n)
               (if (null vars) :NOT-FOUND
@@ -220,8 +220,8 @@
                       `(:RECORD-OFF (,closure-name ,no) (,sym) (,cps-expr0))
 
                       (let* ((nexted-no (position sym n-info))
-                             (base-sym (cadar n-info))
-                             (n-info-func-pos (caddar n-info))
+                             ;(x (print `(:caddar-n-info ,n-info)))
+                             (base-sym (cdar n-info))
                              (stock-sym (cddr (assoc base-sym new-symbol-pos-pairs)))
                              (ref-sym 
                                (if stock-sym stock-sym (cps-gensym parser)))
@@ -253,7 +253,7 @@
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind-fixh ((parser closure-converter) expr env)
-  (print `(:cps-bind-fixh ,expr :env ,(car env)))
+  ;(print `(:cps-bind-fixh ,expr :env ,(car env)))
   (let ((closure-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
@@ -267,7 +267,7 @@
       (let* ((free-vars-env (car env))
              (all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
-             (z (print `(:free-variables ,closure-name ,free-variables)))
+             ;(z (print `(:free-variables ,closure-name ,free-variables)))
 
              (func-name (make-new-func-name closure-name))
              (new-args (cons closure-name args))
@@ -292,7 +292,8 @@
                                   remain
                                   :initial-value 0) 1)) 
              (get-ordered-func-name0 (r-free-vars-list0 rv remain)
-               (if (null r-free-vars-list0) (values (nreverse rv)
+               (print `(:get-name0 ,r-free-vars-list0 :rv ,rv))
+               (if (null r-free-vars-list0) (values rv
                                                     (nreverse remain))
 
                  (let* ((top-elm (car r-free-vars-list0))
@@ -318,7 +319,7 @@
 
              (get-ordered-func-name-next0 (r-free-vars-list-next0 rv remain cmp-n)
 
-               (if (null r-free-vars-list-next0) (values (nreverse rv)
+               (if (null r-free-vars-list-next0) (values rv
                                                          (nreverse remain))
                  (let* ((top-elm (car r-free-vars-list-next0))
                         (func-name (car top-elm))
@@ -355,9 +356,9 @@
                                          (intersection vars r-func-names))))
                        r-free-vars-list
                        r-func-names))
-             ;(x (print `(:r-ref-func-list ,r-ref-func-list)))
+             (x (print `(:r-ref-func-list ,r-ref-func-list)))
              (rv (get-ordered-func-name1 r-ref-func-list '() 0)))
-        (values (nreverse rv) (nreverse ref-vars))))))
+        (values rv (nreverse ref-vars))))))
 
 ;----------------------------------------------------------------
 (defun merge-env (r-env-list)
@@ -370,7 +371,7 @@
             (if (null off-vars0) next-cps0
               (let* ((sym (car off-vars0))
                      (offset-n (position sym func-names)))
-                (print `(:off-n ,offset-n ,off-vars :=> ,func-names))
+                ;(print `(:off-n ,offset-n ,off-vars :=> ,func-names))
                 (assert (not (= 0 offset-n)))
                 (make-wrapped-record-offs0 (cdr off-vars0)
                   `(:RECORD-OFFS (,k-sym ,offset-n) (,sym) (,next-cps0)))))))
@@ -461,7 +462,7 @@
                (upper-closure-list
                    (filter-upper-closure-list (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
                (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
-               (x (print `(:uc ,upper-closure-list ,closure-list)))
+               ;(x (print `(:uc ,upper-closure-list ,closure-list)))
 
                (heap-list (append (mapcar #'(lambda (func-name) `(:LABEL ,(make-new-func-name func-name))) new-func-names) (make-list (length ref-vars) :initial-element :#f) (set-difference closure-list func-names)))
                (next-all-variables (car next-finder-env))
@@ -472,7 +473,7 @@ e              (top-sym (car new-func-names))
                (next-free-funcs-without-k-sym (remove k-sym next-free-funcs))
                (x (print `(:nfree ,next-free-funcs :fn ,func-names)))
                (wrapped-record-offs-cps (if next-free-funcs (make-wrapped-record-offs parser k-sym func-names next-free-funcs-without-k-sym new-next-cps) new-next-cps))
-               (wrapped-heap-cps (if ref-vars (make-wrapped-heap parser k-sym ref-vars func-names next-free-funcs-without-k-sym wrapped-record-offs-cps) wrapped-record-offs-cps))
+               (wrapped-heap-cps (if ref-vars (make-wrapped-heap parser k-sym ref-vars func-names next-free-funcs wrapped-record-offs-cps) wrapped-record-offs-cps))
 
                (heap-cps
                  `(:HEAP ,heap-list (,k-sym) (,wrapped-heap-cps))))
