@@ -173,7 +173,7 @@
   ;(print `(:top-env ,top-env))
   (let ((closure-name (cdar top-env))
         (new-symbol-pos-pairs '()))
-  (print `(:wrap-cps-bind-fixh-with-record-ref ,this-free-vars, new-next-cps))
+  ;(print `(:wrap-cps-bind-fixh-with-record-ref ,this-free-vars, new-next-cps))
 
     (labels ((get-pressed-num0 (sym vars n)
               (if (null vars) :NOT-FOUND
@@ -195,7 +195,7 @@
                        (get-num0 sym (cdr vars) (+ n 1)))))))
 
              (get-off-num (sym vars n)
-               (print `(:get-off-num ,sym ,vars ,n))
+               ;(print `(:get-off-num ,sym ,vars ,n))
                (assert vars)
                (let ((check-fixh-tagged-list (car vars)))
                  (if (not (consp check-fixh-tagged-list))
@@ -210,7 +210,7 @@
 
              (do-wrap0 (sym cps-expr0)
                 (multiple-value-bind (no n-info) (get-off-num sym top-env 0)
-                  (print `(:do-wrap0 ,sym ,no ,n-info))
+                  ;(print `(:do-wrap0 ,sym ,no ,n-info))
                   (assert (not (eq no :NOT-FOUND)))
                   ;(print `(,no :+ ,func-pos :=> :new-no))
                   (if (atom n-info)
@@ -292,7 +292,7 @@
                                   remain
                                   :initial-value 0) 1)) 
              (get-ordered-func-name0 (r-free-vars-list0 rv remain)
-               (print `(:get-name0 ,r-free-vars-list0 :rv ,rv))
+               ;(print `(:get-name0 ,r-free-vars-list0 :rv ,rv))
                (if (null r-free-vars-list0) (values rv
                                                     (nreverse remain))
 
@@ -356,7 +356,7 @@
                                          (intersection vars r-func-names))))
                        r-free-vars-list
                        r-func-names))
-             (x (print `(:r-ref-func-list ,r-ref-func-list)))
+             ;(x (print `(:r-ref-func-list ,r-ref-func-list)))
              (rv (get-ordered-func-name1 r-ref-func-list '() 0)))
         (values rv (nreverse ref-vars))))))
 
@@ -417,9 +417,9 @@
       (multiple-value-bind (new-func-names ref-vars)
         (get-ordered-func-name parser r-func-names r-env-list)
 
-        (print `(:func-names ,func-names :new-func-names ,(copy-tree new-func-names) :ref-vars ,ref-vars))
+        ;(print `(:func-names ,func-names :new-func-names ,(copy-tree new-func-names) :ref-vars ,ref-vars))
 
-        (print `(:diff-env :good ,finder-env :new ,(copy-tree (merge-env r-env-list)) :ref ,ref-vars))
+        ;(print `(:diff-env :good ,finder-env :new ,(copy-tree (merge-env r-env-list)) :ref ,ref-vars))
 
         (let* ((all-variables (merge-env r-env-list))
                ;(u (print `(FUNC ,@func-names :env ,env)))
@@ -437,9 +437,9 @@
 
                (upper-free-vars-list
                  (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-               (x (print `(:fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
+               ;(x (print `(:fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
                (fixh-list (mapcar #'(lambda (f) `(:fixh . ,f)) new-func-names))
-               (x (print `(:fixh-list ,fixh-list)))
+               ;(x (print `(:fixh-list ,fixh-list)))
                (strict-free-vars-without-func-names
                  (set-difference strict-free-vars func-names))
 
@@ -471,7 +471,7 @@
 e              (top-sym (car new-func-names))
                (k-sym (if (find top-sym next-free-funcs) top-sym (cps-gensym parser)))
                (next-free-funcs-without-k-sym (remove k-sym next-free-funcs))
-               (x (print `(:nfree ,next-free-funcs :fn ,func-names)))
+               ;(x (print `(:nfree ,next-free-funcs :fn ,func-names)))
                (wrapped-record-offs-cps (if next-free-funcs (make-wrapped-record-offs parser k-sym func-names next-free-funcs-without-k-sym new-next-cps) new-next-cps))
                (wrapped-heap-cps (if ref-vars (make-wrapped-heap parser k-sym ref-vars func-names next-free-funcs wrapped-record-offs-cps) wrapped-record-offs-cps))
 
