@@ -1,0 +1,20 @@
+(:FIXH
+ ((EVEN? (|sym2| X) (:APP ODD? (|sym2| X)))
+  (ODD? (|sym8| X) (:APP OTHERS? (|sym8| X)))
+  (OTHERS? (|sym7| X) (:APP EVEN? (|sym7| X))))
+ (:APP EVEN? (EXIT 997)))
+:
+(:FIXH
+ ((|:EVEN?| (EVEN? |sym2| X)
+   (:RECORD-OFF (EVEN? 1) (ODD?)
+    ((:RECORD-REF (ODD? 0) (|k-sym1|) ((:APP |k-sym1| (ODD? |sym2| X)))))))
+  (|:ODD?| (ODD? |sym8| X)
+   (:RECORD-OFF (ODD? 1) (OTHERS?)
+    ((:RECORD-REF (OTHERS? 0) (|k-sym2|)
+      ((:APP |k-sym2| (OTHERS? |sym8| X)))))))
+  (|:OTHERS?| (OTHERS? |sym7| X)
+   (:RECORD-REF (OTHERS? 1) (EVEN?)
+    ((:RECORD-REF (EVEN? 0) (|k-sym3|) ((:APP |k-sym3| (EVEN? |sym7| X))))))))
+ (:HEAP ((:LABEL |:EVEN?|) (:LABEL |:ODD?|) (:LABEL |:OTHERS?|) :|#F|) (EVEN?)
+  ((:RECORD-SET! (EVEN? 3 EVEN?) NIL
+    ((:RECORD-REF (EVEN? 0) (|k-sym4|) ((:APP |k-sym4| (EVEN? EXIT 997)))))))))
