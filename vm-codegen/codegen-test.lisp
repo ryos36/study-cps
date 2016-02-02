@@ -7,6 +7,7 @@
 
 (load "package.lisp")
 (load "vm-codegen.lisp" )
+(load "heap-parser.lisp" )
 
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")

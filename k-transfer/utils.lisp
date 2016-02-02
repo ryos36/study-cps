@@ -31,4 +31,10 @@
       (if debug-print (print rv-cxr))
       (do-cxr (reverse (cdr rv-cxr)) expr))))
 
+;----------------------------------------------------------------
+(defun closure-name-to-label-name (closure-name)
+  (intern (format nil ":~s" closure-name)))
+
+(defun make-label (sym &optional c-to-l)
+  `(:LABEL ,(if c-to-l (closure-name-to-label-name sym) sym)))
 

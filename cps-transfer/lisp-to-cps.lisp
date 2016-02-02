@@ -112,21 +112,23 @@
 (load "primitive.lisp")
 
 ;----------------------------------------------------------------
-(defun make-exit-transfer-lambda ()
-  (let* ((new-cps-expr (copy-tree `(:APP EXIT (ARG0))))
+(defun make-exit-transfer-lambda ( use-exit )
+  (let* ((new-cps-expr-exit (copy-tree `(:EXIT (ARG0) () ())))
+         (new-cps-expr-app (copy-tree `(:APP EXIT (ARG0))))
+         (new-cps-expr (if use-exit new-cps-expr-exit new-cps-expr-app))
  
          (arg0-list (pickup-list new-cps-expr 'ARG0)))
     (flet ((fill-arg0 (arg0) (setf (car arg0-list) arg0)
                       new-cps-expr))
       #'fill-arg0)))
 
-(defun make-exit-continuous ()
-      (cons (make-exit-transfer-lambda) nil))
+(defun make-exit-continuous ( &optional use-exit )
+      (cons (make-exit-transfer-lambda use-exit) nil))
 
-(defun exit-transfer (expr context)
+(defun exit-transfer (expr context &optional use-exit )
   (let ((arg0 (cadr expr))
         (table-list (cdr context)))
-    (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda) table-list))))
+    (do-lisp-to-cps arg0 (cons (make-exit-transfer-lambda use-exit ) table-list))))
 
 ;----------------------------------------------------------------
 (defun if-transfer (expr context)

@@ -45,19 +45,63 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
+(defun make-attribuite () (copy-list '(:attribute)))
+
+;----------------------------------------------------------------
 (defmethod make-jump-instruction ((codegen vm-codegen) sym)
-  (copy-tree `(:jump (:attribute) ,sym))) 
+  `(:jump ,(make-attribuite) ,sym))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-cond-instruction ((codegen vm-codegen) sym)
-  (copy-tree `(:jump-cond (:attribute) ,sym))) 
+  `(:jump-cond ,(make-attribuite) ,sym))
 
 ;----------------------------------------------------------------
 (defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
   (let* ((args-status (mapcar #'(lambda (a) (if (find a live-args) 1 0)) args))
          (reg-status (append args-status (make-list (- (max-n codegen) (length args)) :initial-element 0))))
 
-    (copy-tree `(:live-reg (:attribute) ,heap-size ,reg-status)))) 
+    `(:live-reg ,(make-attribuite) ,heap-size ,reg-status)))
+
+;----------------------------------------------------------------
+(defmethod make-move-instruction ((codegen vm-codegen) reg-no0 reg-no1)
+  (let ((registers (registers codegen)))
+    (print `(:reg-no ,reg-no0 ,reg-no1))
+
+  `(:move ,(make-attribuite) ,(elt registers reg-no0) ,(elt registers reg-no1))))
+
+;----------------------------------------------------------------
+(defmethod make-swap-instruction ((codegen vm-codegen) reg-no0 reg-no1)
+  (let ((registers (registers codegen)))
+    (print `(:reg-no ,reg-no0 ,reg-no1))
+
+  `(:swap ,(make-attribuite) ,(elt registers reg-no0) ,(elt registers reg-no1))))
+
+;----------------------------------------------------------------
+(defmethod make-movei-instruction ((codegen vm-codegen) imm reg-no)
+  (let ((registers (registers codegen)))
+  `(:movei ,(make-attribuite) ,imm ,(elt registers reg-no))))
+
+;----------------------------------------------------------------
+(defmethod make-halt-instruction ((codegen vm-codegen))
+  `(:halt ,(make-attribuite)))
+
+;----------------------------------------------------------------
+(defmethod global-variable? ((codegen vm-codegen) sym)
+  (print `(:sym ,(intern "EXIT") ,sym :reg ,
+                (or 
+                  (eq :exit sym)
+                  (eq (intern "EXIT") sym))))
+
+  (or 
+    (eq :exit sym)
+    (eq (intern "EXIT") sym)))
+
+(defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)
+  ;(assert nil)
+  (add-code codegen
+            (let ((registers (registers codegen)))
+              `(:movei ,(make-attribuite) ,(make-label sym :closure-name)
+                       ,(elt registers reg-no)))))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -123,9 +167,9 @@
                  (or (eq :NOT-SYMBOL arg) (numberp arg))))
 
       (let* ((registers (registers codegen))
-             (x (print `(:args ,args)))
+             ;(x (print `(:args ,args)))
              (arg-list0 (mapcar #'(lambda (arg) (if (cps-symbolp arg) arg :NOT-SYMBOL)) args))
-             (x (print `(:arg-list0 ,arg-list0 ,register-list)))
+             ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
                                                   (if found found arg))) arg-list0))
              (x (print `(:arg-list1 ,arg-list1)))
@@ -333,10 +377,39 @@
         (live-vars-tagged-list (caar env))
         (codegen-tagged-list (cadar env)))
         
-    (add-code codegen (make-jump-instruction codegen func-name))
-    (let ((new-func-name (cps-symbol codegen func-name env))
-          (new-args (mapcar #'(lambda (arg) (cps-terminal codegen arg env)) args)))
-      `(:APP ,new-func-name ,new-args))))
+    (let* ((register-tagged-list (cadr codegen-tagged-list))
+           (register-list (cadr register-tagged-list))
+           (registers (registers codegen)))
+
+      (print `(:register-list ,register-list :args ,args))
+      (let ((cur-pos 0))
+        (mapl #'(lambda (arg-list reg-list) 
+                  (let ((arg (car arg-list))
+                        (sym (car reg-list)))
+
+                    (if (global-variable? codegen arg)
+                      (set-global-variable-address-to-reg codegen arg cur-pos)
+                      (if (eq arg sym) :already-set 
+                        (if (cps-symbolp arg)
+                          (let ((pos (position arg register-list)))
+                            (assert pos)
+                            (let ((new-pos (position sym arg-list)))
+                              (if new-pos
+                                (let ((abs-new-pos (+ cur-pos new-pos)))
+                                  (setf (elt reg-list new-pos) sym)
+                                  (add-code codegen (make-swap-instruction codegen abs-new-pos cur-pos)))))
+                            (add-code codegen (make-move-instruction codegen pos cur-pos)))
+                          (add-code codegen (make-movei-instruction codegen arg cur-pos)))))
+
+                  (incf cur-pos)))
+
+                          args register-list))
+
+      (let* ((pos (position func-name register-list))
+             (reg (elt registers pos)))
+        (add-code codegen (make-jump-instruction codegen reg))
+
+        `(:APP ,reg ,args)))))
 
 ;----------------------------------------------------------------
 (defmethod cps-compare-primitive ((codegen vm-codegen) expr env)
@@ -353,29 +426,38 @@
         (assert codegen-tagged-list)
         (assert (= 2 (length next-cpss)))
 
-        ; dummy code
-        (add-code codegen (copy-list `(,op (:attribute) ,args ,result)))
-        (add-code codegen (make-jump-cond-instruction codegen label-sym))
+        (let* ((declare-tagged-list (cadr live-vars-tagged-list))
+               (declare-vars (cdr declare-tagged-list))
+               (live-tagged-list (cadddr live-vars-tagged-list))
+               (live-vars (cdr live-tagged-list))
 
-        (let* ((else-clause (cadr next-cpss))
-               (then-clause (car next-cpss))
-               (op-vars-info (cadr live-vars-tagged-list))
-               (next-live-vars-list (car (cddddr op-vars-info)))
+               (not-used-reg (set-difference declare-vars live-vars))
+               (new-args (update-register-usage codegen codegen-tagged-list args env))
+               (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
+               (new-result (update-register-usage codegen codegen-tagged-list result env)))
+          ; dummy code
+          (add-code codegen (copy-list `(,op (:attribute) ,new-args ,new-result)))
+          (add-code codegen (make-jump-cond-instruction codegen label-sym))
 
-               (next-env-for-else (make-new-env codegen env
-                                     `((:live-vars ,(cadr next-live-vars-list))
-                                       ,(copy-tree codegen-tagged-list))))
-               ;(x (print `(:else ,else-clause)))
-               (new-next-else-cps (cps-parse codegen else-clause next-env-for-else))
-               (label-insn (add-code codegen label-sym))
+          (let* ((else-clause (cadr next-cpss))
+                 (then-clause (car next-cpss))
+                 (op-vars-info (cadr live-vars-tagged-list))
+                 (next-live-vars-list (car (cddddr op-vars-info)))
 
-               (next-env-for-then (make-new-env codegen env
-                                     `((:live-vars ,(car next-live-vars-list))
-                                       ,(copy-tree codegen-tagged-list))))
+                 (next-env-for-else (make-new-env codegen env
+                                       `((:live-vars ,(cadr next-live-vars-list))
+                                         ,(copy-tree codegen-tagged-list))))
+                 ;(x (print `(:else ,else-clause)))
+                 (new-next-else-cps (cps-parse codegen else-clause next-env-for-else))
+                 (label-insn (add-code codegen label-sym))
 
-               (new-next-then-cps (cps-parse codegen then-clause next-env-for-then)))
+                 (next-env-for-then (make-new-env codegen env
+                                       `((:live-vars ,(car next-live-vars-list))
+                                         ,(copy-tree codegen-tagged-list))))
 
-          `(,op ,args ,result (,new-next-then-cps ,new-next-else-cps)))))
+                 (new-next-then-cps (cps-parse codegen then-clause next-env-for-then)))
+
+            `(,op ,new-args ,new-result (,new-next-then-cps ,new-next-else-cps))))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((codegen vm-codegen) expr env)
@@ -402,11 +484,10 @@
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
 
-        ; dummy code
-        (print `(:op ,op (,(copy-tree args) :=> ,(copy-tree new-args) (,(copy-tree result) :=> ,(copy-tree new-result)))))
-        (print `(:live-vars ,(copy-tree (cadr live-vars-tagged-list)) :not-used ,not-used-reg))
-        (print `(:register-list ,(cadr (cadr codegen-tagged-list))))
-        (add-code codegen (copy-list `(,op (:attribute) ,new-args ,new-result)))
+          ;(print `(:op ,op (,(copy-tree args) :=> ,(copy-tree new-args) (,(copy-tree result) :=> ,(copy-tree new-result)))))
+          ;(print `(:live-vars ,(copy-tree (cadr live-vars-tagged-list)) :not-used ,not-used-reg))
+          ;(print `(:register-list ,(cadr (cadr codegen-tagged-list))))
+          (add-code codegen (copy-list `(,op (:attribute) ,new-args ,new-result)))
 
           (let* ((op-vars-info (cadr live-vars-tagged-list))
                  (next-live-vars-list (car (cddddr op-vars-info)))
@@ -418,6 +499,29 @@
 
             `(,op ,new-args ,new-result (,new-next-cpss))))))))
 
+;----------------------------------------------------------------
+(def-cps-func cps-neq ((codegen vm-codegen) expr env)
+    (cps-compare-primitive codegen expr env))
+
+;----------------------------------------------------------------
+(def-cps-func cps-exit ((codegen vm-codegen) expr env)
+  (let* ((op (car expr))
+         (arg (caadr expr))
+
+         (live-vars-tagged-list (caar env))
+         (codegen-tagged-list (cadar env))
+
+         (register-tagged-list (cadr codegen-tagged-list))
+         (register-list (cadr register-tagged-list)))
+
+    (if (cps-symbolp arg)
+      (let ((reg-pos (position arg register-list)))
+        (if (not (= 0 reg-pos))
+          (add-code codegen (make-move-instruction codegen reg-pos 0))))
+
+      (add-code codegen (make-movei-instruction codegen arg 0)))
+
+    (add-code codegen (make-halt-instruction codegen))))
 ;----------------------------------------------------------------
 (def-cps-func cps-symbol ((codegen vm-codegen) expr env)
     (let* ((registers (registers codegen))

@@ -43,10 +43,6 @@
          (and (listp expr) (eq (car expr) :label)))))
 
 ;----------------------------------------------------------------
-(defun make-label (sym)
-  `(:LABEL ,sym))
-
-;----------------------------------------------------------------
 (defmethod cps-primitive-p ((parser cps-parser) op)
   (case op 
     (:#t nil)
