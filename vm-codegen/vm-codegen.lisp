@@ -472,14 +472,17 @@
 
         (assert codegen-tagged-list)
         (assert (= 2 (length next-cpss)))
+        (print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
 
-        (let* ((declare-tagged-list (cadr live-vars-tagged-list))
+        (let* ((live-vars-list (cadr live-vars-tagged-list))
+               (declare-tagged-list (cadr live-vars-list))
                (declare-vars (cdr declare-tagged-list))
-               (live-tagged-list (cadddr live-vars-tagged-list))
+               (live-tagged-list (cadddr live-vars-list))
                (live-vars (cdr live-tagged-list))
 
                (not-used-reg (set-difference declare-vars live-vars))
                (new-args (update-register-usage codegen codegen-tagged-list args env))
+               (x (print `(:op ,op)))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
           ; primitive-code
@@ -520,13 +523,16 @@
 
         (assert codegen-tagged-list)
         (assert (= (length next-cpss) 1))
+        (print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
 
-        (let* ((declare-tagged-list (cadr live-vars-tagged-list))
+        (let* ((live-vars-list (cadr live-vars-tagged-list))
+               (declare-tagged-list (cadr live-vars-list))
                (declare-vars (cdr declare-tagged-list))
-               (live-tagged-list (cadddr live-vars-tagged-list))
+               (live-tagged-list (cadddr live-vars-list))
                (live-vars (cdr live-tagged-list))
 
                (not-used-reg (set-difference declare-vars live-vars))
+               (x (print `(:live-vars-list ,live-vars-list)))
                (new-args (update-register-usage codegen codegen-tagged-list args env))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
