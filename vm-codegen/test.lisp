@@ -30,20 +30,22 @@
                                                    (:app-info)))))))
 
     (cps-parse codegen cps-expr codegen-env)
-    ))
+    (create-initialize-codes codegen)
+    (get-final-codes codegen)))
 
 (defparameter *test-script-dir* "./cps-script/" )
 (defparameter *test-ext* ".cps")
 (defparameter *test-parse-func* #'cps-parse-one)
 (defparameter *debug-mode* nil)
 (defparameter *debug-mode* t)
+(defparameter *test-insn-view* t)
+
 (defun cps-gensym-reset ()
-  (setf (slot-value codegen 'sym-no) 0))
+  (setf (slot-value codegen 'sym-no) 0)
+  (reset-codes codegen))
 
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("1" "3" "4" "2" "1"))
+(set-test-files '("3" "4" (1 . 2)))
 (do-test)
-(dolist (insn (get-final-codes codegen))
-  (format t "~s~%" insn))

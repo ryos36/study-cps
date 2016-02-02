@@ -13,9 +13,12 @@
     :max-n
     :global-variable
 
+    :reset-codes 
+
     :add-global-variable
     :global-variable? 
 
+    :create-initialize-codes 
     :get-final-codes 
     :print-codes
 

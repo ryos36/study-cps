@@ -5,6 +5,7 @@
 
 (defparameter *test-env* nil)
 
+(defparameter *test-insn-view* nil)
 (defparameter *test-script-dir* nil)
 (defparameter *test-ext* nil)
 (defparameter *test-name* "test-")
@@ -102,7 +103,12 @@
                 (with-output-to-string (str)
                   (dolist (i lisp-test-list)
                     (let ((rv (funcall *test-parse-func* i *test-env*)))
-                      (format str "~s~%:~%~s~%" i rv)
+                      (format str "~s~%:~%~s~%" i 
+                              (if *test-insn-view* "code"
+                                rv))
+                      (if *test-insn-view* 
+                        (dolist (insn rv)
+                          (format str "~s~%" insn)))
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))
 

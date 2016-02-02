@@ -10,13 +10,19 @@
    (live-variables-finder :initarg :live-variables-finder :reader live-variables-finder)
    (use-jump-for-fix :initform t :initarg :use-jump-for-fix :reader use-jump-for-fix)
    (use-attribute :initarg :use-attribute :initform nil :reader use-attribute)
+   (initialize-codes :accessor initialize-codes)
    (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)))
 
 ;----------------------------------------------------------------
 (defmethod reset-registers ((codegen vm-codegen) registers)
   (setf (max-n codegen) (length registers))
-  (setf (registers codegen) registers)
-  (setf (codes codegen) nil))
+  (setf (registers codegen) registers))
+
+;----------------------------------------------------------------
+(defmethod reset-codes ((codegen vm-codegen))
+  (setf (codes codegen) nil)
+  (add-code codegen 
+            (make-label 'common-lisp-user::main :closure-name)))
 
 ;----------------------------------------------------------------
 (defmethod pop-one-make-new-env ((codegen vm-codegen) env &optional getter)
@@ -37,13 +43,29 @@
 
 ;----------------------------------------------------------------
 (defmethod get-final-codes ((codegen vm-codegen))
-  (reverse
-    (slot-value codegen 'codes)))
+  (append
+    (initialize-codes codegen)
+    (reverse
+      (slot-value codegen 'codes))))
 
 ;----------------------------------------------------------------
 (defmethod print-codes ((codegen vm-codegen))
   (dolist (insn (get-final-codes codegen))
     (format t "~s~%" insn)))
+
+;----------------------------------------------------------------
+;----------------------------------------------------------------
+(defmethod create-initialize-codes ((codegen vm-codegen))
+  (setf (initialize-codes codegen)
+
+        (list
+          (make-jump-instruction codegen (make-label "main" :closure-name))
+          (make-label "main")
+          (make-const-instruction codegen (make-label "main" :closure-name))
+          (make-label "exit")
+          (make-const-instruction codegen (make-label "exit" :closure-name))
+          (make-label "exit" :closure-name)
+          (make-halt-instruction codegen))))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -91,6 +113,10 @@
 ;----------------------------------------------------------------
 (defmethod make-halt-instruction ((codegen vm-codegen))
   `(:halt ,@(make-attribute codegen)))
+
+;----------------------------------------------------------------
+(defmethod make-const-instruction ((codegen vm-codegen) const-value)
+  `(:const ,@(make-attribute codegen) ,const-value))
 
 ;----------------------------------------------------------------
 (defmethod add-global-variable ((codegen vm-codegen) sym)
@@ -201,6 +227,7 @@
 
 ;----------------------------------------------------------------
 (defmethod update-register-not-used ((codegen vm-codegen) codegen-tagged-list live-vars-tagged-list)
+  (print `(:update ,codegen-tagged-list ,live-vars-tagged-list))
   (let* ((register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list))
 
@@ -219,7 +246,7 @@
 
     ;(print `(:before-register-list ,register-list ,not-used-reg))
     (mapc #'(lambda (arg) (let ((pos (position arg register-list)))
-                            ;(print `(:pos ,pos :nur ,not-used-reg))
+                            (print `(:pos ,pos :not-used-reg ,not-used-reg))
                             (assert pos)
                             (setf (elt register-list pos) nil))) not-used-reg)
 
@@ -402,7 +429,6 @@
                       (if (eq arg sym) :already-set 
                         (if (cps-symbolp arg)
                           (let ((pos (position arg register-list)))
-                                  ;(print `(:elt-assert ,pos))
                             (assert pos)
                             (let ((new-pos (position sym (cdr arg-list))))
                                   ;(print `(:elt ,register-list ,new-pos))

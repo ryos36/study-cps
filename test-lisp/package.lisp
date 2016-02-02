@@ -17,8 +17,9 @@
     :*test-save*
     :*test-print*
     :*test-reset-func*
-    :test-success-n*
+    :*test-success-n*
     :*test-save-n*
+    :*test-insn-view*
 
     :set-test-files
     :do-test))
