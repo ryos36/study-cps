@@ -65,7 +65,7 @@
       (mapc #'(lambda(arg) 
                 (set-variable parser arg t next-cps-env)) func-names)
         
-      (let ((new-binds (cps-binds parser binds bind-env))
+      (let ((new-binds (cps-binds parser binds next-cps-env))
             (new-next-cps (cps-parse parser next-cps next-cps-env)))
 
         `(,fix-op ,new-binds ,new-next-cps)))))

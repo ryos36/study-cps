@@ -417,9 +417,9 @@
       (multiple-value-bind (new-func-names ref-vars)
         (get-ordered-func-name parser r-func-names r-env-list)
 
-        ;(print `(:func-names ,func-names :new-func-names ,(copy-tree new-func-names) :ref-vars ,ref-vars))
+        (print `(:func-names ,func-names :new-func-names ,(copy-tree new-func-names) :ref-vars ,ref-vars))
 
-        ;(print `(:diff-env :good ,finder-env :new ,(copy-tree (merge-env r-env-list)) :ref ,ref-vars))
+        (print `(:diff-env :good ,finder-env :new ,(copy-tree (merge-env r-env-list)) :ref ,ref-vars))
 
         (let* ((all-variables (merge-env r-env-list))
                ;(u (print `(FUNC ,@func-names :env ,env)))
@@ -457,7 +457,7 @@
                (new-id `((:primitive . :fixh-funcs) ,@func-names))
                (env-next-cps (make-new-env parser env new-id))
 
-               (new-next-cps (cps-parse parser next-cps env))
+               (new-next-cps (cps-parse parser next-cps env-next-cps))
 
                (upper-closure-list
                    (filter-upper-closure-list (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
