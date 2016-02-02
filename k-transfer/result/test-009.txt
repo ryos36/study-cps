@@ -1,0 +1,50 @@
+(:FIXH
+ ((XOR0 (|sym12| BIT-N)
+   (:= (0 BIT-N) NIL
+    ((:APP |sym12| (RV))
+     (:FIXS
+      ((|sym27| (|sym28|)
+        (:FIXS ((|sym25| (|sym26|) (:APP XOR0 (|sym12| |sym26|))))
+         (:APP GET-BIT0 (|sym25| X1)))))
+      (:APP GET-BIT0 (|sym27| X0))))))
+  (GET-BIT0 (|rsym0| X) (:APP |rsym0| (0)))
+  (XOR-BIT (|rsym1| A B) (:APP |rsym1| (0))))
+ (:APP EXIT (0)))
+:
+(:FIXH
+ ((|:XOR0| (XOR0 |sym12| BIT-N)
+   (:RECORD-REF (XOR0 5) (RV)
+    ((:RECORD-REF (XOR0 4) (X0)
+      ((:RECORD-OFFS (XOR0 1) (GET-BIT0)
+        ((:RECORD-REF (XOR0 3) (X1)
+          ((:= (0 BIT-N) NIL
+            ((:RECORD-REF (|sym12| 0) (|k-sym1|)
+              ((:APP |k-sym1| (|sym12| RV))))
+             (:FIXS
+              ((|:sym27| (|sym27| |sym28|)
+                (:RECORD-REF (|sym27| 4) (GET-BIT0)
+                 ((:RECORD-REF (|sym27| 3) (X1)
+                   ((:RECORD-REF (|sym27| 2) (|sym12|)
+                     ((:RECORD-REF (|sym27| 1) (XOR0)
+                       ((:POP (5) NIL
+                         ((:FIXS
+                           ((|:sym25| (|sym25| |sym26|)
+                             (:RECORD-REF (|sym25| 2) (|sym12|)
+                              ((:RECORD-REF (|sym25| 1) (XOR0)
+                                ((:POP (3) NIL
+                                  ((:RECORD-REF (XOR0 0) (|k-sym2|)
+                                    ((:APP |k-sym2|
+                                      (XOR0 |sym12| |sym26|))))))))))))
+                           (:STACK ((:LABEL |:sym25|) XOR0 |sym12|) (|sym25|)
+                            ((:RECORD-REF (GET-BIT0 0) (|k-sym3|)
+                              ((:APP |k-sym3|
+                                (GET-BIT0 |sym25| X1)))))))))))))))))))
+              (:STACK ((:LABEL |:sym27|) XOR0 |sym12| X1 GET-BIT0) (|sym27|)
+               ((:RECORD-REF (GET-BIT0 0) (|k-sym4|)
+                 ((:APP |k-sym4| (GET-BIT0 |sym27| X0))))))))))))))))))
+  (|:GET-BIT0| (GET-BIT0 |rsym0| X)
+   (:RECORD-REF (|rsym0| 0) (|k-sym5|) ((:APP |k-sym5| (|rsym0| 0)))))
+  (|:XOR-BIT| (XOR-BIT |rsym1| A B)
+   (:RECORD-REF (|rsym1| 0) (|k-sym6|) ((:APP |k-sym6| (|rsym1| 0))))))
+ (:HEAP ((:LABEL |:XOR0|) (:LABEL |:GET-BIT0|) (:LABEL |:XOR-BIT|) X1 X0 RV)
+  (|k-sym8|) ((:RECORD-REF (EXIT 0) (|k-sym7|) ((:APP |k-sym7| (EXIT 0)))))))

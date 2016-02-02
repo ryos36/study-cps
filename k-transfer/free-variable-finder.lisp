@@ -19,7 +19,8 @@
 ;----------------------------------------------------------------
 (defmethod set-variable ((parser free-variable-finder) key value env)
   (let ((top-env (car env)))
-    (setf (car env) (cons `(,key . ,value) top-env))))
+    (if (not (assoc key top-env))
+      (setf (car env) (cons `(,key . ,value) top-env)))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-symbol ((parser free-variable-finder) expr env)
