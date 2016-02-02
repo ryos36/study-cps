@@ -9,6 +9,7 @@
    (heap-parser :initform (make-instance 'heap-parser) :reader heap-parser)
    (live-variables-finder :initarg :live-variables-finder :reader live-variables-finder)
    (use-jump-for-fix :initform t :initarg :use-jump-for-fix :reader use-jump-for-fix)
+   (use-attribute :initarg :use-attribute :initform nil :reader use-attribute)
    (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)))
 
 ;----------------------------------------------------------------
@@ -46,45 +47,50 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-(defun make-attribuite () (copy-list '(:attribute)))
+(defmethod make-attribute ((codegen vm-codegen)) (if (use-attribute codegen) (copy-list '((:attribute))) '()))
+
+;----------------------------------------------------------------
+(defmethod make-primitive-instruction ((codegen vm-codegen) op args result)
+  `(,op ,@(make-attribute codegen) ,args ,
+        (if result result :CONDITION)))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-instruction ((codegen vm-codegen) sym)
-  `(:jump ,(make-attribuite) ,sym))
+  `(:jump ,@(make-attribute codegen) ,sym))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-cond-instruction ((codegen vm-codegen) sym)
-  `(:jump-cond ,(make-attribuite) ,sym))
+  `(:jump-cond ,@(make-attribute codegen) ,sym))
 
 ;----------------------------------------------------------------
 (defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
   (let* ((args-status (mapcar #'(lambda (a) (if (find a live-args) 1 0)) args))
          (reg-status (append args-status (make-list (- (max-n codegen) (length args)) :initial-element 0))))
 
-    `(:live-reg ,(make-attribuite) ,heap-size ,reg-status)))
+    `(:live-reg ,@(make-attribute codegen) ,heap-size ,reg-status)))
 
 ;----------------------------------------------------------------
 (defmethod make-move-instruction ((codegen vm-codegen) reg-no0 reg-no1)
   (let ((registers (registers codegen)))
-    (print `(:reg-no ,reg-no0 ,reg-no1))
+    ;(print `(:reg-no ,reg-no0 ,reg-no1))
 
-  `(:move ,(make-attribuite) ,(elt registers reg-no0) ,(elt registers reg-no1))))
+  `(:move ,@(make-attribute codegen) ,(elt registers reg-no0) ,(elt registers reg-no1))))
 
 ;----------------------------------------------------------------
 (defmethod make-swap-instruction ((codegen vm-codegen) reg-no0 reg-no1)
   (let ((registers (registers codegen)))
-    (print `(:swap-reg-no ,reg-no0 ,reg-no1))
+    ;(print `(:swap-reg-no ,reg-no0 ,reg-no1))
 
-  `(:swap ,(make-attribuite) ,(elt registers reg-no0) ,(elt registers reg-no1))))
+  `(:swap ,@(make-attribute codegen) ,(elt registers reg-no0) ,(elt registers reg-no1))))
 
 ;----------------------------------------------------------------
 (defmethod make-movei-instruction ((codegen vm-codegen) imm reg-no)
   (let ((registers (registers codegen)))
-  `(:movei ,(make-attribuite) ,imm ,(elt registers reg-no))))
+  `(:movei ,@(make-attribute codegen) ,imm ,(elt registers reg-no))))
 
 ;----------------------------------------------------------------
 (defmethod make-halt-instruction ((codegen vm-codegen))
-  `(:halt ,(make-attribuite)))
+  `(:halt ,@(make-attribute codegen)))
 
 ;----------------------------------------------------------------
 (defmethod add-global-variable ((codegen vm-codegen) sym)
@@ -101,7 +107,7 @@
   ;(assert nil)
   (add-code codegen
             (let ((registers (registers codegen)))
-              `(:movei ,(make-attribuite) ,(make-label sym :closure-name)
+              `(:movei ,@(make-attribute codegen) ,(make-label sym :closure-name)
                        ,(elt registers reg-no)))))
 
 ;----------------------------------------------------------------
@@ -173,17 +179,17 @@
              ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
                                                   (if found found arg))) arg-list0))
-             (x (print `(:arg-list1 ,arg-list1)))
+             ;(x (print `(:arg-list1 ,arg-list1)))
              (pos-list0 (mapcar #'(lambda (arg) (if (need-not-find arg) arg (find-reg-in-app arg (cdr app-info-tagged-list)))) arg-list1))
-             (x (print `(:pos-list0 ,pos-list0)))
+             ;(x (print `(:pos-list0 ,pos-list0)))
              (pos-list1 (mapcar #'(lambda (pos0) 
-                                    (print `(:pos0 ,pos0)) (if pos0 pos0 (find-empty-reg-no))) pos-list0)))
+                                    (if pos0 pos0 (find-empty-reg-no))) pos-list0)))
 
-        (print `(:pos-list1 ,pos-list1))
+        ;(print `(:pos-list1 ,pos-list1))
 
         (mapcar #'(lambda (pos arg)
                     (assert (need-not-find pos))
-                    (print `(:pos ,pos ,(numberp pos) ,(if (numberp pos) (elt register-list pos))))
+                    ;(print `(:pos ,pos ,(numberp pos) ,(if (numberp pos) (elt register-list pos))))
                     (if (numberp pos)
                       (if (null (elt register-list pos))
                         (setf (elt register-list pos) arg)))
@@ -211,13 +217,13 @@
          (not-used-reg-for-bind (set-difference declare-vars live-vars))
          (not-used-reg use-vars))
 
-    (print `(:before-register-list ,register-list ,not-used-reg))
+    ;(print `(:before-register-list ,register-list ,not-used-reg))
     (mapc #'(lambda (arg) (let ((pos (position arg register-list)))
-                            (print `(:pos ,pos :nur ,not-used-reg))
+                            ;(print `(:pos ,pos :nur ,not-used-reg))
                             (assert pos)
                             (setf (elt register-list pos) nil))) not-used-reg)
 
-    (print `(:remove-register-list ,register-list))
+    ;(print `(:remove-register-list ,register-list))
     not-used-reg))
 
 ;----------------------------------------------------------------
@@ -365,7 +371,7 @@
                                    `((:live-vars ,(car (nth 4 bind-vars-info)))
                                      ,codegen-tagged-list)))
              (new-args (mapcar #'(lambda (arg) (cps-terminal codegen arg next-env)) args))
-             (x (print `(:args ,args :=> ,new-args)))
+             ;(x (print `(:args ,args :=> ,new-args)))
              (new-next-cps (cps-parse codegen next-cps next-env)))
 
       `(,func-name ,new-args ,new-next-cps)))))
@@ -382,30 +388,30 @@
            (register-list (cadr register-tagged-list))
            (registers (registers codegen)))
 
-      (print `(:register-list ,register-list :args ,args))
+      ;(print `(:register-list ,register-list :args ,args))
 
       (let ((cur-pos 0))
         (mapl #'(lambda (arg-list reg-list) 
                   (let ((arg (car arg-list))
                         (sym (car reg-list)))
 
-      (print `(:0register-list ,register-list :args ,args))
+      ;(print `(:0register-list ,register-list :args ,args))
                     (if (global-variable? codegen arg)
                       (set-global-variable-address-to-reg codegen arg cur-pos)
 
                       (if (eq arg sym) :already-set 
                         (if (cps-symbolp arg)
                           (let ((pos (position arg register-list)))
-                                  (print `(:elt-assert ,pos))
+                                  ;(print `(:elt-assert ,pos))
                             (assert pos)
                             (let ((new-pos (position sym (cdr arg-list))))
-                                  (print `(:elt ,register-list ,new-pos))
+                                  ;(print `(:elt ,register-list ,new-pos))
                               (if new-pos
                                 (let ((abs-new-pos (+ cur-pos new-pos)))
-                                  (print `(:elt ,cur-pos ,new-pos))
+                                  ;(print `(:elt ,cur-pos ,new-pos))
                                   (if (find (elt register-list abs-new-pos) (cdr arg-list))
                                     (progn 
-                                  (print `(:elt ,register-list ,pos))
+                                  ;(print `(:elt ,register-list ,pos))
                                       (add-code codegen (make-swap-instruction codegen pos cur-pos))
                                       (setf (elt register-list pos) arg))
                                     (progn 
@@ -419,7 +425,7 @@
 
                           args (copy-list register-list)))
 
-      (print `(:func-name ,func-name ,register-list))
+      ;(print `(:func-name ,func-name ,register-list))
       (let* ((pos (position func-name register-list))
              (reg (elt registers pos)))
         (add-code codegen (make-jump-instruction codegen reg))
@@ -450,8 +456,8 @@
                (new-args (update-register-usage codegen codegen-tagged-list args env))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
-          ; dummy code
-          (add-code codegen (copy-list `(,op (:attribute) ,new-args ,new-result)))
+          ; primitive-code
+          (add-code codegen (make-primitive-instruction codegen op new-args new-result))
           (add-code codegen (make-jump-cond-instruction codegen label-sym))
 
           (let* ((else-clause (cadr next-cpss))
@@ -502,7 +508,9 @@
           ;(print `(:op ,op (,(copy-tree args) :=> ,(copy-tree new-args) (,(copy-tree result) :=> ,(copy-tree new-result)))))
           ;(print `(:live-vars ,(copy-tree (cadr live-vars-tagged-list)) :not-used ,not-used-reg))
           ;(print `(:register-list ,(cadr (cadr codegen-tagged-list))))
-          (add-code codegen (copy-list `(,op (:attribute) ,new-args ,new-result)))
+
+          ; primitive-code
+          (add-code codegen (make-primitive-instruction codegen op new-args new-result))
 
           (let* ((op-vars-info (cadr live-vars-tagged-list))
                  (next-live-vars-list (car (cddddr op-vars-info)))
