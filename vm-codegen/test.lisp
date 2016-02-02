@@ -29,7 +29,8 @@
                                                    (:register ,(make-list (max-n codegen)))
                                                    (:app-info)))))))
 
-    (cps-parse codegen cps-expr codegen-env)))
+    (cps-parse codegen cps-expr codegen-env)
+    ))
 
 (defparameter *test-script-dir* "./cps-script/" )
 (defparameter *test-ext* ".cps")

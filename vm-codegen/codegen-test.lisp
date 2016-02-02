@@ -95,3 +95,16 @@
                  ((:APP (:DECLARE) (:USE |zym5| J0 |zym9|) (:LIVE))))))))
             (:FIX-BODY (:DECLARE) (:USE) (:LIVE)
              ((:APP (:DECLARE) (:USE |zym7| J0 I) (:LIVE))))))))))))))))
+
+;(add-global-variable codegen 'ryos)
+;(add-global-variable codegen 'exi)
+(print `(:exit ,(global-variable? codegen 'exit)))
+(print `(:gv ,(slot-value codegen 'global-variable)))
+(print `(:cps-app-swap ,(cps-app codegen '(:app :func0 (sym0 sym1 sym2))
+                                 (make-new-env codegen '()
+                                     (copy-tree `((:live-vars (:app (:declare) 
+                                                                    (:use sym0 sym1 sym2)
+                                                                    (:live)))
+                                                  (:codegen
+                                                    (:register (sym1 sym2 sym0 nil :func0))
+                                                    (:app-info))))))))

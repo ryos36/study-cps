@@ -8,7 +8,8 @@
    (codes :accessor codes :initform nil)
    (heap-parser :initform (make-instance 'heap-parser) :reader heap-parser)
    (live-variables-finder :initarg :live-variables-finder :reader live-variables-finder)
-   (use-jump-for-fix :initform t :initarg :use-jump-for-fix :reader use-jump-for-fix)))
+   (use-jump-for-fix :initform t :initarg :use-jump-for-fix :reader use-jump-for-fix)
+   (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)))
 
 ;----------------------------------------------------------------
 (defmethod reset-registers ((codegen vm-codegen) registers)
@@ -72,7 +73,7 @@
 ;----------------------------------------------------------------
 (defmethod make-swap-instruction ((codegen vm-codegen) reg-no0 reg-no1)
   (let ((registers (registers codegen)))
-    (print `(:reg-no ,reg-no0 ,reg-no1))
+    (print `(:swap-reg-no ,reg-no0 ,reg-no1))
 
   `(:swap ,(make-attribuite) ,(elt registers reg-no0) ,(elt registers reg-no1))))
 
@@ -86,15 +87,15 @@
   `(:halt ,(make-attribuite)))
 
 ;----------------------------------------------------------------
-(defmethod global-variable? ((codegen vm-codegen) sym)
-  (print `(:sym ,(intern "EXIT") ,sym :reg ,
-                (or 
-                  (eq :exit sym)
-                  (eq (intern "EXIT") sym))))
+(defmethod add-global-variable ((codegen vm-codegen) sym)
+  (setf (slot-value codegen 'global-variable)
+        (cons sym (global-variable codegen))))
 
-  (or 
-    (eq :exit sym)
-    (eq (intern "EXIT") sym)))
+;----------------------------------------------------------------
+(defmethod global-variable? ((codegen vm-codegen) sym)
+  (find sym (global-variable codegen)))
+
+;----------------------------------------------------------------
 
 (defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)
   ;(assert nil)
@@ -382,34 +383,48 @@
            (registers (registers codegen)))
 
       (print `(:register-list ,register-list :args ,args))
+
       (let ((cur-pos 0))
         (mapl #'(lambda (arg-list reg-list) 
                   (let ((arg (car arg-list))
                         (sym (car reg-list)))
 
+      (print `(:0register-list ,register-list :args ,args))
                     (if (global-variable? codegen arg)
                       (set-global-variable-address-to-reg codegen arg cur-pos)
+
                       (if (eq arg sym) :already-set 
                         (if (cps-symbolp arg)
                           (let ((pos (position arg register-list)))
+                                  (print `(:elt-assert ,pos))
                             (assert pos)
-                            (let ((new-pos (position sym arg-list)))
+                            (let ((new-pos (position sym (cdr arg-list))))
+                                  (print `(:elt ,register-list ,new-pos))
                               (if new-pos
                                 (let ((abs-new-pos (+ cur-pos new-pos)))
-                                  (setf (elt reg-list new-pos) sym)
-                                  (add-code codegen (make-swap-instruction codegen abs-new-pos cur-pos)))))
-                            (add-code codegen (make-move-instruction codegen pos cur-pos)))
+                                  (print `(:elt ,cur-pos ,new-pos))
+                                  (if (find (elt register-list abs-new-pos) (cdr arg-list))
+                                    (progn 
+                                  (print `(:elt ,register-list ,pos))
+                                      (add-code codegen (make-swap-instruction codegen pos cur-pos))
+                                      (setf (elt register-list pos) arg))
+                                    (progn 
+                                      (add-code codegen (make-move-instruction cur-pos abs-new-pos))
+                                      (add-code codegen (make-move-instruction codegen pos cur-pos)))))
+                                (add-code codegen (make-move-instruction codegen pos cur-pos)))))
+                          
                           (add-code codegen (make-movei-instruction codegen arg cur-pos)))))
 
                   (incf cur-pos)))
 
-                          args register-list))
+                          args (copy-list register-list)))
 
+      (print `(:func-name ,func-name ,register-list))
       (let* ((pos (position func-name register-list))
              (reg (elt registers pos)))
         (add-code codegen (make-jump-instruction codegen reg))
 
-        `(:APP ,reg ,args)))))
+        `(:APP ,reg ,(butlast registers (- (length registers) (length args))))))))
 
 ;----------------------------------------------------------------
 (defmethod cps-compare-primitive ((codegen vm-codegen) expr env)

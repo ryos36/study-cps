@@ -11,6 +11,10 @@
     :vm-codegen
 
     :max-n
+    :global-variable
+
+    :add-global-variable
+    :global-variable? 
 
     :get-final-codes 
     :print-codes
