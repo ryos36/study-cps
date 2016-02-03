@@ -183,3 +183,14 @@
             ,(caddr re-top-env)
             ,(cadddr re-top-env)
                    ,new-next-cpss))))
+
+;----------------------------------------------------------------
+(def-cps-func cps-exit ((parser cps-live-variables-finder) expr env)
+  (let* ((arg0 (caadr expr))
+         (arg0-is-symbol (cps-symbolp arg0))
+         (use-arg0 (if arg0-is-symbol `(:use ,arg0) '(:use))))
+
+    (if arg0-is-symbol
+      (update-live-variables parser (list arg0) env))
+
+      (copy-tree `(:EXIT (:declare) ,use-arg0 (:live) ()))))

@@ -77,7 +77,7 @@
 
       (let* ((all-variables (car finder-env))
              (free-variables (filter-free-variables all-variables))
-             ;(x (print `(var ,all-variables :free ,free-variables)))
+             (x (print `(var ,all-variables :free ,free-variables)))
 
              (fixs-free-vars `((:fixs) ,@free-variables))
              (env-binds (make-new-env parser env fixs-free-vars))

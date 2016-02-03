@@ -3,8 +3,10 @@
 
 ;----------------------------------------------------------------
 (defclass vm-codegen (cps-parser)
-  ((max-n :initarg :max-n :initform 10 :reader max-n)
-   (registers :accessor registers :initform '(:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
+  ((max-n :initarg :max-n :initform 20 :reader max-n)
+   (registers :accessor registers :initform '
+              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9
+              :x0 :x1 :x2 :x3 :x4 :x5 :x6 :x7 :x8 :x9))
    (codes :accessor codes :initform nil)
    (heap-parser :initform (make-instance 'heap-parser) :reader heap-parser)
    (live-variables-finder :initarg :live-variables-finder :reader live-variables-finder)
@@ -405,6 +407,7 @@
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((codegen vm-codegen) expr env)
+  (print `(:cps-app ,expr ,env))
   (let ((func-name (cadr expr))
         (args (caddr expr))
 
@@ -441,7 +444,7 @@
                                       (add-code codegen (make-swap-instruction codegen pos cur-pos))
                                       (setf (elt register-list pos) arg))
                                     (progn 
-                                      (add-code codegen (make-move-instruction cur-pos abs-new-pos))
+                                      (add-code codegen (make-move-instruction codegen cur-pos abs-new-pos))
                                       (add-code codegen (make-move-instruction codegen pos cur-pos)))))
                                 (add-code codegen (make-move-instruction codegen pos cur-pos)))))
                           
@@ -522,7 +525,7 @@
             (codegen-tagged-list (cadar env)))
 
         (assert codegen-tagged-list)
-        (assert (= (length next-cpss) 1))
+        (assert (= 1 (length next-cpss)))
         (print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
 
         (let* ((live-vars-list (cadr live-vars-tagged-list))
@@ -568,6 +571,8 @@
 
          (register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list)))
+
+    (print `(:expr ,expr :env ,(car env)))
 
     (if (cps-symbolp arg)
       (let ((reg-pos (position arg register-list)))

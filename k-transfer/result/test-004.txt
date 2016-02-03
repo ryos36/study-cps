@@ -46,8 +46,7 @@
                     (:APP XOR (|sym33| 32 |sym37| |sym35|)))))))
                (:APP XOR (|sym36| 32 |sym40| |sym38|)))))))
           (:APP XOR (|sym39| 32 |sym42| |sym41|)))))))))
-   (:FIXS ((|sym43| (|sym44|) (:EXIT (|sym44|) NIL NIL)))
-    (:APP RAND (|sym43|))))))
+   (:FIXS ((|sym43| (|sym44|) (:APP EXIT (|sym44|)))) (:APP RAND (|sym43|))))))
 :
 (:HEAP (19201738) (|sym45|)
  ((:FIXH
@@ -259,6 +258,12 @@
     ((:LABEL |:RAND|) (:LABEL |:XOR|) (:LABEL |:XOR0|) (:LABEL |:GET-BIT0|)
      (:LABEL |:CLEAR-BIT0|) (:LABEL |:XOR-BIT|) |sym45|)
     (RAND)
-    ((:FIXS ((|:sym43| (|sym43| |sym44|) (:EXIT (|sym44|) NIL NIL)))
-      (:RECORD-REF (RAND 0) (|k-sym16|)
-       ((:APP |k-sym16| (RAND |sym43|))))))))))
+    ((:FIXS
+      ((|:sym43| (|sym43| |sym44|)
+        (:RECORD-REF (|sym43| 1) (EXIT)
+         ((:POP (2) NIL
+           ((:RECORD-REF (EXIT 0) (|k-sym16|)
+             ((:APP |k-sym16| (EXIT |sym44|))))))))))
+      (:STACK ((:LABEL |:sym43|) EXIT) (|sym43|)
+       ((:RECORD-REF (RAND 0) (|k-sym17|)
+         ((:APP |k-sym17| (RAND |sym43|))))))))))))

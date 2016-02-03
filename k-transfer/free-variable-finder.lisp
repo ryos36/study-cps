@@ -56,7 +56,7 @@
 
     (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
       (mapc #'(lambda(arg) 
-                (set-variable parser arg t env)) func-names))
+                (set-variable parser arg nil env)) func-names))
 
 
     (mapcar #'(lambda (bind) 
@@ -119,6 +119,15 @@
 
           `(,fix-op ,new-binds ,new-next-cps))))))
 |#
+
+;----------------------------------------------------------------
+(def-cps-func cps-exit ((parser free-variable-finder) expr env)
+  (let ((arg0 (caadr expr)))
+
+    (set-variable parser arg0 nil env)
+
+    (let ((new-arg0 (cps-terminal parser arg0 env)))
+      `(:EXIT (,new-arg0) () ()))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser free-variable-finder) expr env)
