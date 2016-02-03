@@ -1,4 +1,4 @@
 (:FIX ((ONE NIL 1)) (:EXIT (ONE)))
 :
 (:FIXH ((ONE (|sym2|) (:APP |sym2| (1))))
- (:FIXS ((|sym3| (|sym4|) (:EXIT (|sym4|) NIL NIL))) (:APP ONE (|sym3|))))
+ (:FIXS ((|sym3| (|sym4|) (:APP EXIT (|sym4|)))) (:APP ONE (|sym3|))))

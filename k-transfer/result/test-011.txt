@@ -1,0 +1,16 @@
+(:FIXH ((ONE (|sym2|) (:APP |sym2| (1))))
+ (:FIXS ((|sym3| (|sym4|) (:APP EXIT (|sym4|)))) (:APP ONE (|sym3|))))
+:
+(:FIXH
+ ((|:ONE| (ONE |sym2|)
+   (:RECORD-REF (|sym2| 0) (|k-sym0|) ((:APP |k-sym0| (|sym2| 1))))))
+ (:HEAP ((:LABEL |:ONE|)) (ONE)
+  ((:FIXS
+    ((|:sym3| (|sym3| |sym4|)
+      (:RECORD-REF (|sym3| 2) (|sym3|)
+       ((:RECORD-REF (|sym3| 1) (EXIT)
+         ((:POP (3) NIL
+           ((:RECORD-REF (EXIT 0) (|k-sym1|)
+             ((:APP |k-sym1| (EXIT |sym4|))))))))))))
+    (:STACK ((:LABEL |:sym3|) EXIT |sym3|) (|sym3|)
+     ((:RECORD-REF (ONE 0) (|k-sym2|) ((:APP |k-sym2| (ONE |sym3|))))))))))
