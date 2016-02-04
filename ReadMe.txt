@@ -10,13 +10,18 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
 ってかこのまま common lisp 上でいいのか？
 
 ----------------------------------------------------------------
-2016年 2月  2日 火曜日 00:06:00 JST
+2016年 2月  4日 木曜日 08:50:46 JST
 進捗
-    k-transfer ある程度デバッグで来た
-    record-offs に対応した。docment がまだ追いついていない。
-    今後は VM コードの生成へと進む
+    VM コードも多分できた。testsuite が圧倒的に足りない。
+
+    k-transfer ある程度安定してきた。ただし、今の仕組みでは
+    限界も見えている。
+
+    k-transfer 時の record-offs に対応した。
+    docment がまだ追いついていない。
 
     将来的には GC や float/double のサイズが問題になることは明らか。
+    浮動小数点は型推定が必要になるだろう。
     boxing(boxed?) するのか？
     ML や GHC(Haskellのコンパイラ) を参考にすべき？
     Standard ML of New Jersey を参考にすべき？
@@ -32,8 +37,8 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
     cps-reorder   => とりえあえず完成
     cps-live-variables-finder => とりあえず完成
     cps-spill => とりあえず完成
-
-    vm-codegen => VM 対応中
+    vm-codegen => とりあえず完成
+    vmgen => 対応中
 
 今後
     ARM 対応
@@ -140,7 +145,12 @@ cps-spill
     -----------------------------------------
 
 vm-codegen
-    => 簡単なバーチャルマシン生成。ただし vm 自身がまだない。
+    簡単なバーチャルマシン生成。ただし vm 自身がまだない。
+    生成されるジャンプ命令が多すぎるができた模様。
+
+vmgen
+    gforth の vmgen と連携して C の実行形式を作ることが出来る。
+    vm 自動生成ツール(になるはず)
 ----------------------------------------------------------------
 ひとりごと、vx-scheme に追いつけ追い越せ。
 
