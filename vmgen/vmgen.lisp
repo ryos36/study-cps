@@ -88,14 +88,23 @@
 (make-two-args-primitive primitive-bitor ("or" "ori8" "ori32"))
 (make-two-args-primitive primitive-bitxor ("xor" "ori8" "xori32"))
 
-(make-two-args-compare-primitive primitive-> ("lessthan" "lessthani" "lessthani32"))
-(make-two-args-compare-primitive primitive->= ("lesseq" "lesseqi" "lesseqi32"))
+(make-two-args-compare-primitive primitive-> ("less_than" "less_thani" "less_thani32"))
+(make-two-args-compare-primitive primitive->= ("less_eq" "less_eqi" "less_eqi32"))
 
-(make-two-args-compare-primitive primitive-< ("greaterthan" "greaterthani" "greaterthani32"))
-(make-two-args-compare-primitive primitive-< ("greatereq" "greatereqi" "greatereqi32"))
+(make-two-args-compare-primitive primitive-< ("greater_than" "greater_thani" "greater_thani32"))
+(make-two-args-compare-primitive primitive-< ("greater_eq" "greater_eqi" "greater_eqi32"))
 
 (make-two-args-compare-primitive primitive-eq ("eq" "eqi" "eqi32"))
 (make-two-args-compare-primitive primitive-neq ("neq" "neqi" "neqi32"))
+
+;----------------------------------------------------------------
+#|
+stack pop
+           (:heap . ,#'heap-transfer)
+           (:record-set! . ,#'record-set!-transfer)
+           (:record-ref . ,#'record-ref-transfer)
+           (:record-offs . ,#'record-offs-transfer)))
+|#
 
 ;----------------------------------------------------------------
 #|
