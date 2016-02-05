@@ -1,39 +1,49 @@
-(defparameter *registers* '(:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
+;----------------------------------------------------------------
+(in-package :sinby.cps.vmgen)
+
 (defparameter *code-pos* 0)
 (defparameter *code-array-name* "codes")
+
+;----------------------------------------------------------------
+(defclass vmgen ()
+  ((registers :accessor registers :initform '
+              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
+   (code-pos :initform 0 :accessor code-pos)
+   (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)))
 
 ;----------------------------------------------------------------
 (defun symbol-to-c-label (sym)
   (format nil "~a" sym))
 
 ;----------------------------------------------------------------
-(defun reg-pos (a0 a1 &optional (a2 :r0))
-  (let ((pos0 (position a0 *registers*))
-        (pos2 (position a2 *registers*)))
+(defun reg-pos ((vmgen vmgen) a0 a1 &optional (a2 :r0))
+  (let ((registers (registers vmgen)))
+    (let ((pos0 (position a0 registers))
+          (pos2 (position a2 registers)))
 
-    ;(print `(:02 ,a0 ,a1 ,pos0 a2 ,pos2))
-    (multiple-value-bind (x1 x1-type)
-      (if (numberp a1)
-        (if (>= 255 a1 0)
-          (values (logand a1 #b11111111) :IMM8)
-          (values 0 :IMM32))
-        (values (logand (position a1 *registers*) #xff) :REG))
+      ;(print `(:02 ,a0 ,a1 ,pos0 a2 ,pos2))
+      (multiple-value-bind (x1 x1-type)
+        (if (numberp a1)
+          (if (>= 255 a1 0)
+            (values (logand a1 #b11111111) :IMM8)
+            (values 0 :IMM32))
+          (values (logand (position a1 registers) #xff) :REG))
 
-      ;(print `(,x1 ,x1-type))
-      (let ((x1-type-no (position x1-type '(:REG :IMM8 :IMM32 :NOT-DEFINE))))
-        (values
-          (logior
-            (ash (ash x1-type-no 2) 24)
-            (ash (logand pos0 #xff) 16)
-            (ash x1 8)
-            (ash (logand pos2 #xff)  0))
+        ;(print `(,x1 ,x1-type))
+        (let ((x1-type-no (position x1-type '(:REG :IMM8 :IMM32 :NOT-DEFINE))))
+          (values
+            (logior
+              (ash (ash x1-type-no 2) 24)
+              (ash (logand pos0 #xff) 16)
+              (ash x1 8)
+              (ash (logand pos2 #xff)  0))
 
-          x1-type)))))
+            x1-type))))))
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
-  `(defun ,func-name (a0 a1 a2)
-     (multiple-value-bind (oprand x1-type) (reg-pos a0 a1 a2)
+  `(defmethod ,func-name ((vmgen vmgen) a0 a1 a2)
+     (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1 a2)
        ,(if (eq (car code-list) :NA) `(assert (not (eq x1-type :REG))))
        ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
        ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
@@ -53,8 +63,8 @@
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-compare-primitive (func-name code-list)
-  `(defun ,func-name (a0 a1 label)
-     (multiple-value-bind (oprand x1-type) (reg-pos a0 a1)
+  `(defmethod ,func-name ((vmgen vmgen) a0 a1 label)
+     (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1)
        ,(if (eq (car code-list) :NA) `(assert (not (eq x1-type :REG))))
        ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
        ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
@@ -92,19 +102,17 @@
 (make-two-args-compare-primitive primitive->= ("less_eq" "less_eqi" "less_eqi32"))
 
 (make-two-args-compare-primitive primitive-< ("greater_than" "greater_thani" "greater_thani32"))
-(make-two-args-compare-primitive primitive-< ("greater_eq" "greater_eqi" "greater_eqi32"))
+(make-two-args-compare-primitive primitive-<= ("greater_eq" "greater_eqi" "greater_eqi32"))
 
 (make-two-args-compare-primitive primitive-eq ("eq" "eqi" "eqi32"))
 (make-two-args-compare-primitive primitive-neq ("neq" "neqi" "neqi32"))
 
 ;----------------------------------------------------------------
-#|
-stack pop
-           (:heap . ,#'heap-transfer)
-           (:record-set! . ,#'record-set!-transfer)
-           (:record-ref . ,#'record-ref-transfer)
-           (:record-offs . ,#'record-offs-transfer)))
-|#
+;stack pop
+;           (:heap . ,#'heap-transfer)
+;           (:record-set! . ,#'record-set!-transfer)
+;           (:record-ref . ,#'record-ref-transfer)
+;           (:record-offs . ,#'record-offs-transfer)))
 
 ;----------------------------------------------------------------
 #|
