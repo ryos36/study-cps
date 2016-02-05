@@ -3,10 +3,9 @@
 
 ;----------------------------------------------------------------
 (defclass vm-codegen (cps-parser)
-  ((max-n :initarg :max-n :initform 20 :reader max-n)
+  ((max-n :initarg :max-n :initform 10 :reader max-n)
    (registers :accessor registers :initform '
-              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9
-              :x0 :x1 :x2 :x3 :x4 :x5 :x6 :x7 :x8 :x9))
+              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (codes :accessor codes :initform nil)
    (heap-parser :initform (make-instance 'heap-parser) :reader heap-parser)
    (live-variables-finder :initarg :live-variables-finder :reader live-variables-finder)
@@ -59,15 +58,17 @@
 ;----------------------------------------------------------------
 (defmethod create-initialize-codes ((codegen vm-codegen))
   (setf (initialize-codes codegen)
+        (let ((main 'common-lisp-user::main)
+              (exit 'common-lisp-user::exit))
 
         (list
-          (make-jump-instruction codegen (make-label "main" :closure-name))
-          (make-label "main")
-          (make-const-instruction codegen (make-label "main" :closure-name))
-          (make-label "exit")
-          (make-const-instruction codegen (make-label "exit" :closure-name))
-          (make-label "exit" :closure-name)
-          (make-halt-instruction codegen))))
+          (make-jump-instruction codegen (make-label main :closure-name))
+          (make-label main)
+          (make-const-instruction codegen (make-label main :closure-name))
+          (make-label exit)
+          (make-const-instruction codegen (make-label exit :closure-name))
+          (make-label exit :closure-name)
+          (make-halt-instruction codegen)))))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -75,16 +76,15 @@
 
 ;----------------------------------------------------------------
 (defmethod make-primitive-instruction ((codegen vm-codegen) op args result)
-  `(,op ,@(make-attribute codegen) ,args ,
-        (if result result :CONDITION)))
+  `(,op ,@(make-attribute codegen) ,args , result))
 
 ;----------------------------------------------------------------
-(defmethod make-jump-instruction ((codegen vm-codegen) sym)
-  `(:jump ,@(make-attribute codegen) ,sym))
+(defmethod make-jump-instruction ((codegen vm-codegen) label-sym)
+  `(:jump ,@(make-attribute codegen) ,label-sym))
 
 ;----------------------------------------------------------------
-(defmethod make-jump-cond-instruction ((codegen vm-codegen) sym)
-  `(:jump-cond ,@(make-attribute codegen) ,sym))
+(defmethod make-jump-cond-instruction ((codegen vm-codegen) op new-args label-sym)
+  `(:jump-cond ,@(make-attribute codegen) ,op ,new-args ,label-sym))
 
 ;----------------------------------------------------------------
 (defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
@@ -113,8 +113,8 @@
   `(:movei ,@(make-attribute codegen) ,imm ,(elt registers reg-no))))
 
 ;----------------------------------------------------------------
-(defmethod make-halt-instruction ((codegen vm-codegen))
-  `(:halt ,@(make-attribute codegen)))
+(defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r0))
+  `(:halt ,@(make-attribute codegen) ,arg))
 
 ;----------------------------------------------------------------
 (defmethod make-const-instruction ((codegen vm-codegen) const-value)
@@ -489,8 +489,7 @@
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
           ; primitive-code
-          (add-code codegen (make-primitive-instruction codegen op new-args new-result))
-          (add-code codegen (make-jump-cond-instruction codegen label-sym))
+          (add-code codegen (make-jump-cond-instruction codegen op new-args label-sym))
 
           (let* ((else-clause (cadr next-cpss))
                  (then-clause (car next-cpss))
