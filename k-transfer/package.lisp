@@ -38,6 +38,7 @@
 
     :closure-name-to-label-name 
     :make-label 
+    :make-registers
 
     :make-cxr-route
     :pickup-list))

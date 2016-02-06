@@ -38,3 +38,9 @@
 (defun make-label (sym &optional c-to-l)
   `(:LABEL ,(if c-to-l (closure-name-to-label-name sym) sym)))
 
+(defun make-registers (n &optional (prefix :R) &key (format-func #'(lambda(no prefix) (intern (format nil "~a~a" prefix no) "KEYWORD" ))))
+  (labels ((make-registers0 (n0 rv)
+              (if (= n0 n) (nreverse rv)
+                (make-registers0 (+ n0 1)
+                   (cons (funcall format-func n0 prefix) rv)))))
+    (make-registers0 0 '())))
