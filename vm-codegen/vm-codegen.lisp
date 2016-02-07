@@ -62,11 +62,11 @@
               (exit 'common-lisp-user::exit))
 
         (list
-          (make-jump-instruction codegen (make-label main :closure-name))
+          (make-jump-instruction codegen (closure-name-to-label-name main))
           (make-label main)
-          (make-const-instruction codegen (make-label main :closure-name))
+          (make-const-instruction codegen (closure-name-to-label-name main))
           (make-label exit)
-          (make-const-instruction codegen (make-label exit :closure-name))
+          (make-const-instruction codegen (closure-name-to-label-name exit))
           (make-label exit :closure-name)
           (make-halt-instruction codegen)))))
 

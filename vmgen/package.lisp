@@ -40,8 +40,24 @@
     :primitive-record-set!
 
     :primitive-const
+    :primitive-jump
+
+    :primitive-halt
+
+    :primitive-move 
+    :primitive-swap 
+    :primitive-movei
 
     :mark-label
     :write-out-labels
     ))
 
+;----------------------------------------------------------------
+(defpackage :sinby.cps.vmc-to-c-source
+  (:use :cl :sinby.cps.vmgen)
+  (:nicknames :cps-vmc-to-c-source)
+  (:export 
+
+    :vmc-to-c-source
+
+    :convert))
