@@ -211,6 +211,45 @@
            (format-incf t "0x~8,'0x,~%" (logand #xffffffff a1))))))))
 
 ;----------------------------------------------------------------
+(defmethod primitive-jump ((vmgen vmgen) label-sym)
+  (format-incf t "INST_ADDR(jump),~%" )
+  (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
+
+;----------------------------------------------------------------
+(defmethod primitive-jump-cond ((vmgen vmgen) label-sym)
+  (format-incf t "INST_ADDR(jump_condition),~%" )
+  (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
+
+;----------------------------------------------------------------
+(defmethod primitive-move ((vmgen vmgen) r0 r1)
+  (format-incf t "INST_ADDR(move),~%" )
+  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
+    (assert (eq x1-type :REG))
+    (format-incf t "0x~8,'0x,~%" oprand)))
+
+;----------------------------------------------------------------
+(defmethod primitive-swap ((vmgen vmgen) r0 r1)
+  (format-incf t "INST_ADDR(swap),~%" )
+  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
+    (assert (eq x1-type :REG))
+    (format-incf t "0x~8,'0x,~%" oprand)))
+
+;----------------------------------------------------------------
+(defmethod primitive-movei ((vmgen vmgen) imm r1)
+  (format-incf t "INST_ADDR(swap),~%" )
+  (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
+    (assert (not (eq x1-type :REG)))
+    (format-incf t "0x~8,'0x,~%" oprand)
+    (if (eq x1-type :IMM32)
+      (format-incf t "0x~8,'0x,~%" (logand #xffffffff a1)))))
+
+;----------------------------------------------------------------
+(defmethod primitive-halt ((vmgen vmgen) r0)
+  (format-incf t "INST_ADDR(swap),~%" )
+  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 :r0)
+    (format-incf t "0x~8,'0x,~%" oprand)))
+
+;----------------------------------------------------------------
 (defmethod primitive-const ((vmgen vmgen) v)
   (if (numberp v)
     (format-incf t "0x~8,'0x,~%" v)
