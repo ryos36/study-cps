@@ -104,7 +104,7 @@
                   (dolist (i lisp-test-list)
                     (let ((rv (funcall *test-parse-func* i *test-env*)))
                       (format str "~s~%:~%~s~%" i 
-                              (if *test-insn-view* "code"
+                              (if *test-insn-view* :code
                                 rv))
                       (if *test-insn-view* 
                         (dolist (insn rv)

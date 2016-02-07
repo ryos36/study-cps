@@ -1,24 +1,25 @@
 (load "package.lisp")
 (load "vmgen.lisp")
 
+(load "../test-lisp/package.lisp")
+(load "../test-lisp/test.lisp")
+
 (use-package :cps-vmgen)
+(use-package :cps-test)
 
 (setf vmgen (make-instance 'vmgen))
+(setf *test-env* nil)
 
-(primitive-+ vmgen :r0 1 :r0)
-(primitive-+ vmgen :r0 -1 :r0)
-(primitive-+ vmgen :r0 1211 :r0)
-(primitive-+ vmgen :r0 :r1 :r0)
+(defun vmgen-one (cps-expr env)
+  (let ((*xstandard-output* nil))
+    (primitive-+ vmgen :r0 1 :r0)))
 
-(primitive-/ vmgen :r0 :r1 :r0)
-;(format t "~X~%" (reg-pos :r0 1 :r2))
+(defparameter *test-script-dir* "./vm-code/" )
+(defparameter *test-ext* ".vmc")
+(defparameter *test-parse-func* #'vmgen-one)
+(defparameter *debug-mode* nil)
+(defparameter *test-insn-view* t)
 
-(primitive-< vmgen :r0 :r1 '|:label1|)
-
-(primitive-heap vmgen '(0 1 2 (label |:label1|) :r3 3 4) :r5)
-(primitive-record-ref vmgen :r0 0 :r5)
-(primitive-record-offs vmgen :r0 1 :r3)
-
-(primitive-record-set! vmgen :r0 1 :r3)
-(primitive-record-set! vmgen 400 255 :r3)
-
+;(set-test-files '("32" "42" "29" "41"))
+(set-test-files '("1" (1 . 3)))
+(do-test)

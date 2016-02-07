@@ -50,9 +50,9 @@
       (slot-value codegen 'codes))))
 
 ;----------------------------------------------------------------
-(defmethod print-codes ((codegen vm-codegen))
+(defmethod print-codes ((codegen vm-codegen) &optional (str t))
   (dolist (insn (get-final-codes codegen))
-    (format t "~s~%" insn)))
+    (format str "~s~%" insn)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------

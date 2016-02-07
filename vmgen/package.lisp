@@ -39,5 +39,9 @@
     :primitive-record-offs
     :primitive-record-set!
 
+    :primitive-const
+
+    :mark-label
+    :write-out-labels
     ))
 
