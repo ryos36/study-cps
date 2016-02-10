@@ -446,7 +446,7 @@
                                       ;(print `(:elt ,register-list ,(elt register-list pos)))
 
                                       (add-code codegen (make-swap-instruction codegen pos cur-pos))
-                                      (setf (elt register-list cur-pos) :moved)
+                                      (setf (elt register-list cur-pos) arg)
                                       (setf (elt register-list pos) disappeared-sym))
                                     (progn 
                                       (add-code codegen (make-move-instruction codegen cur-pos abs-new-pos))
