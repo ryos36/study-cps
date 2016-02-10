@@ -23,7 +23,7 @@
 (defmethod reset-codes ((codegen vm-codegen))
   (setf (codes codegen) nil)
   (add-code codegen 
-            (make-label 'common-lisp-user::main :closure-name)))
+            (closure-name-to-label-name 'common-lisp-user::main)))
 
 ;----------------------------------------------------------------
 (defmethod pop-one-make-new-env ((codegen vm-codegen) env &optional getter)
@@ -46,7 +46,6 @@
 (defmethod get-final-codes ((codegen vm-codegen))
   (append
     (initialize-codes codegen)
-    (list (closure-name-to-label-name 'common-lisp-user::main))
     (reverse
       (slot-value codegen 'codes))))
 
@@ -76,16 +75,25 @@
 (defmethod make-attribute ((codegen vm-codegen)) (if (use-attribute codegen) (copy-list '((:attribute))) '()))
 
 ;----------------------------------------------------------------
-(defmethod make-primitive-instruction ((codegen vm-codegen) op args result)
-  `(,op ,@(make-attribute codegen) ,args , result))
+(defmethod make-primitive-instruction ((codegen vm-codegen) op args &optional result)
+  (if result
+    `(,op ,@(make-attribute codegen) ,args ,result)
+    `(,op ,@(make-attribute codegen) ,args)))
 
 ;----------------------------------------------------------------
-(defmethod make-jump-instruction ((codegen vm-codegen) label-sym)
-  `(:jump ,@(make-attribute codegen) ,label-sym))
+(defmethod make-jump-or-cond-instruction ((codegen vm-codegen) op sym)
+  (let ((registers (registers codegen)))
+    (copy-list
+      `(,op ,@(make-attribute codegen) ,
+            (if (find sym registers) sym `(:LABEL ,sym))))))
 
 ;----------------------------------------------------------------
-(defmethod make-jump-cond-instruction ((codegen vm-codegen) op new-args label-sym)
-  `(:jump-cond ,@(make-attribute codegen) ,op ,new-args ,label-sym))
+(defmethod make-jump-instruction ((codegen vm-codegen) sym)
+  (make-jump-or-cond-instruction codegen :jump sym))
+
+;----------------------------------------------------------------
+(defmethod make-jump-cond-instruction ((codegen vm-codegen) sym)
+  (make-jump-or-cond-instruction codegen :jump-cond sym))
 
 ;----------------------------------------------------------------
 (defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
@@ -495,7 +503,9 @@
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
           ; primitive-code
-          (add-code codegen (make-jump-cond-instruction codegen op new-args label-sym))
+          ; You can optimize by using peephole 
+          (add-code codegen (make-primitive-instruction codegen op new-args))
+          (add-code codegen (make-jump-cond-instruction codegen label-sym))
 
           (let* ((else-clause (cadr next-cpss))
                  (then-clause (car next-cpss))
