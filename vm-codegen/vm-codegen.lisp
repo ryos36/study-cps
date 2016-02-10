@@ -46,6 +46,7 @@
 (defmethod get-final-codes ((codegen vm-codegen))
   (append
     (initialize-codes codegen)
+    (list (closure-name-to-label-name 'common-lisp-user::main))
     (reverse
       (slot-value codegen 'codes))))
 
@@ -63,11 +64,11 @@
 
         (list
           (make-jump-instruction codegen (closure-name-to-label-name main))
-          (make-label main)
-          (make-const-instruction codegen (closure-name-to-label-name main))
-          (make-label exit)
-          (make-const-instruction codegen (closure-name-to-label-name exit))
+          main
+          (make-label main :closure-name)
+          exit
           (make-label exit :closure-name)
+          (closure-name-to-label-name exit)
           (make-halt-instruction codegen)))))
 
 ;----------------------------------------------------------------
@@ -130,13 +131,13 @@
   (find sym (global-variable codegen)))
 
 ;----------------------------------------------------------------
-
 (defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)
   ;(assert nil)
   (add-code codegen
             (let ((registers (registers codegen)))
-              `(:movei ,@(make-attribute codegen) ,(make-label sym :closure-name)
-                       ,(elt registers reg-no)))))
+              (copy-list
+              `(:movei ,@(make-attribute codegen) (:ADDRESS ,sym)
+                       ,(elt registers reg-no))))))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
