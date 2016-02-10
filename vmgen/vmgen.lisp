@@ -10,7 +10,7 @@
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (code-pos :initform 0 :accessor code-pos)
    (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)
-   (types :initform '(:REG :IMM8 :IMM32 :NOT-DEFINE) :reader types)
+   (types :initform '(:REG :IMM8 :IMM32 :LABEL) :reader types)
    (tagged-labels :initform nil :accessor tagged-labels)))
 
 ;----------------------------------------------------------------
@@ -67,7 +67,7 @@
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
   `(defmethod ,func-name ((vmgen vmgen) a0 a1 a2)
-     (print `(:args ,a0 ,a1 ,a2))
+     ;(print `(:args ,a0 ,a1 ,a2))
      (let ((types (types vmgen)))
        (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1 a2)
          ,(if (eq (car code-list) :NA) `(assert (not (eq x1-type :REG))))
@@ -90,9 +90,10 @@
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-compare-primitive (func-name code-list)
-  `(defmethod ,func-name ((vmgen vmgen) a0 a1 label)
-     (let ((types (types vmgen)))
-       (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1)
+  `(defmethod ,func-name ((vmgen vmgen) a0 a1 label-or-reg)
+     (let ((types (types vmgen))
+           (a2 (if (listp label-or-reg) :r0 label-or-reg)))
+       (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1 a2)
          ,(if (eq (car code-list) :NA) `(assert (not (eq x1-type :REG))))
          ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
          ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
@@ -110,9 +111,8 @@
            (format t "0x~8,'0x,~%" (logand #xffffffff a1))
            (incf (code-pos vmgen)))
 
-         (format t "~a = ~a;~%" (symbol-to-c-label label) (code-pos vmgen))
-
-         (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label))
+         (if (listp label-or-reg)
+           (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen (cadr label-or-reg))))
          (incf (code-pos vmgen))))))
 
 ;----------------------------------------------------------------
@@ -178,12 +178,12 @@
 ;----------------------------------------------------------------
 (defmethod primitive-pop ((vmgen vmgen) arg0)
   (assert (numberp arg0))
-  (format-incf t "INST_ADDR(pop),~%" )
+  (format-incf t "INST_ADDR(popi8),~%" )
   (format-incf t "0x~8,'0x,~%" arg0))
 
 ;----------------------------------------------------------------
-(make-two-args-primitive primitive-record-ref ("record-ref" "record-refi8" :NA))
-(make-two-args-primitive primitive-record-offs ("record-offs" "record-offsi8" :NA))
+(make-two-args-primitive primitive-record-ref ("record_ref" "record_refi8" :NA))
+(make-two-args-primitive primitive-record-offs ("record_offs" "record_offsi8" :NA))
 
 ;----------------------------------------------------------------
 (defmethod primitive-record-set! ((vmgen vmgen) a0 a1 a2)
@@ -191,12 +191,12 @@
         (types (types vmgen)))
     (multiple-value-bind (x0 x0-type) (get-value-type a0 registers)
       (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
-        (assert (eq x1-type :IMM8))
+        (assert (not (eq x1-type :IMM32)))
         (let ((x0-type-no (position x0-type types))
               (x1-type-no (position x1-type types))
               (pos2 (position a2 registers)))
 
-          (format-incf t "INST_ADDR(record-set!),~%" )
+          (format-incf t "INST_ADDR(record_set!),~%" )
           (let ((oprand
                   (logior
                     (ash (logior (ash x0-type-no 4)
@@ -207,10 +207,7 @@
             (format-incf t "0x~8,'0x,~%" oprand))
 
          (if (eq x0-type :IMM32)
-           (format-incf t "0x~8,'0x,~%" (logand #xffffffff a0)))
-
-         (if (eq x1-type :IMM32)
-           (format-incf t "0x~8,'0x,~%" (logand #xffffffff a1))))))))
+           (format-incf t "0x~8,'0x,~%" (logand #xffffffff a0))))))))
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump ((vmgen vmgen) label-or-reg)
@@ -221,7 +218,7 @@
 
       (format-incf t "0x~8,'0x,~%" 
                    (ash (ash (position :IMM32 (types vmgen)) 4) 24))
-      (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
+      (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
 
     (let ((reg0 label-or-reg)
           (registers (registers vmgen)))
@@ -248,10 +245,13 @@
 (defmethod primitive-movei ((vmgen vmgen) imm-or-label r1)
   (format-incf t "INST_ADDR(movei),~%" )
   (if (listp imm-or-label)
-    (let ((label-sym (cadr imm-or-label)))
+    (let ((label-sym (cadr imm-or-label))
+          (registers (registers vmgen)))
       (format-incf t "0x~8,'0x,~%" 
-                   (ash (ash (position :IMM32 (types vmgen)) 4) 24))
-      (format t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
+                   (logior
+                     (ash (ash (position :IMM32 (types vmgen)) 4) 24)
+                     (ash (logand (position r1 registers) #xff) 0)))
+      (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
 
     (let ((imm imm-or-label))
       (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
@@ -260,7 +260,7 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-halt ((vmgen vmgen) r0)
-  (format-incf t "INST_ADDR(swap),~%" )
+  (format-incf t "INST_ADDR(halt),~%" )
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 :r0)
     (format-incf t "0x~8,'0x,~%" oprand)))
 

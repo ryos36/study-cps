@@ -108,6 +108,7 @@
                                 rv))
                       (if *test-insn-view* 
                         (dolist (insn rv)
+                          (if (symbolp insn) (format str "~%"))
                           (format str "~s~%" insn)))
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))

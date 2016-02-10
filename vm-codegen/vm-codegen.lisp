@@ -229,7 +229,7 @@
 
 ;----------------------------------------------------------------
 (defmethod update-register-not-used ((codegen vm-codegen) codegen-tagged-list live-vars-tagged-list)
-  (print `(:update ,codegen-tagged-list ,live-vars-tagged-list))
+  ;(print `(:update ,codegen-tagged-list ,live-vars-tagged-list))
   (let* ((register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list))
 
@@ -248,7 +248,7 @@
 
     ;(print `(:before-register-list ,register-list ,not-used-reg))
     (mapc #'(lambda (arg) (let ((pos (position arg register-list)))
-                            (print `(:pos ,pos :not-used-reg ,not-used-reg))
+                            ;(print `(:pos ,pos :not-used-reg ,not-used-reg))
                             (assert pos)
                             (setf (elt register-list pos) nil))) not-used-reg)
 
@@ -320,12 +320,14 @@
            (fix-body-id (car fix-body))
            (next-id (caaar (cddddr fix-body))))
 
+      #|
       (print `(:cps-fix ,fix-op 
                         :fix-id ,fix-id 
                         :bind ,b-len ,b-dec-list 
                         :fix-body-id ,fix-body-id 
                         :next ,next-id))
       (print `(:lvtl , (cadr live-vars-tagged-list)))
+      |#
       (assert codegen-tagged-list))
 |#
 
@@ -407,7 +409,7 @@
 
 ;----------------------------------------------------------------
 (def-cps-func cps-app ((codegen vm-codegen) expr env)
-  (print `(:cps-app ,expr ,env))
+  ;(print `(:cps-app ,expr ,env))
   (let ((func-name (cadr expr))
         (args (caddr expr))
 
@@ -425,7 +427,7 @@
                   (let ((arg (car arg-list))
                         (sym (car reg-list)))
 
-      ;(print `(:0register-list ,register-list :args ,args))
+                    ;(print `(:0register-list ,register-list :args ,args))
                     (if (global-variable? codegen arg)
                       (set-global-variable-address-to-reg codegen arg cur-pos)
 
@@ -434,15 +436,18 @@
                           (let ((pos (position arg register-list)))
                             (assert pos)
                             (let ((new-pos (position sym (cdr arg-list))))
-                                  ;(print `(:elt ,register-list ,new-pos))
+                              ;(print `(:new-pos ,arg ,new-pos))
                               (if new-pos
-                                (let ((abs-new-pos (+ cur-pos new-pos)))
-                                  ;(print `(:elt ,cur-pos ,new-pos))
-                                  (if (find (elt register-list abs-new-pos) (cdr arg-list))
-                                    (progn 
-                                  ;(print `(:elt ,register-list ,pos))
+                                (let* ((abs-new-pos (+ cur-pos new-pos))
+                                       (disappeared-sym (elt register-list abs-new-pos)))
+                                  ;(print `(:elt ,cur-pos ,new-pos ,abs-new-pos ,disappeared-sym))
+                                  (if (find disappeared-sym (cdr arg-list))
+                                    (progn
+                                      ;(print `(:elt ,register-list ,(elt register-list pos)))
+
                                       (add-code codegen (make-swap-instruction codegen pos cur-pos))
-                                      (setf (elt register-list pos) arg))
+                                      (setf (elt register-list cur-pos) :moved)
+                                      (setf (elt register-list pos) disappeared-sym))
                                     (progn 
                                       (add-code codegen (make-move-instruction codegen cur-pos abs-new-pos))
                                       (add-code codegen (make-move-instruction codegen pos cur-pos)))))
@@ -475,7 +480,7 @@
 
         (assert codegen-tagged-list)
         (assert (= 2 (length next-cpss)))
-        (print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
+        ;(print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
 
         (let* ((live-vars-list (cadr live-vars-tagged-list))
                (declare-tagged-list (cadr live-vars-list))
@@ -485,7 +490,7 @@
 
                (not-used-reg (set-difference declare-vars live-vars))
                (new-args (update-register-usage codegen codegen-tagged-list args env))
-               (x (print `(:op ,op)))
+               ;(x (print `(:op ,op)))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
           ; primitive-code
@@ -525,7 +530,7 @@
 
         (assert codegen-tagged-list)
         (assert (= 1 (length next-cpss)))
-        (print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
+        ;(print `(:op ,op ,args ,result :codegen ,codegen-tagged-list))
 
         (let* ((live-vars-list (cadr live-vars-tagged-list))
                (declare-tagged-list (cadr live-vars-list))
@@ -534,7 +539,7 @@
                (live-vars (cdr live-tagged-list))
 
                (not-used-reg (set-difference declare-vars live-vars))
-               (x (print `(:live-vars-list ,live-vars-list)))
+               ;(x (print `(:live-vars-list ,live-vars-list)))
                (new-args (update-register-usage codegen codegen-tagged-list args env))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))

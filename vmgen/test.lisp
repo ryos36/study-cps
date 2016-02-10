@@ -15,9 +15,9 @@
 
 (defun vmgen-one (code-tagged-list env)
   (mapcar #'(lambda (expr)
-              (print `(:expr ,expr))
               (convert converter expr))
-          (cdr code-tagged-list)))
+          (cdr code-tagged-list))
+  (write-out-labels vmgen *standard-output*))
 
 (defparameter *test-script-dir* "./vm-code/" )
 (defparameter *test-ext* ".vmc")
@@ -26,5 +26,5 @@
 (defparameter *test-insn-view* t)
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("1" (1 . 3)))
+(set-test-files '("2" (1 . 3)))
 (do-test)

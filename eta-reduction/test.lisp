@@ -20,5 +20,9 @@
 
 (set-test-files '((1 . 28) 31 37 38 40 42 50 51 (53 . 57)))
 
+(defparameter *test-script-dir* "./cps-script/" )
+(defparameter *test-result-dir* "./cps-script/result/")
+(set-test-files '(37))
+
 (defparameter *test-env* (make-env))
 (do-test)

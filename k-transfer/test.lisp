@@ -45,5 +45,6 @@
 
 (set-test-files '((14 . 24) (26 . 42) (50 . 57)))
 (set-test-files '((1 . 12)))
+(set-test-files '(13))
 (do-test)
 
