@@ -2,9 +2,9 @@
 ;
 
 (setf *print-circle* t)
-
 (defparameter *test-env* nil)
 
+(defparameter *test-src-insn-view* nil)
 (defparameter *test-insn-view* nil)
 (defparameter *test-script-dir* nil)
 (defparameter *test-ext* nil)
@@ -17,6 +17,14 @@
 (defparameter *test-reset-func* nil)
 (defparameter *test-success-n* 0)
 (defparameter *test-save-n* 0)
+
+(defun insn-print (lst str flag)
+  (if (not flag)
+    (format str "~s~%" lst)
+                            
+    (dolist (insn lst)
+      (if (symbolp insn) (format str "~%"))
+      (format str "~s~%" insn))))
 
 (defun min-max-no-list (min-max-list)
   (let ((min-no (car min-max-list))
@@ -103,13 +111,9 @@
                 (with-output-to-string (str)
                   (dolist (i lisp-test-list)
                     (let ((rv (funcall *test-parse-func* i *test-env*)))
-                      (format str "~s~%:~%~s~%" i 
-                              (if *test-insn-view* :code
-                                rv))
-                      (if *test-insn-view* 
-                        (dolist (insn rv)
-                          (if (symbolp insn) (format str "~%"))
-                          (format str "~s~%" insn)))
+                      (insn-print i str *test-src-insn-view*)
+                      (format str ":~%" )
+                      (insn-print rv str *test-insn-view*)
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))
 

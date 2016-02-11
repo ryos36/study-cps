@@ -20,6 +20,7 @@
     :*test-success-n*
     :*test-save-n*
     :*test-insn-view*
+    :*test-src-insn-view*
 
     :set-test-files
     :do-test))

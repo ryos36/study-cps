@@ -21,8 +21,7 @@
 
 ;----------------------------------------------------------------
 (defun symbol-to-c-label (sym)
-  (substitute #\_  #\:
-              (format nil "~a" sym)))
+  (substitute-if #\_  #'(lambda (c) (find c "*-+:")) (format nil "~a" sym)))
 
 ;----------------------------------------------------------------
 (defun label-to-c-macro-name (vmgen sym-or-c-label)

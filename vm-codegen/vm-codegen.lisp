@@ -76,9 +76,13 @@
 
 ;----------------------------------------------------------------
 (defmethod make-primitive-instruction ((codegen vm-codegen) op args &optional result)
-  (if result
-    `(,op ,@(make-attribute codegen) ,args ,result)
-    `(,op ,@(make-attribute codegen) ,args)))
+  (copy-tree
+    (if (or (eq :heap op) (eq :stack op))
+      `(,op ,@(make-attribute codegen) (:heap-list ,@args) ,@result)
+
+      (if result
+        `(,op ,@(make-attribute codegen) ,@args ,@result)
+        `(,op ,@(make-attribute codegen) ,@args)))))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-or-cond-instruction ((codegen vm-codegen) op sym)

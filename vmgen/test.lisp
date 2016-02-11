@@ -23,6 +23,7 @@
 (defparameter *test-ext* ".vmc")
 (defparameter *test-parse-func* #'vmgen-one)
 (defparameter *debug-mode* nil)
+(defparameter *test-src-insn-view* t)
 (defparameter *test-insn-view* t)
 
 ;(set-test-files '("32" "42" "29" "41"))
