@@ -44,10 +44,12 @@
 
 ;----------------------------------------------------------------
 (defmethod get-final-codes ((codegen vm-codegen))
-  (append
-    (initialize-codes codegen)
-    (reverse
-      (slot-value codegen 'codes))))
+  (let ((main 'common-lisp-user::main))
+    (append
+      (initialize-codes codegen)
+      (list (closure-name-to-label-name main))
+      (reverse
+        (slot-value codegen 'codes)))))
 
 ;----------------------------------------------------------------
 (defmethod print-codes ((codegen vm-codegen) &optional (str t))
@@ -212,11 +214,16 @@
                     pos))
 
                (need-not-find (arg)
-                 (or (eq :NOT-SYMBOL arg) (numberp arg))))
+                 (or (listp arg)
+                     (eq :NOT-SYMBOL arg)
+                     (numberp arg))))
 
       (let* ((registers (registers codegen))
              ;(x (print `(:args ,args)))
-             (arg-list0 (mapcar #'(lambda (arg) (if (cps-symbolp arg) arg :NOT-SYMBOL)) args))
+             (arg-list0 (mapcar #'(lambda (arg) (if (global-variable? codegen arg)
+                                                  (copy-list `(:ADDRESS ,arg))
+                                                  (if
+                                                    (cps-symbolp arg) arg :NOT-SYMBOL))) args))
              ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
                                                   (if found found arg))) arg-list0))
@@ -230,13 +237,14 @@
 
         (mapcar #'(lambda (pos arg)
                     (assert (need-not-find pos))
-                    ;(print `(:pos ,pos ,(numberp pos) ,(if (numberp pos) (elt register-list pos))))
+                    ;(print `(:xpos ,pos ,(numberp pos) ,(if (numberp pos) (elt register-list pos))))
                     (if (numberp pos)
                       (if (null (elt register-list pos))
                         (setf (elt register-list pos) arg)))
 
                     ;(print `(:pos-list1 ,pos ,arg , (if (numberp pos) (elt register-list pos) :?) ,register-list))
-                    (cps-terminal codegen arg env))
+                    (if (listp pos) pos
+                      (cps-terminal codegen arg env)))
                 pos-list1
                 args)))))
 

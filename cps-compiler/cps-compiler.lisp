@@ -1,4 +1,7 @@
 ;----------------------------------------------------------------
+;(defgeneric print-codes (instance &optional str))
+
+;----------------------------------------------------------------
 (load "../cps-transfer/package.lisp")
 (load "../cps-transfer/lisp-to-cps.lisp")
 (load "../cps-transfer/make-cxr-route.lisp")
@@ -107,27 +110,34 @@
     (get-final-codes codegen)))
 
 ;----------------------------------------------------------------
-(defun print-expr (expr env)
+(defun print-cps (expr env)
   (print `(:expr ,expr))
   expr)
+
+;----------------------------------------------------------------
+(defmethod print-codes (codes &optional (str t))
+  (let ((prefix-str "--("))
+    (setf (elt prefix-str 0) #\newline)
+    (setf (elt prefix-str 1) #\newline)
+    (dolist (i codes)
+      (format str "~a~a" prefix-str i)
+      (setf prefix-str "- ")
+      (setf (elt prefix-str 0) #\newline)))
+  (format str ")~%"))
+
 ;----------------------------------------------------------------
 (setf func-env-pair `((,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
                       ((,#'cps-parser:cps-parse . ,reorder) .  ,(cps-parser:make-new-env reorder '()))
                       ((,#'cps-parser:cps-parse . ,conveter) .  ,(cps-parser:make-new-env conveter '()))
                       ((,#'cps-spill-parse-one . ,spill) . nil)
-                      (,#'print-expr)
+                      (,#'print-cps)
                       (,#'cps-codegen-parse-one . nil)
                       ))
 
 ;----------------------------------------------------------------
-(print
-    (do-lisp-to-cps '(:+ 3 5) *env*))
-(print 
-  (cps-eta-reduction:walk-cps
-    (do-lisp-to-cps '(:+ 3 5) *env*)
-    (cps-eta-reduction:make-env)))
 
+;----------------------------------------------------------------
 (labels ((proc-loop (func-env-pair0 expr)
             (if (null func-env-pair0) expr
               (let ((func (caar func-env-pair0))
@@ -139,5 +149,5 @@
 
                   (proc-loop (cdr func-env-pair0) (funcall func expr env)))))))
 
-  (print (proc-loop func-env-pair '(:+ 4 6))))
+  (print-codes (proc-loop func-env-pair '(:+ 4 6))))
 
