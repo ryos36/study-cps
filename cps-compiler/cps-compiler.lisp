@@ -36,11 +36,18 @@
 (load "../cps-spill/cps-spill.lisp" )
 
 ;----------------------------------------------------------------
+(load "../vm-codegen/package.lisp")
+(load "../vm-codegen/vm-codegen.lisp" )
+(load "../vm-codegen/heap-parser.lisp" )
+
+;----------------------------------------------------------------
 (use-package :cps-transfer)
 ;(use-package :cps-eta-reduction)
 ;(use-package :cps-parser)
 (use-package :cps-free-variable-finder)
 (use-package :cps-closure-converter)
+(use-package :cps-spill)
+(use-package :vm-codegen)
 
 (defun cps-gensym-reset ()
   (cps-gensym 0))
@@ -64,10 +71,53 @@
 (setf conveter (make-instance 'cps-closure-converter:closure-converter :sym-name "k-sym"))
 
 ;----------------------------------------------------------------
+(setf spill (make-instance 'cps-spill:cps-spill :sym-name "s-sim" :max-n 10))
+
+(defun cps-spill-parse-one (spill cps-expr env)
+  (let* ((finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
+         (finder-env (cps-parser:make-new-env finder '() '()))
+         (result (cps-parser:cps-parse finder cps-expr finder-env))
+         (spill-env (cps-parser:make-new-env spill '() 
+                                  (copy-tree `((:live-vars ,@result)
+                                               (:spill
+                                                 (:used )
+                                                 (:duplicate 0)
+                                                 (:spill-out ))))
+                                  )))
+
+    (cps-parser:cps-parse spill cps-expr spill-env)))
+
+;----------------------------------------------------------------
+(defparameter *codegen* nil)
+
+(defun cps-codegen-parse-one (cps-expr env)
+  (let* ((finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
+         (codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label"))
+         (finder-env (cps-parser:make-new-env finder '() '()))
+         (result (cps-parser:cps-parse finder cps-expr finder-env))
+         (codegen-env (cps-parser:make-new-env codegen '()
+                                    (copy-tree `((:live-vars ,result)
+                                                 (:codegen
+                                                   (:register ,(make-list (max-n codegen)))
+                                                   (:app-info)))))))
+    (setf *codegen* codegen)
+
+    (cps-parser:cps-parse codegen cps-expr codegen-env)
+    (create-initialize-codes codegen)
+    (get-final-codes codegen)))
+
+;----------------------------------------------------------------
+(defun print-expr (expr env)
+  (print `(:expr ,expr))
+  expr)
+;----------------------------------------------------------------
 (setf func-env-pair `((,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
                       ((,#'cps-parser:cps-parse . ,reorder) .  ,(cps-parser:make-new-env reorder '()))
                       ((,#'cps-parser:cps-parse . ,conveter) .  ,(cps-parser:make-new-env conveter '()))
+                      ((,#'cps-spill-parse-one . ,spill) . nil)
+                      (,#'print-expr)
+                      (,#'cps-codegen-parse-one . nil)
                       ))
 
 ;----------------------------------------------------------------
