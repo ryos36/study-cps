@@ -1,4 +1,7 @@
 ;----------------------------------------------------------------
+(in-package :sinby.cps.transfer)
+
+;----------------------------------------------------------------
 ; primitive
 
 (defmacro make-two-args-primitive (func-name op)

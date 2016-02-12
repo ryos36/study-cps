@@ -1,9 +1,13 @@
+(load "package.lisp")
+(load "lisp-to-cps.lisp")
+(load "make-cxr-route.lisp")
+(load "primitive.lisp")
+
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
 
+(use-package :cps-transfer)
 (use-package :cps-test)
-
-(load "lisp-to-cps.lisp")
 
 (defparameter *test-script-dir* "../scm-script/" )
 (defparameter *test-ext* ".scm")

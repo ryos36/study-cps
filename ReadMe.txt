@@ -10,15 +10,13 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
 ってかこのまま common lisp 上でいいのか？
 
 ----------------------------------------------------------------
-2016年 2月  4日 木曜日 08:50:46 JST
+2016年 2月 12日 金曜日 00:55:15 JST
 進捗
-    VM コードも多分できた。testsuite が圧倒的に足りない。
+    VM コードも多分できた。vmgen で作った VM の上で動いたりしている。
+    testsuite が圧倒的に足りない。
 
     k-transfer ある程度安定してきた。ただし、今の仕組みでは
     限界も見えている。
-
-    k-transfer 時の record-offs に対応した。
-    docment がまだ追いついていない。
 
     将来的には GC や float/double のサイズが問題になることは明らか。
     浮動小数点は型推定が必要になるだろう。
@@ -124,6 +122,9 @@ cps-live-variables-finder
 
 k-transfer
     クロージャー変換
+    k-transfer 時の record-offs に対応した。
+    docment がまだ追いついていない。
+
     record-offs を途中まで知らなかったので右往左往することに
     現在は record-offs を使ってのクロージャの共有を達成
     また、record-offs にマイナスを許せば、さらにコードは
@@ -132,6 +133,7 @@ k-transfer
         各 binds の前に binds が何番目の binds かをダミーコードとして
         いれておけば、heap サイズのチェックは容易になるはず。
     FIX の多重層によるクロージャの共有はかなり怪しい。
+
 
 cps-spill
     スピル処理

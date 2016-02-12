@@ -1,4 +1,7 @@
 ;----------------------------------------------------------------
+(in-package :sinby.cps.transfer)
+
+;----------------------------------------------------------------
 (defparameter *context* nil)
 (defparameter *debug-mode* nil)
 (defparameter *warning* t)
@@ -114,7 +117,7 @@
 ;----------------------------------------------------------------
 (defun make-exit-transfer-lambda ( use-exit )
   (let* ((new-cps-expr-exit (copy-tree `(:EXIT (ARG0) () ())))
-         (new-cps-expr-app (copy-tree `(:APP EXIT (ARG0))))
+         (new-cps-expr-app (copy-tree `(:APP cl-user::EXIT (ARG0))))
          (new-cps-expr (if use-exit new-cps-expr-exit new-cps-expr-app))
  
          (arg0-list (pickup-list new-cps-expr 'ARG0)))
