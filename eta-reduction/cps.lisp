@@ -1,4 +1,7 @@
 ;----------------------------------------------------------------
+(in-package :sinby.cps.eta-reduction)
+
+;----------------------------------------------------------------
 (defun terminal-p (expr)
   (or (symbolp expr)
       (numberp expr)))

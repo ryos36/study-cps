@@ -111,8 +111,8 @@
      (gensym))))
 
 ;----------------------------------------------------------------
-(load "make-cxr-route.lisp")
-(load "primitive.lisp")
+;(load "make-cxr-route.lisp")
+;(load "primitive.lisp")
 
 ;----------------------------------------------------------------
 (defun make-exit-transfer-lambda ( use-exit )

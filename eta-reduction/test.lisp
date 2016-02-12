@@ -1,8 +1,12 @@
+(load "package.lisp")
+(load "cps.lisp")
+(load "optimize.lisp")
+
 (load "../test-lisp/package.lisp")
 (load "../test-lisp/test.lisp")
 
 (use-package :cps-test)
-(load "cps.lisp")
+(use-package :cps-eta-reduction)
 
 (defparameter *test-script-dir* "../cps-script/" )
 (defparameter *test-ext* ".cps")

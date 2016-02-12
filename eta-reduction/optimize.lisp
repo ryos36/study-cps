@@ -1,3 +1,7 @@
+;----------------------------------------------------------------
+(in-package :sinby.cps.eta-reduction)
+
+;----------------------------------------------------------------
 (defun eta-reduction (cps-expr)
   (flet ((replace-app-func (found-list0)
             (let ((old-func-name (car found-list0))

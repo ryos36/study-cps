@@ -15,5 +15,6 @@
 
     :*transfer-table*
     :*debug-mode*
-    ))
+    :*context*
+    :*warning*))
 
