@@ -52,24 +52,15 @@
 (use-package :cps-spill)
 (use-package :vm-codegen)
 
-(defun cps-gensym-reset ()
-  (cps-gensym 0))
+;----------------------------------------------------------------
+(setf use-exit-primitive nil)
 
+;----------------------------------------------------------------
 (defparameter *transfer-table* (make-transfer-table))
 
-(let ((av (argv)))
-  (setf last-arg (elt av (- (length av) 1))))
-
-
-(setf use-exit-primitive nil)
-(setf *env* (make-exit-continuous use-exit-primitive))
-
-;(setf codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label"))
-
-;(use-package :cps-parser)
-;(setf *test-env* (make-new-env codegen '()))
-
+;----------------------------------------------------------------
 (setf reorder (make-instance 'cps-reorder:cps-reorder :sym-name "ro-sym"))
+
 ;----------------------------------------------------------------
 (setf conveter (make-instance 'cps-closure-converter:closure-converter :sym-name "k-sym"))
 
@@ -136,7 +127,10 @@
                       ))
 
 ;----------------------------------------------------------------
+;----------------------------------------------------------------
 
+(let ((av (argv)))
+  (setf last-arg (elt av (- (length av) 1))))
 ;----------------------------------------------------------------
 (labels ((proc-loop (func-env-pair0 expr)
             (if (null func-env-pair0) expr
