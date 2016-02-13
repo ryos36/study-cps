@@ -29,7 +29,7 @@
 (primitive-conditional-jump vmgen '(:label |:cjump-label1|))
 
 (mark-label vmgen '|:label2|)
-(primitive-heap vmgen '(0 1 2 (label |:label1|) :r3 3 4) :r5)
+(primitive-heap vmgen '(0 1 2 (:label |:label1|) (:address |:main|) :r3 3 4) :r5)
 (primitive-record-ref vmgen :r0 0 :r5)
 (primitive-record-offs vmgen :r0 1 :r3)
 
@@ -41,3 +41,13 @@
 
 (format t "==============~%")
 (write-out-labels vmgen *standard-output*)
+(format t "==============~%")
+
+(defun cats (arg)
+  (format t "~s => " arg)
+  (convert-arg-to-string vmgen arg))
+
+(cats :r0)
+(cats #x0817)
+(cats '(:address |:MAIN|))
+(cats '(:label |:MAIN|))

@@ -1,4 +1,8 @@
 ----------------------------------------------------------------
+衝撃的な結論(2016年 2月 14日 日曜日 01:27:08 JST)
+CPS より A正規化、A正規化より K正規化の方がよいらしい。
+ひと段落ついたら A正規化に移行する。
+
 自分の CPS の勉強用に作る。
 
 「コンパイラ作成実験資料」という 1996 年のとある大学の 実習(?)資料を
@@ -36,7 +40,8 @@ scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指�
     cps-live-variables-finder => とりあえず完成
     cps-spill => とりあえず完成
     vm-codegen => とりあえず完成
-    vmgen => 対応中
+    vmgen => C言語対応はした。バイナリ化すべき。
+    cps-compiler => とりあえず完成
 
 今後
     ARM 対応
@@ -150,6 +155,17 @@ vm-codegen
     簡単なバーチャルマシン生成。ただし vm 自身がまだない。
     生成されるジャンプ命令が多すぎるができた模様。
 
+cps-compiler
+    cps-transfer
+    cps-reorder
+    k-transfer
+    cps-spill
+    vm-codegen
+    までを連続して行う。連続して行うもそれぞれが連動しておらず、
+    意味なく cps-live-variables-finder が２回呼ばれる上に
+    別に free variables を見つけるルーチンあるのでかなり冗長
+    だが、動く!!
+    
 vmgen
     gforth の vmgen と連携して C の実行形式を作ることが出来る。
     vm 自動生成ツール(になるはず)

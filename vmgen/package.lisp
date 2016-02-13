@@ -54,6 +54,8 @@
 
     :mark-label
     :write-out-labels
+
+    :convert-arg-to-string
     ))
 
 ;----------------------------------------------------------------
@@ -63,6 +65,7 @@
   (:export 
 
     :vmc-to-c-source
+
     :make-converter
 
     :convert))
