@@ -102,14 +102,14 @@
 
 ;----------------------------------------------------------------
 (defun print-cps (expr env)
-  (print `(:expr ,expr))
+  (print ':==================================)
+  (print (if env env :expr))
+  (format t "~%~%~s~%~%" expr)
   expr)
 
 ;----------------------------------------------------------------
 (defmethod print-codes (codes &optional (str t))
-  (let ((prefix-str "--("))
-    (setf (elt prefix-str 0) #\newline)
-    (setf (elt prefix-str 1) #\newline)
+  (let ((prefix-str "("))
     (dolist (i codes)
       (format str "~a~a" prefix-str i)
       (setf prefix-str "- ")
@@ -117,31 +117,64 @@
   (format str ")~%"))
 
 ;----------------------------------------------------------------
-(setf func-env-pair `((,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
+(setf func-env-pair `(
+                      (,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
+                      (,#'print-cps :after-spill)
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
                       ((,#'cps-parser:cps-parse . ,reorder) .  ,(cps-parser:make-new-env reorder '()))
                       ((,#'cps-parser:cps-parse . ,conveter) .  ,(cps-parser:make-new-env conveter '()))
                       ((,#'cps-spill-parse-one . ,spill) . nil)
-                      (,#'print-cps)
                       (,#'cps-codegen-parse-one . nil)
                       ))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-
-(let ((av (argv)))
-  (setf last-arg (elt av (- (length av) 1))))
+(defun this-usage () (format *error-output* "Usage:clisp cps-compiler.lisp [-d] <scm file>"))
 ;----------------------------------------------------------------
-(labels ((proc-loop (func-env-pair0 expr)
-            (if (null func-env-pair0) expr
-              (let ((func (caar func-env-pair0))
-                    (env (cdar func-env-pair0)))
-                (if (listp func)
-                  (let ((method (car func))
-                        (instance (cdr func)))
-                    (proc-loop (cdr func-env-pair0) (funcall method instance expr env)))
+(defparameter *debug-mode* nil)
 
-                  (proc-loop (cdr func-env-pair0) (funcall func expr env)))))))
+(let ((av (argv))
+      (ext-str ".scm"))
 
-  (print-codes (proc-loop func-env-pair '(:+ 4 6))))
+  (let* ((av-len (length av))
+         (last-arg (elt av (- av-len 1)))
+         (last-arg-len (length last-arg))
+         (ext-str-len (length ext-str))
+         (tiny-scheme-file0
+           (if (string= ext-str
+                        (subseq last-arg (- last-arg-len ext-str-len)))
+             last-arg
+             (concatenate 'string last-arg ".scm"))))
+    (setf tiny-scheme-file tiny-scheme-file0)
+    (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
+    (print `(:output-file-name ,output-file-name))
+    (if (string= (elt av (- av-len 2)) "-d")
+      (setf *debug-mode* t))
+    (print `(:tiny-scheme-file ,tiny-scheme-file ))))
+;----------------------------------------------------------------
+
+(if (probe-file tiny-scheme-file)
+  (let ((tiny-scheme-program
+          (with-open-file (in tiny-scheme-file)
+            (read in))))
+
+    (print-cps tiny-scheme-program :tiny-scheme-file)
+    (labels ((proc-loop (func-env-pair0 expr)
+                (if (null func-env-pair0) expr
+                  (let ((func (caar func-env-pair0))
+                        (env (cdar func-env-pair0)))
+                    (if (listp func)
+                      (let ((method (car func))
+                            (instance (cdr func)))
+                        (proc-loop (cdr func-env-pair0) (funcall method instance expr env)))
+
+                      (proc-loop (cdr func-env-pair0) (funcall func expr env)))))))
+
+
+      (let ((codes (proc-loop func-env-pair tiny-scheme-program)))
+        (with-open-file (out output-file-name :if-does-not-exist :create :direction :output)
+          (print-codes codes out))
+        (if *debug-mode* (print-codes codes)))))
+
+  (this-usage))
 
