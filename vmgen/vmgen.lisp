@@ -21,7 +21,7 @@
 
 ;----------------------------------------------------------------
 (defun symbol-to-c-label (sym)
-  (substitute-if #\_  #'(lambda (c) (find c "*-+:")) (format nil "~a" sym)))
+  (substitute-if #\_  #'(lambda (c) (find c "?*-+:")) (format nil "~a" sym)))
 
 ;----------------------------------------------------------------
 (defun label-to-c-macro-name (vmgen sym-or-c-label)
@@ -65,7 +65,7 @@
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
-  `(defmethod ,func-name ((vmgen vmgen) a0 a1 a2)
+  `(defmethod ,func-name ((vmgen vmgen) a0 a1 &optional (a2 :r0))
      ;(print `(:args ,a0 ,a1 ,a2))
      (let ((types (types vmgen)))
        (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1 a2)
@@ -127,19 +127,20 @@
 (make-two-args-primitive primitive-bitor ("or" "ori8" "ori32"))
 (make-two-args-primitive primitive-bitxor ("xor" "ori8" "xori32"))
 
-(make-two-args-compare-primitive primitive-> ("less_than" "less_thani" "less_thani32"))
-(make-two-args-compare-primitive primitive->= ("less_eq" "less_eqi" "less_eqi32"))
+(make-two-args-primitive primitive-> ("less_than" "less_thani" "less_thani32"))
+(make-two-args-primitive primitive->= ("less_eq" "less_eqi" "less_eqi32"))
 
-(make-two-args-compare-primitive primitive-< ("greater_than" "greater_thani" "greater_thani32"))
-(make-two-args-compare-primitive primitive-<= ("greater_eq" "greater_eqi" "greater_eqi32"))
+(make-two-args-primitive primitive-< ("greater_than" "greater_thani" "greater_thani32"))
+(make-two-args-primitive primitive-<= ("greater_eq" "greater_eqi" "greater_eqi32"))
 
-(make-two-args-compare-primitive primitive-eq ("eq" "eqi" "eqi32"))
-(make-two-args-compare-primitive primitive-neq ("neq" "neqi" "neqi32"))
+(make-two-args-primitive primitive-eq ("eq" "eqi" "eqi32"))
+(make-two-args-primitive primitive-neq ("neq" "neqi" "neqi32"))
 
 ;----------------------------------------------------------------
-(defmethod primitive-heap-or-stack ((vmgen vmgen) op args a2)
+(defmethod primitive-heap-or-stack ((vmgen vmgen) op tagged-heap-list a2)
   ;(print `(:phor ,op ,args ,a2))
-  (let ((len (length args)))
+  (let* ((args (cdr tagged-heap-list))
+         (len (length args)))
     (assert (<= len 256))
     (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
       (format-incf t "INST_ADDR(~a),~%" op)
@@ -209,15 +210,15 @@
            (format-incf t "0x~8,'0x,~%" (logand #xffffffff a0))))))))
 
 ;----------------------------------------------------------------
-(defmethod primitive-jump ((vmgen vmgen) label-or-reg)
-  (format-incf t "INST_ADDR(jump),~%" )
+(defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op label-or-reg)
+  (format-incf t "INST_ADDR(~a),~%" op)
   (if (listp label-or-reg)
     (let ((registers (registers vmgen))
           (label-sym (cadr label-or-reg)))
 
       (format-incf t "0x~8,'0x,~%" 
                    (ash (ash (position :IMM32 (types vmgen)) 4) 24))
-      (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen label-sym)))
+      (format-incf t "~a,~%" (label-to-c-macro-name vmgen label-sym)))
 
     (let ((reg0 label-or-reg)
           (registers (registers vmgen)))
@@ -225,6 +226,14 @@
       (let ((pos (position reg0 registers)))
 
         (format-incf t "0x~8,'0x,~%" (ash (logand pos #xff) 16))))))
+
+;----------------------------------------------------------------
+(defmethod primitive-jump ((vmgen vmgen) label-or-reg)
+  (primitive-jump-or-conditional-jump vmgen "jump" label-or-reg))
+
+;----------------------------------------------------------------
+(defmethod primitive-conditional-jump ((vmgen vmgen) label-or-reg)
+  (primitive-jump-or-conditional-jump vmgen "conditional-jump" label-or-reg))
 
 ;----------------------------------------------------------------
 (defmethod primitive-move ((vmgen vmgen) r0 r1)
@@ -267,7 +276,22 @@
 (defmethod primitive-const ((vmgen vmgen) v)
   (if (numberp v)
     (format-incf t "0x~8,'0x,~%" v)
-    (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen (cadr v)))))
+    (if (eq (car v) :address)
+      (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen (cadr v)))
+      (format-incf t "~a,~%"  (label-to-c-macro-name vmgen (cadr v))))))
+
+;----------------------------------------------------------------
+(defmethod primitive-label ((vmgen vmgen) label-sym)
+  (format-incf t "~a,~%" (label-to-c-macro-name vmgen label-sym)))
+
+;----------------------------------------------------------------
+(defmethod primitive-live-reg ((vmgen vmgen) heap-n usage-of-registers)
+  (format-incf t "INST_ADDR(live_reg),~%" )
+  (format-incf t "0x~8,'0x,~%" heap-n)
+  (labels ((bit->hex (usage-of-registers0 rv)
+            (if (null usage-of-registers0) rv
+              (bit->hex (cdr usage-of-registers0) (+ (ash rv 1) (car usage-of-registers0))))))
+    (format-incf t "0x~8,'0x,~%" (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
 (defmethod write-out-labels ((vmgen vmgen) str)

@@ -111,7 +111,7 @@
 (defmethod print-codes (codes &optional (str t))
   (let ((prefix-str "("))
     (dolist (i codes)
-      (format str "~a~a" prefix-str i)
+      (format str "~a~s" prefix-str i)
       (setf prefix-str "- ")
       (setf (elt prefix-str 0) #\newline)))
   (format str ")~%"))
@@ -119,7 +119,7 @@
 ;----------------------------------------------------------------
 (setf func-env-pair `(
                       (,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
-                      (,#'print-cps :after-spill)
+                      ;(,#'print-cps :after-spill)
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
                       ((,#'cps-parser:cps-parse . ,reorder) .  ,(cps-parser:make-new-env reorder '()))
                       ((,#'cps-parser:cps-parse . ,conveter) .  ,(cps-parser:make-new-env conveter '()))
@@ -129,7 +129,7 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-(defun this-usage () (format *error-output* "Usage:clisp cps-compiler.lisp [-d] <scm file>"))
+(defun this-usage () (format *error-output* "~%Usage:clisp cps-compiler.lisp [-d] <scm file>~%"))
 ;----------------------------------------------------------------
 (defparameter *debug-mode* nil)
 
@@ -145,20 +145,20 @@
                         (subseq last-arg (- last-arg-len ext-str-len)))
              last-arg
              (concatenate 'string last-arg ".scm"))))
-    (setf tiny-scheme-file tiny-scheme-file0)
-    (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
-    (print `(:output-file-name ,output-file-name))
-    (if (string= (elt av (- av-len 2)) "-d")
-      (setf *debug-mode* t))
-    (print `(:tiny-scheme-file ,tiny-scheme-file ))))
+    (when tiny-scheme-file0
+      (setf tiny-scheme-file tiny-scheme-file0)
+      (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
+      (if (string= (elt av (- av-len 2)) "-d")
+        (setf *debug-mode* t))
+      (print `(,tiny-scheme-file :-> ,output-file-name)))))
 ;----------------------------------------------------------------
 
-(if (probe-file tiny-scheme-file)
+(if (and tiny-scheme-file (probe-file tiny-scheme-file))
   (let ((tiny-scheme-program
           (with-open-file (in tiny-scheme-file)
             (read in))))
 
-    (print-cps tiny-scheme-program :tiny-scheme-file)
+    ;(print-cps tiny-scheme-program :tiny-scheme-file)
     (labels ((proc-loop (func-env-pair0 expr)
                 (if (null func-env-pair0) expr
                   (let ((func (caar func-env-pair0))
@@ -176,5 +176,7 @@
           (print-codes codes out))
         (if *debug-mode* (print-codes codes)))))
 
-  (this-usage))
+  (progn
+    (format *error-output* "~a is not exist.~%" tiny-scheme-program)
+    (this-usage)))
 

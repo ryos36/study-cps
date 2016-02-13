@@ -98,8 +98,8 @@
   (make-jump-or-cond-instruction codegen :jump sym))
 
 ;----------------------------------------------------------------
-(defmethod make-jump-cond-instruction ((codegen vm-codegen) sym)
-  (make-jump-or-cond-instruction codegen :jump-cond sym))
+(defmethod make-conditional-jump-instruction ((codegen vm-codegen) sym)
+  (make-jump-or-cond-instruction codegen :conditional-jump sym))
 
 ;----------------------------------------------------------------
 (defmethod make-live-reg-instruction ((codegen vm-codegen) heap-size args live-args)
@@ -517,7 +517,7 @@
           ; primitive-code
           ; You can optimize by using peephole 
           (add-code codegen (make-primitive-instruction codegen op new-args))
-          (add-code codegen (make-jump-cond-instruction codegen label-sym))
+          (add-code codegen (make-conditional-jump-instruction codegen label-sym))
 
           (let* ((else-clause (cadr next-cpss))
                  (then-clause (car next-cpss))

@@ -41,12 +41,16 @@
 
     :primitive-const
     :primitive-jump
+    :primitive-conditional-jump
 
     :primitive-halt
 
     :primitive-move 
     :primitive-swap 
     :primitive-movei
+
+    :primitive-label
+    :primitive-live-reg
 
     :mark-label
     :write-out-labels
@@ -59,5 +63,6 @@
   (:export 
 
     :vmc-to-c-source
+    :make-converter
 
     :convert))
