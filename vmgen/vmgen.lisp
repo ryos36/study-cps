@@ -10,7 +10,7 @@
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (code-pos :initform 0 :accessor code-pos)
    (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)
-   (types :initform '(:REG :IMM8 :IMM32 :ADDRESS) :reader types)
+   (types :initform '(:REG :IMM8 :IMM32) :reader types)
    (tagged-labels :initform nil :accessor tagged-labels)))
 
 ; :ADDRESS is only used for heap/stack. please refer hvm.vmg
@@ -72,15 +72,20 @@
 ;----------------------------------------------------------------
 (defun get-value-type (ax registers)
   (if (numberp ax)
-    (if (>= 255 ax 0)
+    (if (<= 0 ax 255)
       (values (logand ax #b11111111) :IMM8)
       (values 0 :IMM32))
 
-    (case ax
-      (:|#T| (values 1 :IMM8))
-      (:|#F| (values 0 :IMM8))
-      (otherwise
-        (values (logand (position ax registers) #xff) :REG)))))
+    (if (listp ax)
+      (let ((key (car ax)))
+        (assert (or (eq key :ADDRESS) (eq key :LABEL)))
+        (values ax :IMM32))
+
+      (case ax
+        (:|#T| (values 1 :IMM8))
+        (:|#F| (values 0 :IMM8))
+        (otherwise
+          (values (logand (position ax registers) #xff) :REG))))))
 
 ;----------------------------------------------------------------
 (defmethod reg-pos ((vmgen vmgen) a0 a1 &optional (a2 :r0))
@@ -154,7 +159,9 @@
 ;----------------------------------------------------------------
 (defmethod primitive-heap-or-stack ((vmgen vmgen) op tagged-heap-list a2)
   ;(print `(:phor ,op ,args ,a2))
-  (let* ((args (cdr tagged-heap-list))
+  (let* ((registers (registers vmgen))
+         (types (types vmgen))
+         (args (cdr tagged-heap-list))
          (len (length args)))
     (assert (<= len 256))
     (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
@@ -166,12 +173,14 @@
                          (sub-len (length top16))
                          (v
                            (reduce #'(lambda (i0 i1)
-                                       (+ (* i0 2) i1))
+                                       (+ (ash i0 2) i1))
                                    (mapcar #'(lambda (x)
-                                               (if (symbolp x) 0 1)) top16)
-                                   :initial-value 0))
-                         (v0 (ash v (- 16 sub-len))))
-                    (format-incf t "0x~8,'0x,~%" v0)
+                                               (multiple-value-bind (v type) (get-value-type x registers)
+                                                 (if (eq type :REG) 0 2)))
+                                           top16)
+                                   :initial-value 0)))
+
+                    (format-incf t "0x~8,'0x,~%" v)
                     (mapc #'(lambda (x) (convert-arg-to-string vmgen x)) top16))
                   (format-heap-list (nthcdr 16 hlist)))))
 
