@@ -10,9 +10,10 @@
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (code-pos :initform 0 :accessor code-pos)
    (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)
-   ;(types :initform '(:REG :IMM8 :IMM32 :LABEL) :reader types) ignore :LABEL
-   (types :initform '(:REG :IMM8 :IMM32) :reader types)
+   (types :initform '(:REG :IMM8 :IMM32 :ADDRESS) :reader types)
    (tagged-labels :initform nil :accessor tagged-labels)))
+
+; :ADDRESS is only used for heap/stack. please refer hvm.vmg
 
 ;----------------------------------------------------------------
 (defmacro format-incf (&rest body)
@@ -117,7 +118,7 @@
          ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
          ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
 
-         (format-incf t "INST_ADDR(~a),~%" 
+         (format-incf t "INSTRUCTION(~a),~%" 
                      (cdr
                        (assoc x1-type `((,(car types)   . ,,(car code-list))
                                         (,(cadr types)  . ,,(cadr code-list))
@@ -141,14 +142,14 @@
 (make-two-args-primitive primitive-bitor ("or" "ori8" "ori32"))
 (make-two-args-primitive primitive-bitxor ("xor" "ori8" "xori32"))
 
-(make-two-args-primitive primitive-> ("less_than" "less_thani" "less_thani32"))
-(make-two-args-primitive primitive->= ("less_eq" "less_eqi" "less_eqi32"))
+(make-two-args-primitive primitive-> ("less_than" "less_thani8" "less_thani32"))
+(make-two-args-primitive primitive->= ("less_eq" "less_eqi8" "less_eqi32"))
 
-(make-two-args-primitive primitive-< ("greater_than" "greater_thani" "greater_thani32"))
-(make-two-args-primitive primitive-<= ("greater_eq" "greater_eqi" "greater_eqi32"))
+(make-two-args-primitive primitive-< ("greater_than" "greater_thani8" "greater_thani32"))
+(make-two-args-primitive primitive-<= ("greater_eq" "greater_eqi8" "greater_eqi32"))
 
-(make-two-args-primitive primitive-eq ("eq" "eqi" "eqi32"))
-(make-two-args-primitive primitive-neq ("neq" "neqi" "neqi32"))
+(make-two-args-primitive primitive-eq ("eq" "eqi8" "eqi32"))
+(make-two-args-primitive primitive-neq ("neq" "neqi8" "neqi32"))
 
 ;----------------------------------------------------------------
 (defmethod primitive-heap-or-stack ((vmgen vmgen) op tagged-heap-list a2)
@@ -157,7 +158,7 @@
          (len (length args)))
     (assert (<= len 256))
     (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
-      (format-incf t "INST_ADDR(~a),~%" op)
+      (format-incf t "INSTRUCTION(~a),~%" op)
       (format-incf t "0x~8,'0x,~%" oprand)
       (labels ((format-heap-list (hlist)
                 (if (not (null hlist))
@@ -187,7 +188,7 @@
 ;----------------------------------------------------------------
 (defmethod primitive-pop ((vmgen vmgen) arg0)
   (assert (numberp arg0))
-  (format-incf t "INST_ADDR(popi8),~%" )
+  (format-incf t "INSTRUCTION(popi8),~%" )
   (format-incf t "0x~8,'0x,~%" arg0))
 
 ;----------------------------------------------------------------
@@ -205,7 +206,7 @@
               (x1-type-no (position x1-type types))
               (pos2 (position a2 registers)))
 
-          (format-incf t "INST_ADDR(record_set!),~%" )
+          (format-incf t "INSTRUCTION(record_set),~%" )
           (let ((oprand
                   (logior
                     (ash (logior (ash x0-type-no 4)
@@ -220,11 +221,11 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op label-or-reg)
-  (format-incf t "INST_ADDR(~a),~%" op)
   (if (listp label-or-reg)
     (let ((registers (registers vmgen))
           (label-sym (cadr label-or-reg)))
 
+      (format-incf t "INSTRUCTION(~ai32),~%" op)
       (format-incf t "0x~8,'0x,~%" 
                    (ash (ash (position :IMM32 (types vmgen)) 4) 24))
       (format-incf t "~a,~%" (label-to-c-macro-name vmgen label-sym)))
@@ -234,6 +235,7 @@
 
       (let ((pos (position reg0 registers)))
 
+        (format-incf t "INSTRUCTION(~a),~%" op)
         (format-incf t "0x~8,'0x,~%" (ash (logand pos #xff) 16))))))
 
 ;----------------------------------------------------------------
@@ -242,31 +244,29 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-conditional-jump ((vmgen vmgen) label-or-reg)
-  (primitive-jump-or-conditional-jump vmgen "conditional-jump" label-or-reg))
+  (primitive-jump-or-conditional-jump vmgen "conditional_jump" label-or-reg))
 
 ;----------------------------------------------------------------
 (defmethod primitive-move ((vmgen vmgen) r0 r1)
-  (format-incf t "INST_ADDR(move),~%" )
+  (format-incf t "INSTRUCTION(move),~%" )
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
     (format-incf t "0x~8,'0x,~%" oprand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-swap ((vmgen vmgen) r0 r1)
-  (format-incf t "INST_ADDR(swap),~%" )
+  (format-incf t "INSTRUCTION(swap),~%" )
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
     (format-incf t "0x~8,'0x,~%" oprand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-movei ((vmgen vmgen) imm-or-label r1)
-
-  (format-incf t "INST_ADDR(~a),~%" (if (and (numberp imm-or-label) (<= 0 imm-or-label 255)) "movei8" "movei32"))
-
   (if (listp imm-or-label)
     (let ((label-sym (cadr imm-or-label))
           (registers (registers vmgen)))
 
+      (format-incf t "INSTRUCTION(movei32),~%" )
       (format-incf t "0x~8,'0x,~%" 
                    (logior
                      (ash (ash (position :IMM32 (types vmgen)) 4) 24)
@@ -276,13 +276,14 @@
     (let ((imm (number-or-bool->number imm-or-label)))
       (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
         (assert (not (eq x1-type :REG)))
+        (format-incf t "INSTRUCTION(movei~a),~%" (if (eq x1-type :IMM32) 32 8))
         (format-incf t "0x~8,'0x,~%" oprand)
         (if (eq x1-type :IMM32)
           (format-incf t "0x~8,'0x,~%" imm))))))
 
 ;----------------------------------------------------------------
 (defmethod primitive-halt ((vmgen vmgen) r0)
-  (format-incf t "INST_ADDR(halt),~%" )
+  (format-incf t "INSTRUCTION(halt),~%" )
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 :r0)
     (format-incf t "0x~8,'0x,~%" oprand)))
 
@@ -300,7 +301,7 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-live-reg ((vmgen vmgen) heap-n usage-of-registers)
-  (format-incf t "INST_ADDR(live_reg),~%" )
+  (format-incf t "INSTRUCTION(live_reg),~%" )
   (format-incf t "0x~8,'0x,~%" heap-n)
   (labels ((bit->hex (usage-of-registers0 rv)
             (if (null usage-of-registers0) rv

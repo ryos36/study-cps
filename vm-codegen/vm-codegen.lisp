@@ -128,7 +128,7 @@
   `(:movei ,@(make-attribute codegen) ,imm ,(elt registers reg-no))))
 
 ;----------------------------------------------------------------
-(defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r0))
+(defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r1))
   `(:halt ,@(make-attribute codegen) ,arg))
 
 ;----------------------------------------------------------------
