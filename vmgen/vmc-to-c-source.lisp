@@ -18,7 +18,6 @@
                        `(,(car apair) (apply ,(cdr apair) `(,,vmgen-sym ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((converter vmc-to-c-source) vm-code)
        (let ((,vmgen-sym (vmgen converter)))
-         (print `(:vm-code ,vm-code))
          (if (symbolp vm-code)
            (mark-label ,vmgen-sym vm-code)
 

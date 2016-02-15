@@ -1,20 +1,21 @@
 ;----------------------------------------------------------------
 (in-package :sinby.cps.vmgen)
 
-;(defparameter *code-pos* 0)
-;(defparameter *code-array-name* "codes")
-
 ;----------------------------------------------------------------
 (defclass vmgen ()
   ((registers :accessor registers :initform '
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (code-pos :initform 0 :accessor code-pos)
-   (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)
    (codes :accessor codes :initform nil)
    (types :initform '(:REG :IMM8 :IMM32) :reader types)
    (tagged-labels :initform nil :accessor tagged-labels)))
 
-; :ADDRESS is only used for heap/stack. please refer hvm.vmg
+;----------------------------------------------------------------
+;----------------------------------------------------------------
+(defmethod mark-label ((vmgen vmgen) label)
+  (push label (codes vmgen))
+  (let ((label-c (symbol-to-c-label label)))
+    (push (cons label-c (code-pos vmgen)) (tagged-labels vmgen))))
 
 ;----------------------------------------------------------------
 (defmethod add-code ((vmgen vmgen) code)
@@ -47,39 +48,6 @@
           (:|#F| 0)
           (otherwise (assert (eq sym "must be true or false"))))))))
 
-;----------------------------------------------------------------
-(defmethod deprecated-convert-arg-to-string ((vmgen vmgen) arg &optional (str t))
-  (if (numberp arg)
-    (format-incf str "0x~8,'0x,~%" arg)
-
-    (if (listp arg)
-      (let ((tag-name (car arg)))
-        ;(print `(:tag-name ,tag-name, (eq tag-name :label)))
-        (case tag-name
-          (:label
-            (format-incf str "~a,~%"  (label-to-c-macro-name vmgen (cadr arg))))
-          (:address
-            (format-incf str "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen (cadr arg))))
-          
-          (otherwise
-            (assert (eq "not support list" arg)))))
-
-      (let ((sym arg))
-        (assert (symbolp sym))
-        (format-incf str "0x~8,'0x,~%" 
-          (case sym
-            (:|#T| 1)
-            (:|#F| 0)
-            (otherwise
-              (let ((pos (position sym (registers vmgen))))
-                (assert pos)
-                pos))))))))
-
-;----------------------------------------------------------------
-(defun deprecated-label-to-c-macro-name (vmgen sym-or-c-label)
-  (let ((c-label (if (symbolp sym-or-c-label) (symbol-to-c-label sym-or-c-label) sym-or-c-label)))
-    ;(assert (stringp c-label))
-    (format nil "__~a_~a__" (code-array-name vmgen) c-label)))
 
 ;----------------------------------------------------------------
 (defun get-value-type (ax registers)
@@ -119,12 +87,6 @@
 
             x1-type))))))
 
-;----------------------------------------------------------------
-;----------------------------------------------------------------
-(defmethod mark-label ((vmgen vmgen) label)
-  (push label (codes vmgen))
-  (let ((label-c (symbol-to-c-label label)))
-    (push (cons label-c (code-pos vmgen)) (tagged-labels vmgen))))
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
@@ -336,7 +298,8 @@
     (add-code vmgen (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
-(defmethod write-out-labels ((vmgen vmgen) str)
+;----------------------------------------------------------------
+(defmethod deprecated-write-out-labels ((vmgen vmgen) str)
   (let ((tagged-labels (nreverse (tagged-labels vmgen))))
     ;(print `(:tl ,tagged-labels))
     (mapc #'(lambda (label-pos)

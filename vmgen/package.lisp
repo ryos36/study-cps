@@ -53,7 +53,6 @@
     :primitive-live-reg
 
     :mark-label
-    :write-out-labels
 
     :get-codes
     ))
