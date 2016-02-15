@@ -1,8 +1,8 @@
 ;----------------------------------------------------------------
 (in-package :sinby.cps.vmgen)
 
-(defparameter *code-pos* 0)
-(defparameter *code-array-name* "codes")
+;(defparameter *code-pos* 0)
+;(defparameter *code-array-name* "codes")
 
 ;----------------------------------------------------------------
 (defclass vmgen ()
@@ -10,10 +10,21 @@
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
    (code-pos :initform 0 :accessor code-pos)
    (code-array-name :initarg :code-array-name :initform "codes" :reader code-array-name)
+   (codes :accessor codes :initform nil)
    (types :initform '(:REG :IMM8 :IMM32) :reader types)
    (tagged-labels :initform nil :accessor tagged-labels)))
 
 ; :ADDRESS is only used for heap/stack. please refer hvm.vmg
+
+;----------------------------------------------------------------
+(defmethod add-code ((vmgen vmgen) code)
+  (push code (codes vmgen))
+  (incf (code-pos vmgen))
+  code)
+
+;----------------------------------------------------------------
+(defmethod get-codes ((vmgen vmgen))
+  (reverse (codes vmgen)))
 
 ;----------------------------------------------------------------
 (defmacro format-incf (&rest body)
@@ -27,16 +38,17 @@
 
 ;----------------------------------------------------------------
 (defun number-or-bool->number (num-or-sym)
-  (if (numberp num-or-sym) num-or-sym
-    (let ((sym num-or-sym))
-      (assert (symbolp sym))
-      (case sym
-        (:|#T| 1)
-        (:|#F| 0)
-        (otherwise (assert (eq sym "must be true or false")))))))
+  (if (listp num-or-sym) num-or-sym
+    (if (numberp num-or-sym) num-or-sym
+      (let ((sym num-or-sym))
+        (assert (symbolp sym))
+        (case sym
+          (:|#T| 1)
+          (:|#F| 0)
+          (otherwise (assert (eq sym "must be true or false"))))))))
 
 ;----------------------------------------------------------------
-(defmethod convert-arg-to-string ((vmgen vmgen) arg &optional (str t))
+(defmethod deprecated-convert-arg-to-string ((vmgen vmgen) arg &optional (str t))
   (if (numberp arg)
     (format-incf str "0x~8,'0x,~%" arg)
 
@@ -64,7 +76,7 @@
                 pos))))))))
 
 ;----------------------------------------------------------------
-(defun label-to-c-macro-name (vmgen sym-or-c-label)
+(defun deprecated-label-to-c-macro-name (vmgen sym-or-c-label)
   (let ((c-label (if (symbolp sym-or-c-label) (symbol-to-c-label sym-or-c-label) sym-or-c-label)))
     ;(assert (stringp c-label))
     (format nil "__~a_~a__" (code-array-name vmgen) c-label)))
@@ -110,6 +122,7 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 (defmethod mark-label ((vmgen vmgen) label)
+  (push label (codes vmgen))
   (let ((label-c (symbol-to-c-label label)))
     (push (cons label-c (code-pos vmgen)) (tagged-labels vmgen))))
 
@@ -123,16 +136,18 @@
          ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
          ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
 
-         (format-incf t "INSTRUCTION(~a),~%" 
-                     (cdr
-                       (assoc x1-type `((,(car types)   . ,,(car code-list))
-                                        (,(cadr types)  . ,,(cadr code-list))
-                                        (,(caddr types) . ,,(caddr code-list))))))
+         (let ((inst-str
+                 (cdr
+                   (assoc x1-type `((,(car types)   . ,,(car code-list))
+                                    (,(cadr types)  . ,,(cadr code-list))
+                                    (,(caddr types) . ,,(caddr code-list)))))))
 
-         (format-incf t "0x~8,'0x,~%" oprand)
+           (add-code vmgen `(:INSTRUCTION ,inst-str)))
 
-         (when (eq x1-type :IMM32)
-           (format-incf t "0x~8,'0x,~%" (logand #xffffffff a1)))))))
+          (add-code vmgen oprand)
+
+          (when (eq x1-type :IMM32)
+            (add-code vmgen a1))))))
 
 ;----------------------------------------------------------------
 (make-two-args-primitive primitive-+ ("add" "addi8" "addi32"))
@@ -157,16 +172,17 @@
 (make-two-args-primitive primitive-neq ("neq" "neqi8" "neqi32"))
 
 ;----------------------------------------------------------------
-(defmethod primitive-heap-or-stack ((vmgen vmgen) op tagged-heap-list a2)
-  ;(print `(:phor ,op ,args ,a2))
+(defmethod primitive-heap-or-stack ((vmgen vmgen) op-str tagged-heap-list a2)
+  ;(print `(:phor ,op-str ,args ,a2))
   (let* ((registers (registers vmgen))
          (types (types vmgen))
          (args (cdr tagged-heap-list))
          (len (length args)))
     (assert (<= len 256))
     (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
-      (format-incf t "INSTRUCTION(~a),~%" op)
-      (format-incf t "0x~8,'0x,~%" oprand)
+      (add-code vmgen `(:INSTRUCTION ,op-str))
+      (add-code vmgen oprand)
+      
       (labels ((format-heap-list (hlist)
                 (if (not (null hlist))
                   (let* ((top16 (subseq hlist 0 (min (length hlist) 16)))
@@ -180,8 +196,10 @@
                                            top16)
                                    :initial-value 0)))
 
-                    (format-incf t "0x~8,'0x,~%" v)
-                    (mapc #'(lambda (x) (convert-arg-to-string vmgen x)) top16))
+                    (add-code vmgen v)
+                    (mapc #'(lambda (x) 
+                              (add-code vmgen (number-or-bool->number x)))
+                          top16))
                   (format-heap-list (nthcdr 16 hlist)))))
 
         (format-heap-list args)))))
@@ -197,8 +215,8 @@
 ;----------------------------------------------------------------
 (defmethod primitive-pop ((vmgen vmgen) arg0)
   (assert (numberp arg0))
-  (format-incf t "INSTRUCTION(popi8),~%" )
-  (format-incf t "0x~8,'0x,~%" arg0))
+  (add-code vmgen (copy-list '(:INSTRUCTION "popi8")))
+  (add-code vmgen arg0))
 
 ;----------------------------------------------------------------
 (make-two-args-primitive primitive-record-ref ("record_ref" "record_refi8" :NA))
@@ -215,7 +233,7 @@
               (x1-type-no (position x1-type types))
               (pos2 (position a2 registers)))
 
-          (format-incf t "INSTRUCTION(record_set),~%" )
+          (add-code vmgen (copy-list '(:INSTRUCTION "record_set")))
           (let ((oprand
                   (logior
                     (ash (logior (ash x0-type-no 4)
@@ -223,29 +241,29 @@
                     (ash x0 16)
                     (ash x1 8)
                     (ash (logand pos2 #xff)  0))))
-            (format-incf t "0x~8,'0x,~%" oprand))
+            (add-code vmgen oprand))
 
          (if (eq x0-type :IMM32)
-           (format-incf t "0x~8,'0x,~%" (logand #xffffffff a0))))))))
+           (add-code vmgen a0)))))))
 
 ;----------------------------------------------------------------
-(defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op label-or-reg)
+(defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op-str label-or-reg)
   (if (listp label-or-reg)
     (let ((registers (registers vmgen))
-          (label-sym (cadr label-or-reg)))
+          (label label-or-reg))
 
-      (format-incf t "INSTRUCTION(~ai32),~%" op)
-      (format-incf t "0x~8,'0x,~%" 
-                   (ash (ash (position :IMM32 (types vmgen)) 4) 24))
-      (format-incf t "~a,~%" (label-to-c-macro-name vmgen label-sym)))
+      (add-code vmgen `(:INSTRUCTION ,op-str))
+      (add-code vmgen (ash (ash (position :IMM32 (types vmgen)) 4) 24))
+      (add-code vmgen (copy-list label)))
 
     (let ((reg0 label-or-reg)
           (registers (registers vmgen)))
 
       (let ((pos (position reg0 registers)))
+        (assert (numberp pos))
 
-        (format-incf t "INSTRUCTION(~a),~%" op)
-        (format-incf t "0x~8,'0x,~%" (ash (logand pos #xff) 16))))))
+        (add-code vmgen `(:INSTRUCTION ,op-str))
+        (add-code vmgen (ash (logand pos #xff) 16))))))
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump ((vmgen vmgen) label-or-reg)
@@ -257,65 +275,65 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-move ((vmgen vmgen) r0 r1)
-  (format-incf t "INSTRUCTION(move),~%" )
+  (add-code vmgen (copy-list `(:INSTRUCTION "move")))
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
-    (format-incf t "0x~8,'0x,~%" oprand)))
+    (add-code vmgen oprand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-swap ((vmgen vmgen) r0 r1)
-  (format-incf t "INSTRUCTION(swap),~%" )
+  (add-code vmgen (copy-list `(:INSTRUCTION "swap")))
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
-    (format-incf t "0x~8,'0x,~%" oprand)))
+    (add-code vmgen oprand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-movei ((vmgen vmgen) imm-or-label r1)
   (if (listp imm-or-label)
-    (let ((label-sym (cadr imm-or-label))
+    (let ((label imm-or-label)
           (registers (registers vmgen)))
 
-      (format-incf t "INSTRUCTION(movei32),~%" )
-      (format-incf t "0x~8,'0x,~%" 
-                   (logior
-                     (ash (ash (position :IMM32 (types vmgen)) 4) 24)
-                     (ash (logand (position r1 registers) #xff) 0)))
-      (convert-arg-to-string vmgen imm-or-label))
+      (add-code vmgen (copy-list '(:INSTRUCTION "loadi32")))
+      (add-code vmgen
+        (logior
+          (ash (ash (position :IMM32 (types vmgen)) 4) 24)
+          (ash (logand (position r1 registers) #xff) 0)))
+      (add-code vmgen (copy-list label)))
 
     (let ((imm (number-or-bool->number imm-or-label)))
+      (assert (numberp imm))
       (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
         (assert (not (eq x1-type :REG)))
-        (format-incf t "INSTRUCTION(movei~a),~%" (if (eq x1-type :IMM32) 32 8))
-        (format-incf t "0x~8,'0x,~%" oprand)
+
+        (add-code vmgen `(:INSTRUCTION ,(if (eq x1-type :IMM32) "movei32" "movei8")))
+        (add-code vmgen oprand)
         (if (eq x1-type :IMM32)
-          (format-incf t "0x~8,'0x,~%" imm))))))
+          (add-code vmgen imm))))))
 
 ;----------------------------------------------------------------
 (defmethod primitive-halt ((vmgen vmgen) r0)
-  (format-incf t "INSTRUCTION(halt),~%" )
+  (add-code vmgen (copy-list '(:INSTRUCTION "halt")))
   (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 :r0)
-    (format-incf t "0x~8,'0x,~%" oprand)))
+    (add-code vmgen oprand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-const ((vmgen vmgen) v)
-  (if (numberp v)
-    (format-incf t "0x~8,'0x,~%" v)
-    (if (eq (car v) :address)
-      (format-incf t "&~a[~a],~%" (code-array-name vmgen) (label-to-c-macro-name vmgen (cadr v)))
-      (format-incf t "~a,~%"  (label-to-c-macro-name vmgen (cadr v))))))
+  (if (listp v)
+    (add-code vmgen (copy-list v))
+    (add-code vmgen v)))
 
 ;----------------------------------------------------------------
-(defmethod primitive-label ((vmgen vmgen) label-sym)
-  (format-incf t "~a,~%" (label-to-c-macro-name vmgen label-sym)))
+;(defmethod primitive-label ((vmgen vmgen) label-sym)
+;  (add-code vmgen (copy-list label-sym)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-live-reg ((vmgen vmgen) heap-n usage-of-registers)
-  (format-incf t "INSTRUCTION(live_reg),~%" )
-  (format-incf t "0x~8,'0x,~%" heap-n)
+  (add-code vmgen (copy-list '(:INSTRUCTION "live_reg")))
+  (add-code vmgen heap-n)
   (labels ((bit->hex (usage-of-registers0 rv)
             (if (null usage-of-registers0) rv
               (bit->hex (cdr usage-of-registers0) (+ (ash rv 1) (car usage-of-registers0))))))
-    (format-incf t "0x~8,'0x,~%" (bit->hex usage-of-registers 0))))
+    (add-code vmgen (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
 (defmethod write-out-labels ((vmgen vmgen) str)

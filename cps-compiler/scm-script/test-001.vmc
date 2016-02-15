@@ -1,10 +1,10 @@
 ((:JUMP (:LABEL |:MAIN|))
  MAIN
- (:LABEL |:MAIN|)
+ (:CONST (:LABEL |:MAIN|))
  EXIT
- (:LABEL |:EXIT|)
+ (:CONST (:LABEL |:EXIT|))
  |:EXIT|
- (:HALT :R0)
+ (:HALT :R1)
  |:MAIN|
  (:JUMP (:LABEL |:label0|))
  (:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))

@@ -55,8 +55,16 @@
     :mark-label
     :write-out-labels
 
-    :convert-arg-to-string
+    :get-codes
     ))
+
+;----------------------------------------------------------------
+(defpackage :sinby.cps.vmc-to-bin
+  (:use :cl :sinby.cps.vmgen)
+  (:nicknames :cps-vmc-to-bin)
+  (:export 
+
+    :vmc-to-c-bin))
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.vmc-to-c-source

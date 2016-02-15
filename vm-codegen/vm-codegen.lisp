@@ -66,9 +66,9 @@
         (list
           (make-jump-instruction codegen (closure-name-to-label-name main))
           main
-          (make-label main :closure-name)
+          (make-const-instruction codegen (make-label main :closure-name))
           exit
-          (make-label exit :closure-name)
+          (make-const-instruction codegen (make-label exit :closure-name))
           (closure-name-to-label-name exit)
           (make-halt-instruction codegen)))))
 

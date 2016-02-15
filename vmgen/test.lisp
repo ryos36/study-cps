@@ -17,9 +17,11 @@
   (mapcar #'(lambda (expr)
               (convert converter expr))
           (cdr code-tagged-list))
-  (write-out-labels vmgen *standard-output*))
+  (get-codes vmgen)
+  ;(write-out-labels vmgen *standard-output*)
+  )
 
-(defparameter *test-script-dir* "./vm-code/" )
+(defparameter *test-script-dir* "./codes/" )
 (defparameter *test-ext* ".vmc")
 (defparameter *test-parse-func* #'vmgen-one)
 (defparameter *debug-mode* nil)

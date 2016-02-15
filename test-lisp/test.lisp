@@ -18,12 +18,27 @@
 (defparameter *test-success-n* 0)
 (defparameter *test-save-n* 0)
 
-(defun insn-print (lst str flag)
+(let ((last-live-reg-insn nil))
+  (defun insn-print-insert-newline (insn str)
+    (print `(:insn ,insn))
+    (if (and (consp insn) (eq (car insn) :live-reg))
+      (progn
+        (format str "~%")
+        (setf last-live-reg-insn insn))
+
+      (let ((symbol-flag (symbolp insn)))
+        (if symbol-flag
+          (if last-live-reg-insn
+            (setf last-live-reg-insn nil)
+            (format str "~%")))))))
+
+(defun insn-print (lst str flag &key (insert-newline #'insn-print-insert-newline))
+  (funcall insert-newline nil str)
   (if (not flag)
     (format str "~s~%" lst)
                             
     (dolist (insn lst)
-      (if (symbolp insn) (format str "~%"))
+      (funcall insert-newline insn str)
       (format str "~s~%" insn))))
 
 (defun min-max-no-list (min-max-list)
