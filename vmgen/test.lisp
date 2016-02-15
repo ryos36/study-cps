@@ -31,3 +31,6 @@
 ;(set-test-files '("32" "42" "29" "41"))
 (set-test-files '("1" (1 . 3)))
 (do-test)
+(print (insn-pos-pair vmgen))
+(print (address-pos-pair vmgen))
+(print (label-offset-pos-pair vmgen))

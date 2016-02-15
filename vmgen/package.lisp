@@ -55,6 +55,10 @@
     :mark-label
 
     :get-codes
+
+    :insn-pos-pair 
+    :address-pos-pair
+    :label-offset-pos-pair
     ))
 
 ;----------------------------------------------------------------

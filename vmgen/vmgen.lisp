@@ -8,18 +8,62 @@
    (code-pos :initform 0 :accessor code-pos)
    (codes :accessor codes :initform nil)
    (types :initform '(:REG :IMM8 :IMM32) :reader types)
-   (tagged-labels :initform nil :accessor tagged-labels)))
+   (label-pos-pair :initform nil :accessor label-pos-pair)
+   (insn-pos-pair :initform nil :accessor insn-pos-pair)
+   (label-offset-pos-pair :initform nil :accessor label-offset-pos-pair)
+   (address-pos-pair :initform nil :accessor address-pos-pair)
+   ))
 
 ;----------------------------------------------------------------
+;----------------------------------------------------------------
+(defmacro create-mark-func (func-name slot-name &optional (assert-clouse t))
+  `(defmethod ,func-name ((vmgen vmgen) value)
+     ,assert-clouse
+
+     (let ((,slot-name (,slot-name vmgen))
+           (code-pos (code-pos vmgen)))
+
+       (let ((hit-pair 
+               (assoc value ,slot-name :test #'equal)))
+         (if hit-pair (push code-pos (cdr hit-pair))
+           (push (list value code-pos) (,slot-name vmgen)))))))
+
+;----------------------------------------------------------------
+(create-mark-func mark-label-offset label-offset-pos-pair)
+(create-mark-func mark-address address-pos-pair)
+(create-mark-func mark-instruction insn-pos-pair
+                  (assert (stringp value)))
+
+;----------------------------------------------------------------
+(defmethod xmark-instruction ((vmgen vmgen) bare-code-str)
+  (assert (stringp bare-code-str))
+  (let ((insn-pos-pair (insn-pos-pair vmgen))
+        (code-pos (code-pos vmgen)))
+
+    (let ((hit-insn-pos-pair 
+            (assoc bare-code-str insn-pos-pair :test #'string=)))
+      (if hit-insn-pos-pair (push code-pos (cdr hit-insn-pos-pair))
+        (push (list bare-code-str code-pos) (insn-pos-pair vmgen))))))
+
 ;----------------------------------------------------------------
 (defmethod mark-label ((vmgen vmgen) label)
   (push label (codes vmgen))
   (let ((label-c (symbol-to-c-label label)))
-    (push (cons label-c (code-pos vmgen)) (tagged-labels vmgen))))
+    (push (cons label-c (code-pos vmgen)) (label-pos-pair vmgen))))
 
 ;----------------------------------------------------------------
 (defmethod add-code ((vmgen vmgen) code)
   (push code (codes vmgen))
+
+  (if (consp code)
+    (let ((key (car code))
+          (value (cadr code)))
+      (case key
+        (:INSTRUCTION (mark-instruction vmgen value))
+        (:LABEL (mark-label-offset vmgen value))
+        (:ADDRESS (mark-address vmgen value))
+        (otherwise (assert (eq "not supported list" code))))))
+
   (incf (code-pos vmgen))
   code)
 
@@ -28,7 +72,7 @@
   (reverse (codes vmgen)))
 
 ;----------------------------------------------------------------
-(defmacro format-incf (&rest body)
+(defmacro deprecatd-format-incf (&rest body)
   `(prog1
      (format ,@body)
      (incf (code-pos vmgen))))
@@ -300,11 +344,11 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 (defmethod deprecated-write-out-labels ((vmgen vmgen) str)
-  (let ((tagged-labels (nreverse (tagged-labels vmgen))))
-    ;(print `(:tl ,tagged-labels))
+  (let ((label-pos-pair (nreverse (label-pos-pair vmgen))))
+    ;(print `(:tl ,label-pos-pair))
     (mapc #'(lambda (label-pos)
               (format-incf t "#define ~a 0x~8,'0x~%"
                            (label-to-c-macro-name vmgen (car label-pos))
                            (cdr label-pos)))
-          tagged-labels)))
+          label-pos-pair)))
 
