@@ -20,7 +20,7 @@
   (mapcar #'(lambda (expr)
               (convert vmgen expr))
           (cdr code-tagged-list))
-  ;(write-binary-with-open-file vmgen (concatenate 'string *test-result-dir* *test-current-test-name* ".vmb"))
+  (write-binary-with-open-file vmgen (concatenate 'string *test-result-dir* *test-current-test-name* ".vmb") '(unsigned-byte 8))
   (get-codes vmgen))
 
 ;----------------------------------------------------------------
@@ -40,6 +40,12 @@
 ;(print (label-offset-pos-pair vmgen))
 ;(print (label-pos-pair vmgen))
 
-(dolist (i (to-binary-list vmgen))
-  (format t "0x~8,'0x~%" i))
+#|
+(let ((n 0)
+      (prefix ""))
+  (dolist (i (to-binary-list vmgen))
+    (format t "~a~2,'0x" prefix i)
+    (incf n)
+    (setf prefix (if (eq (mod n 16) 0) #\newline " "))))
 
+|#

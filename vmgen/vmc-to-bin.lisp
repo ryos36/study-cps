@@ -21,8 +21,7 @@
                            (address-pos-offset (round4 label-offset-pos-size address-pos-size))
                            (insn-pos-offset (round4 address-pos-size insn-pos-size))
                            (insn-declare-offset (round4 insn-pos-offset insn-declare-size)))
-                      (list :header
-                            magic-no 
+                      (list magic-no 
                             codes-offset codes-size
                             label-offset-pos-offset label-offset-pos-size
                             address-pos-offset address-pos-size
@@ -39,7 +38,7 @@
                       (push (quad->uint32 (reverse top4)) rv)
                       (byte->quad-byte (nthcdr 4 byte-list) rv))))
 
-               (make-insn-name-bin-list ()
+               (make-insn-name-byte-list ()
                   (let ((n 0)
                         (rv nil))
                     (dolist (i insn-pos-pair)
@@ -56,7 +55,7 @@
                         (push 0 rv)
                         (loop for i from 1 to (- clang-len4 clang-len) do (push 0 rv))
                         ))
-                    (byte->quad-byte (nreverse rv) nil)))
+                    (nreverse rv)))
 
                (normalize-codes0 (key x-pos-pair pos-func)
                  (let ((n 0))
@@ -77,11 +76,19 @@
                    (assert label-pos)
                    (cdr label-pos)))
 
-               (disruptive-simple-flatten (l0 l1 l2 l3 l4 l5)
+               (disruptive-simple-flatten (l0 l1 l2 l3 l4)
                   (reduce #'(lambda (ls0 la0)
                               (setf (cdr (last ls0)) la0))
-                          (list l0 l1 l2 l3 l4 l5))
+                          (list l0 l1 l2 l3 l4))
                   l0)
+
+               (uint32->byte (ui32 &key (shift-list '(-24 -16 -8 0)))
+                 (mapcar #'(lambda (x) (logand (ash ui32 x) #xff))
+                             shift-list))
+
+               (uint32->byte-push (ui32 rv &key (shift-list '(-24 -16 -8 0)))
+                 (mapc #'(lambda (x) (push (logand (ash ui32 x) #xff) rv))
+                             shift-list))
 
                (normalize-codes ()
                  (normalize-codes0 :INSTRUCTION (copy-list insn-pos-pair) #'(lambda (k n) n))
@@ -90,7 +97,9 @@
                  pure-codes))
 
         (normalize-codes)
-        (let* ((insn-name-bin-list (make-insn-name-bin-list))
+        (let* ((insn-name-byte-list (make-insn-name-byte-list))
+               (insn-name-byte-list-len (round4 0 (length insn-name-byte-list)))
+               (inbl-len/4 (/ insn-name-byte-list-len 4))
                (header (make-header
                          (quad->uint32 "VMC" :conv #'char-code)
                          (mapcar #'(lambda (x) (* x 4))
@@ -100,19 +109,23 @@
                                    (length label-offset-pos-list)
                                    (length address-pos-list)
                                    (length insn-pos-list)
-                                   (length insn-name-bin-list))))))
+                                   inbl-len/4)))))
 
-          (dolist (i header) (format t "~x~%" i))
-          (disruptive-simple-flatten header pure-codes label-offset-pos-list address-pos-list insn-pos-list insn-name-bin-list))))))
+          ;(dolist (i header) (format t "~x~%" i))
+
+          (append
+            (reduce #'append
+                    (mapcar #'(lambda (x) (uint32->byte x))
+                            (disruptive-simple-flatten header pure-codes label-offset-pos-list address-pos-list insn-pos-list)))
+            insn-name-byte-list))))))
 
 ;----------------------------------------------------------------
-(defun write-binary-with-open-file (vmgen bin-file)
+(defun write-binary-with-open-file (vmgen bin-file etype)
 
-  (with-open-file (out bin-file :if-does-not-exist :create :direction :output)
-    (flet ((write-header ()
-             (print `(:header-bin) out)))
-      (write-header)
-      (print (insn-pos-pair vmgen) out)
-      (print (address-pos-pair vmgen) out)
-      (print (label-offset-pos-pair vmgen) out)
-      (print (get-codes vmgen) out))))
+  (with-open-file (out bin-file :if-does-not-exist :create 
+                       :element-type etype
+                       :buffered t
+                       :direction :output)
+
+    (let ((byte-list (to-binary-list vmgen)))
+      (write-sequence byte-list out))))
