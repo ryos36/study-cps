@@ -17,11 +17,11 @@
                (make-header (magic-no size-list)
                   (multiple-value-bind (header-size codes-size label-offset-pos-size address-pos-size insn-pos-size insn-declare-size) (values-list size-list)
                     (let* ((codes-offset header-size)
-                           (label-offset-pos-offset (round4 codes-offset label-offset-pos-size))
-                           (address-pos-offset (round4 label-offset-pos-size address-pos-size))
-                           (insn-pos-offset (round4 address-pos-size insn-pos-size))
-                           (insn-declare-offset (round4 insn-pos-offset insn-declare-size)))
-                      (list magic-no 
+                           (label-offset-pos-offset (round4 codes-offset codes-size))
+                           (address-pos-offset (round4 label-offset-pos-offset label-offset-pos-size))
+                           (insn-pos-offset (round4 address-pos-offset address-pos-size))
+                           (insn-declare-offset (round4 insn-pos-offset insn-pos-size)))
+                      (list magic-no header-size
                             codes-offset codes-size
                             label-offset-pos-offset label-offset-pos-size
                             address-pos-offset address-pos-size
@@ -40,7 +40,14 @@
 
                (make-insn-name-byte-list ()
                   (let ((n 0)
-                        (rv nil))
+                        (rv nil)
+                        (len (length insn-pos-pair)))
+
+                    (push (logand len 255) rv)
+                    (push (logand (ash len -8) 255) rv)
+                    (push 0 rv)
+                    (push 0 rv)
+
                     (dolist (i insn-pos-pair)
                       (push (logand n 255) rv)
                       (push (logand (ash n -8) 255) rv)
@@ -82,7 +89,7 @@
                           (list l0 l1 l2 l3 l4))
                   l0)
 
-               (uint32->byte (ui32 &key (shift-list '(-24 -16 -8 0)))
+               (uint32->byte (ui32 &key (shift-list '(0 -8 -16 -24)))
                  (mapcar #'(lambda (x) (logand (ash ui32 x) #xff))
                              shift-list))
 
@@ -92,7 +99,7 @@
 
                (normalize-codes ()
                  (normalize-codes0 :INSTRUCTION (copy-list insn-pos-pair) #'(lambda (k n) n))
-                 (normalize-codes0 :ADDRESS address-pos-pair #'(lambda (k n) n))
+                 (normalize-codes0 :ADDRESS address-pos-pair #'search-label-pos)
                  (normalize-codes0 :LABEL label-offset-pos-pair #'search-label-pos)
                  pure-codes))
 
@@ -104,7 +111,7 @@
                          (quad->uint32 "VMC" :conv #'char-code)
                          (mapcar #'(lambda (x) (* x 4))
                                  (list
-                                   11
+                                   12
                                    (length pure-codes)
                                    (length label-offset-pos-list)
                                    (length address-pos-list)
@@ -112,6 +119,7 @@
                                    inbl-len/4)))))
 
           ;(dolist (i header) (format t "~x~%" i))
+          ;(print  `(:insn-bytes ,insn-name-byte-list))
 
           (append
             (reduce #'append
@@ -128,4 +136,5 @@
                        :direction :output)
 
     (let ((byte-list (to-binary-list vmgen)))
+      ;(print `(:iii ,byte-list))
       (write-sequence byte-list out))))

@@ -243,12 +243,12 @@
            (add-code vmgen a0)))))))
 
 ;----------------------------------------------------------------
-(defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op-str label-or-reg)
+(defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op-str op-stri32 label-or-reg)
   (if (listp label-or-reg)
     (let ((registers (registers vmgen))
           (label label-or-reg))
 
-      (add-code vmgen `(:INSTRUCTION ,op-str))
+      (add-code vmgen `(:INSTRUCTION ,op-stri32))
       (add-code vmgen (ash (ash (position :IMM32 (types vmgen)) 4) 24))
       (add-code vmgen (copy-list label)))
 
@@ -263,11 +263,11 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump ((vmgen vmgen) label-or-reg)
-  (primitive-jump-or-conditional-jump vmgen "jump" label-or-reg))
+  (primitive-jump-or-conditional-jump vmgen "jump" "jumpi32" label-or-reg))
 
 ;----------------------------------------------------------------
 (defmethod primitive-conditional-jump ((vmgen vmgen) label-or-reg)
-  (primitive-jump-or-conditional-jump vmgen "conditional_jump" label-or-reg))
+  (primitive-jump-or-conditional-jump vmgen "conditional_jump" "conditional_jumpi32" label-or-reg))
 
 ;----------------------------------------------------------------
 (defmethod primitive-move ((vmgen vmgen) r0 r1)

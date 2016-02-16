@@ -1,0 +1,5 @@
+*.o
+hvm-*.i
+*.swp
+hvm
+operand-check

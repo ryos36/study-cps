@@ -1,0 +1,256 @@
+\ stack definitions:
+\E stack data-stack sp Cell
+
+\E s" Operand"   single inst-stream type-prefix operand
+\E s" Imm"   single inst-stream type-prefix imm
+\E s" Cell"   single data-stack type-prefix s
+
+\ ----------------------------------------------------------------
+add ( operand --  )
+    regs[operand.r2] = regs[operand.r0] + regs[operand.r1];
+
+addi8 ( operand --  )
+    regs[operand.r2] = regs[operand.r0] + operand.r1;
+
+addi32 ( operand imm32 -- )
+    regs[operand.r2] = regs[operand.r0] + imm32;
+
+\ ----------------------------------------------------------------
+sub ( operand --  )
+    regs[operand.r2] = regs[operand.r0] - regs[operand.r1];
+
+subi8 ( operand --  )
+    regs[operand.r2] = regs[operand.r0] - operand.r1;
+
+subi32 ( operand imm32 -- )
+    regs[operand.r2] = regs[operand.r0] - imm32;
+
+
+\ ----------------------------------------------------------------
+add_sp ( s0 s1 -- s2 )
+{
+    s2.i = s0.i + s1.i;
+}
+
+\ ----------------------------------------------------------------
+push ( operand -- s0 )
+    s0.i = operand.i;
+
+\ ----------------------------------------------------------------
+pop_to_reg ( s2 s1 s0 -- )
+    fprintf(vm_out, "pop_to_reg: %d %d\n", (int)s2.i, (int)s1.i);
+    regs[s2.i & MAX_REG_N_MASK] = s1.i;
+
+\ ----------------------------------------------------------------
+stack ( operand0 operand1 -- )
+{
+    int size;
+    uint32_t type16;
+    Cell *cellp, *cp;
+
+    size = (int)operand0.r1;
+    assert((0 < size) && (size <= MAX_HEAP_OFFSET_N_MASK));
+    type16 = operand1.i;
+
+    sp -= size;
+    cellp = sp;
+    cp = cellp;
+    
+    const int loop_n = (size + 15) / 16;
+
+    IF_spTOS(sp[0] = spTOS);
+    for( int i = 0 ; i <  loop_n ; ++i ) {
+        int j;
+        const int loop_n0 = min(16, size);
+        for ( j = 0 ; j < loop_n0 ; ++j ) {
+            uint32_t type0;
+            type0 = type16 & 0x3;
+
+            switch (type0) {
+            case TYPE_REG:
+                assert(IPTOS.i < MAX_REG_N);
+                cp->i = regs[IPTOS.i];
+                break;
+            case TYPE_IMM8:
+                assert(0);
+                break;
+            case TYPE_IMM32:
+                cp->i = IPTOS.i;
+                break;
+            }
+
+            cp++;
+            INC_IP(1);
+            type16 >>= 2;
+        }
+        size -= j;
+    }
+
+    // restore spTOS
+
+    sp--;
+    sp[0].i = operand0.r1; // ignore TOS
+    IF_spTOS(spTOS = sp[0]);
+    regs[operand0.r2 & MAX_REG_N_MASK] = (long)cellp;
+}
+
+\ ----------------------------------------------------------------
+popi8 ( operand -- )
+    assert( spTOS.i == operand.r1 );
+    sp += (operand.r1 + 1);
+    IF_spTOS(spTOS = sp[0]);
+
+\ ----------------------------------------------------------------
+heap ( operand0 operand1 -- )
+{
+    int size;
+    uint32_t type16;
+    Cell *cellp, *cp;
+
+    size = (int)operand0.r1;
+    cellp = (Cell *)calloc(size, sizeof(Cell));
+    cp = cellp;
+
+    type16 = operand1.i;
+    
+    const int loop_n = (size + 15) / 16;
+
+    IF_spTOS(sp[0] = spTOS);
+    for( int i = 0 ; i <  loop_n ; ++i ) {
+        int j;
+        const int loop_n0 = min(16, size);
+        for ( j = 0 ; j < loop_n0 ; ++j ) {
+            uint32_t type0;
+            type0 = type16 & 0x3;
+
+            switch (type0) {
+            case TYPE_REG:
+                assert(IPTOS.i < MAX_REG_N);
+                cp->i = regs[IPTOS.i];
+                break;
+            case TYPE_IMM8:
+                assert(0);
+                break;
+            case TYPE_IMM32:
+                cp->i = IPTOS.i;
+                break;
+            }
+
+            cp++;
+            INC_IP(1);
+            type16 >>= 2;
+        }
+        size -= j;
+    }
+
+    // restore spTOS
+    IF_spTOS(spTOS = sp[0]);
+
+    regs[operand0.r2 & MAX_REG_N_MASK] = (long)cellp;
+
+    /*
+    for( int ci = 0 ; ci < 2; ++ci ) {
+        fprintf(vm_out, "cellp[%d] = %lx\n", ci, cellp[ci]);
+    }
+    */
+}
+
+\ ----------------------------------------------------------------
+record_ref( operand -- )
+   Cell *heap;
+   heap = (Cell *)regs[operand.r0 & MAX_REG_N_MASK];
+   heap += (regs[operand.r1 & MAX_REG_N_MASK] & MAX_HEAP_OFFSET_N_MASK);
+   regs[operand.r2 & MAX_REG_N_MASK] = heap->i;
+
+\ ----------------------------------------------------------------
+record_refi8( operand -- )
+   Cell *heap;
+   heap = (Cell *)regs[operand.r0 & MAX_REG_N_MASK];
+   heap += (operand.r1 & MAX_HEAP_OFFSET_N_MASK);
+   regs[operand.r2 & MAX_REG_N_MASK] = heap->i;
+
+\ ----------------------------------------------------------------
+record_set( operand -- )
+   Cell *heap;
+   heap = (Cell *)regs[operand.r2 & MAX_REG_N_MASK];
+   heap += (operand.r1 & MAX_HEAP_OFFSET_N_MASK);
+   heap->i = regs[operand.r0 & MAX_REG_N_MASK];
+
+\ ----------------------------------------------------------------
+record_offs( operand -- )
+   Cell *heap;
+   heap = (Cell *)regs[operand.r0 & MAX_REG_N_MASK];
+   heap += (regs[operand.r1 & MAX_REG_N_MASK] & MAX_HEAP_OFFSET_N_MASK);
+   regs[operand.r2 & MAX_REG_N_MASK] = (long)heap;
+
+\ ----------------------------------------------------------------
+record_offsi8( operand -- )
+   Cell *heap;
+   heap = (Cell *)regs[operand.r0 & MAX_REG_N_MASK];
+   heap += (operand.r1 & MAX_HEAP_OFFSET_N_MASK);
+   regs[operand.r2 & MAX_REG_N_MASK] = (long)heap;
+
+\ ----------------------------------------------------------------
+move( operand -- )
+    regs[operand.r1] = regs[operand.r0];
+
+\ ----------------------------------------------------------------
+swap( operand -- )
+    long tmp = regs[operand.r1];
+    regs[operand.r1] = regs[operand.r0];
+    regs[operand.r0] = tmp;
+
+\ ----------------------------------------------------------------
+movei8( operand -- )
+    regs[operand.r2] = operand.r1;
+
+\ ----------------------------------------------------------------
+movei32( operand0 operand1 -- )
+    regs[operand0.r2] = operand1.i;
+
+\ ----------------------------------------------------------------
+loadi32( operand0 operand1 -- )
+    regs[operand0.r2] = operand1.i;
+
+\ ----------------------------------------------------------------
+jump( operand -- )
+    CHECK_REG_NO(operand.r0);
+    SET_IP(ip0 + regs[operand.r0]);
+
+\ ----------------------------------------------------------------
+conditional_jump( operand -- )
+    CHECK_REG_NO(operand.r0);
+    if ( flag ) {
+        SET_IP(ip0 + regs[operand.r0]);
+    }
+
+\ ----------------------------------------------------------------
+jumpi32( operand0 operand1 -- )
+    SET_IP(ip0 + operand1.i);
+
+\ ----------------------------------------------------------------
+conditional_jumpi32( operand0 operand1 -- )
+    if ( flag ) {
+        SET_IP(ip0 + operand1.i);
+    }
+
+\ ----------------------------------------------------------------
+eqi8( operand0 -- )
+    if ( regs[operand0.r0] == operand0.r1 ) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+
+\ ----------------------------------------------------------------
+live_reg( operand0 operand1 -- )
+
+\ ----------------------------------------------------------------
+halt ( operand -- )
+{
+    long long int rv;
+    rv = (long long int)regs[operand.r0 & MAX_REG_N_MASK];
+    printf("halt %lld\n", rv);
+    return rv;
+}
+
