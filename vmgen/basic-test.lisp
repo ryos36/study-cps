@@ -1,9 +1,8 @@
 (load "package.lisp")
 (load "vmgen.lisp")
-(load "vmc-to-c-source.lisp")
+;(load "vmc-to-c-source.lisp")
 
-(use-package :cps-vmgen)
-(use-package :cps-vmc-to-c-source)
+(in-package :sinby.cps.vmgen)
 
 (setf vmgen (make-instance 'vmgen))
 
@@ -12,7 +11,6 @@
 (print (macroexpand-1 '(make-converter convert 
                                        ((:record-offs . #'primitive-record-offs)
                                         (:labell . #'primitive-label)))))
-
 
 (primitive-+ vmgen :r0 1 :r0)
 (primitive-+ vmgen :r0 -1 :r0)
@@ -39,15 +37,3 @@
 (primitive-const vmgen '(:address |:address-label1|))
 (primitive-const vmgen #x0817)
 
-(format t "==============~%")
-(write-out-labels vmgen *standard-output*)
-(format t "==============~%")
-
-(defun cats (arg)
-  (format t "~s => " arg)
-  (convert-arg-to-string vmgen arg))
-
-(cats :r0)
-(cats #x0817)
-(cats '(:address |:MAIN|))
-(cats '(:label |:MAIN|))

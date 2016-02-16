@@ -35,21 +35,9 @@
                   (assert (stringp value)))
 
 ;----------------------------------------------------------------
-(defmethod xmark-instruction ((vmgen vmgen) bare-code-str)
-  (assert (stringp bare-code-str))
-  (let ((insn-pos-pair (insn-pos-pair vmgen))
-        (code-pos (code-pos vmgen)))
-
-    (let ((hit-insn-pos-pair 
-            (assoc bare-code-str insn-pos-pair :test #'string=)))
-      (if hit-insn-pos-pair (push code-pos (cdr hit-insn-pos-pair))
-        (push (list bare-code-str code-pos) (insn-pos-pair vmgen))))))
-
-;----------------------------------------------------------------
 (defmethod mark-label ((vmgen vmgen) label)
   (push label (codes vmgen))
-  (let ((label-c (symbol-to-c-label label)))
-    (push (cons label-c (code-pos vmgen)) (label-pos-pair vmgen))))
+  (push (cons label (code-pos vmgen)) (label-pos-pair vmgen)))
 
 ;----------------------------------------------------------------
 (defmethod add-code ((vmgen vmgen) code)
@@ -82,7 +70,7 @@
   (substitute-if #\_  #'(lambda (c) (find c "?*-+:")) (format nil "~a" sym)))
 
 ;----------------------------------------------------------------
-(defun number-or-bool->number (num-or-sym)
+(defun number-or-bool->number (num-or-sym &optional registers)
   (if (listp num-or-sym) num-or-sym
     (if (numberp num-or-sym) num-or-sym
       (let ((sym num-or-sym))
@@ -90,8 +78,10 @@
         (case sym
           (:|#T| 1)
           (:|#F| 0)
-          (otherwise (assert (eq sym "must be true or false"))))))))
-
+          (otherwise 
+            (let ((pos (position sym registers)))
+              (assert pos)
+              pos)))))))
 
 ;----------------------------------------------------------------
 (defun get-value-type (ax registers)
@@ -204,7 +194,7 @@
 
                     (add-code vmgen v)
                     (mapc #'(lambda (x) 
-                              (add-code vmgen (number-or-bool->number x)))
+                              (add-code vmgen (number-or-bool->number x registers)))
                           top16))
                   (format-heap-list (nthcdr 16 hlist)))))
 
@@ -342,13 +332,57 @@
     (add-code vmgen (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
-;----------------------------------------------------------------
-(defmethod deprecated-write-out-labels ((vmgen vmgen) str)
-  (let ((label-pos-pair (nreverse (label-pos-pair vmgen))))
-    ;(print `(:tl ,label-pos-pair))
-    (mapc #'(lambda (label-pos)
-              (format-incf t "#define ~a 0x~8,'0x~%"
-                           (label-to-c-macro-name vmgen (car label-pos))
-                           (cdr label-pos)))
-          label-pos-pair)))
+(defmacro make-converter (func-name primitive-func-assoc-list)
+  (let* ((case-list
+           (mapcar #'(lambda (apair)
+                       `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
+    `(defmethod ,func-name ((vmgen vmgen) vm-code)
+       (if (symbolp vm-code)
+         (mark-label vmgen vm-code)
 
+         (let ((op (car vm-code))
+               (args (cadr vm-code)))
+           (case op
+             ,@case-list
+             (otherwise 
+               (format *error-output* "~%unknown code:~s~%" op)
+               (sleep 1))))))))
+
+
+;----------------------------------------------------------------
+(make-converter convert 
+                ((:+ . #'primitive-+)
+                 (:- . #'primitive--)
+                 (:* . #'primitive-*)
+                 (:/ . #'primitive-/)
+
+                 (:>> . #'primitive->>)
+                 (:<< . #'primitive-<<)
+
+                 (:< . #'primitive-<)
+                 (:> . #'primitive->)
+                 (:>= . #'primitive->=)
+                 (:<= . #'primitive-<=)
+                 (:= . #'primitive-eq)
+                 (:/= . #'primitive-neq)
+                 (:neq . #'primitive-neq)
+                 (:<= . #'primitive-<)
+
+                 (:jump . #'primitive-jump)
+                 (:conditional-jump . #'primitive-conditional-jump)
+
+                 (:heap . #'primitive-heap)
+                 (:stack . #'primitive-stack)
+                 (:pop . #'primitive-pop)
+
+                 (:record-ref . #'primitive-record-ref)
+                 (:record-offs . #'primitive-record-offs)
+                 (:record-set! . #'primitive-record-set!)
+
+                 (:move . #'primitive-move)
+                 (:swap . #'primitive-swap)
+                 (:movei . #'primitive-movei)
+                 (:halt . #'primitive-halt)
+                 (:label . #'primitive-label)
+                 (:live-reg . #'primitive-live-reg)
+                 (:const . #'primitive-const)))

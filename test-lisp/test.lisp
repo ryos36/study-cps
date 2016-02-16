@@ -18,9 +18,10 @@
 (defparameter *test-success-n* 0)
 (defparameter *test-save-n* 0)
 
+(defparameter *test-current-test-name* nil)
+
 (let ((last-live-reg-insn nil))
   (defun insn-print-insert-newline (insn str)
-    (print `(:insn ,insn))
     (if (and (consp insn) (eq (car insn) :live-reg))
       (progn
         (format str "~%")
@@ -33,13 +34,14 @@
             (format str "~%")))))))
 
 (defun insn-print (lst str flag &key (insert-newline #'insn-print-insert-newline))
-  (funcall insert-newline nil str)
   (if (not flag)
     (format str "~s~%" lst)
                             
     (dolist (insn lst)
       (funcall insert-newline insn str)
-      (format str "~s~%" insn))))
+      (if (numberp insn)
+        (format str "0x~8,'0x~%" insn)
+        (format str "~s~%" insn)))))
 
 (defun min-max-no-list (min-max-list)
   (let ((min-no (car min-max-list))
@@ -107,6 +109,7 @@
   (if (null (directory *test-result-dir*)) (ext:make-directory *test-result-dir*))
   (mapcar 
     #'(lambda (name)
+        (setf *test-current-test-name* name)
         (if *test-reset-func*
           (funcall *test-reset-func*))
         (let 
@@ -127,7 +130,7 @@
                   (dolist (i lisp-test-list)
                     (let ((rv (funcall *test-parse-func* i *test-env*)))
                       (insn-print i str *test-src-insn-view*)
-                      (format str ":~%" )
+                      (format str "~%:~%~%" )
                       (insn-print rv str *test-insn-view*)
                       (if (equal i rv) 
                         (format str "SAME~%" i rv))))))

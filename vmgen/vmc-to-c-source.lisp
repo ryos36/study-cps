@@ -10,62 +10,6 @@
 (defclass vmc-to-c-source ()
   ((vmgen :initarg :vmgen :accessor vmgen )))
 
-;----------------------------------------------------------------
-(defmacro make-converter (func-name primitive-func-assoc-list)
-  (let* ((vmgen-sym (gensym))
-         (case-list
-           (mapcar #'(lambda (apair)
-                       `(,(car apair) (apply ,(cdr apair) `(,,vmgen-sym ,@(cdr vm-code))))) primitive-func-assoc-list )))
-    `(defmethod ,func-name ((converter vmc-to-c-source) vm-code)
-       (let ((,vmgen-sym (vmgen converter)))
-         (if (symbolp vm-code)
-           (mark-label ,vmgen-sym vm-code)
-
-           (let ((op (car vm-code))
-                 (args (cadr vm-code)))
-             (case op
-               ,@case-list
-               (otherwise 
-                 (format *error-output* "~%unknown code:~s~%" op)
-                 (sleep 1)))))))))
-
-;----------------------------------------------------------------
-(make-converter convert 
-                ((:+ . #'primitive-+)
-                 (:- . #'primitive--)
-                 (:* . #'primitive-*)
-                 (:/ . #'primitive-/)
-
-                 (:>> . #'primitive->>)
-                 (:<< . #'primitive-<<)
-
-                 (:< . #'primitive-<)
-                 (:> . #'primitive->)
-                 (:>= . #'primitive->=)
-                 (:<= . #'primitive-<=)
-                 (:= . #'primitive-eq)
-                 (:/= . #'primitive-neq)
-                 (:neq . #'primitive-neq)
-                 (:<= . #'primitive-<)
-
-                 (:jump . #'primitive-jump)
-                 (:conditional-jump . #'primitive-conditional-jump)
-
-                 (:heap . #'primitive-heap)
-                 (:stack . #'primitive-stack)
-                 (:pop . #'primitive-pop)
-
-                 (:record-ref . #'primitive-record-ref)
-                 (:record-offs . #'primitive-record-offs)
-                 (:record-set! . #'primitive-record-set!)
-
-                 (:move . #'primitive-move)
-                 (:swap . #'primitive-swap)
-                 (:movei . #'primitive-movei)
-                 (:halt . #'primitive-halt)
-                 (:label . #'primitive-label)
-                 (:live-reg . #'primitive-live-reg)
-                 (:const . #'primitive-const)))
 
 ;----------------------------------------------------------------
 (defmethod convertx ((converter vmc-to-c-source) vm-code)

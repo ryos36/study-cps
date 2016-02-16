@@ -21,6 +21,7 @@
     :*test-save-n*
     :*test-insn-view*
     :*test-src-insn-view*
+    :*test-current-test-name*
 
     :set-test-files
     :do-test))
