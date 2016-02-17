@@ -44,6 +44,11 @@
 (load "../vm-codegen/heap-parser.lisp" )
 
 ;----------------------------------------------------------------
+(load "../vmgen/package.lisp")
+(load "../vmgen/vmgen.lisp")
+(load "../vmgen/vmc-to-bin.lisp")
+
+;----------------------------------------------------------------
 (use-package :cps-transfer)
 ;(use-package :cps-eta-reduction)
 ;(use-package :cps-parser)
@@ -101,6 +106,17 @@
     (get-final-codes codegen)))
 
 ;----------------------------------------------------------------
+(defparameter vmgen (make-instance 'cps-vmgen:vmgen))
+(defparameter *bin-file-name* nil)
+
+(defun vmgen-one (codes env)
+  (mapcar #'(lambda (expr)
+              (cps-vmgen:convert vmgen expr)) codes)
+  (if *bin-file-name*
+    (cps-vmgen:write-binary-with-open-file vmgen *bin-file-name* '(unsigned-byte 8)))
+  codes)
+
+;----------------------------------------------------------------
 (defparameter *debug-modes* nil)
 (defun debug-print-cps (expr env)
   (if (find :process *debug-modes*)
@@ -131,6 +147,8 @@
                       ((,#'cps-spill-parse-one . ,spill) . nil)
                       (,#'debug-print-cps . (:spill :codegen))
                       (,#'cps-codegen-parse-one . nil)
+                      (,#'debug-print-cps . (:codegen :vmgen))
+                      (,#'vmgen-one . nil)
                       ))
 
 ;----------------------------------------------------------------
@@ -152,6 +170,7 @@
     (when tiny-scheme-file0
       (setf tiny-scheme-file tiny-scheme-file0)
       (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
+      (setf *bin-file-name* (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmb"))
       (if (string= (elt av (- av-len 2)) "-d")
         (setf *debug-modes* '(:process :reorder)))
       (print `(,tiny-scheme-file :-> ,output-file-name)))))
