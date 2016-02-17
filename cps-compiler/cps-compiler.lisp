@@ -154,6 +154,23 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 (defun this-usage () (format *error-output* "~%Usage:clisp cps-compiler.lisp [-d] <scm file>~%"))
+
+;----------------------------------------------------------------
+(defun check-option (option-list) 
+  (let ((o (car option-list)))
+    (if (> (length o) 1)
+      (let ((c0 (elt o 0))
+            (c1 (elt o 1))
+            (str2- (string-upcase (substring o 2))))
+        (when (eq c0 #\-)
+          (if (= (length str2-) 0)
+            (push :process *debug-modes*)
+            (push (intern 
+                    (if (eq (elt str2- 0) #\:) 
+                      (substring str2- 1)
+                      str2-) :keyword) *debug-modes*))
+          (check-option (cdr option-list)))))))
+
 ;----------------------------------------------------------------
 (let ((av (argv))
       (ext-str ".scm"))
@@ -171,8 +188,7 @@
       (setf tiny-scheme-file tiny-scheme-file0)
       (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
       (setf *bin-file-name* (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmb"))
-      (if (string= (elt av (- av-len 2)) "-d")
-        (setf *debug-modes* '(:process :reorder)))
+      (check-option (cdr (reverse (map 'list #'(lambda (x) x) av))))
       (print `(,tiny-scheme-file :-> ,output-file-name)))))
 ;----------------------------------------------------------------
 
