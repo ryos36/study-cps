@@ -425,12 +425,6 @@
                ;(u (print `(FUNC ,@func-names :env ,env)))
                ;(x (print `(all-variables ,all-variables)))
                (func-names-is-1? (= (length func-names) 1))
-               (env-closure-sym (if func-names-is-1?
-                                   (car func-names)
-                                   :make-new-sym))
-               (heap-closure-sym (if func-names-is-1?
-                                   (car func-names)
-                                   (cps-gensym parser)))
                (free-variables (filter-free-variables all-variables))
                (strict-free-vars
                  (get-strict-free-variables free-variables env))
