@@ -50,7 +50,7 @@
  |:label1|
  (:RECORD-REF :R1 0 :R9)
  (:MOVE :R1 :R0)
- (:MOVEI 1 :R1)
+ (:MOVEI 0 :R1)
  (:JUMP :R9)
  |:label0|
  (:HEAP (:HEAP-LIST (:LABEL |:FIBO|)) :R9)

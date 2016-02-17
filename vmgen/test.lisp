@@ -31,10 +31,6 @@
 (defparameter *test-src-insn-view* t)
 (defparameter *test-insn-view* t)
 
-;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("1" (1 . 3)))
-(do-test)
-
 ;(print (insn-pos-pair vmgen))
 ;(print (address-pos-pair vmgen))
 ;(print (label-offset-pos-pair vmgen))
@@ -49,3 +45,7 @@
     (setf prefix (if (eq (mod n 16) 0) #\newline " "))))
 
 |#
+
+;(set-test-files '("32" "42" "29" "41"))
+(set-test-files '("2" "1" (1 . 3)))
+(do-test)

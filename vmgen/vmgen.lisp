@@ -182,14 +182,13 @@
       (labels ((format-heap-list (hlist)
                 (if (not (null hlist))
                   (let* ((top16 (subseq hlist 0 (min (length hlist) 16)))
-                         (sub-len (length top16))
                          (v
                            (reduce #'(lambda (i0 i1)
                                        (+ (ash i0 2) i1))
                                    (mapcar #'(lambda (x)
                                                (multiple-value-bind (v type) (get-value-type x registers)
                                                  (if (eq type :REG) 0 2)))
-                                           top16)
+                                           (reverse top16))
                                    :initial-value 0)))
 
                     (add-code vmgen v)

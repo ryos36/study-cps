@@ -1,0 +1,219 @@
+
+:CODE
+(:JUMP (:LABEL |:MAIN|))
+
+MAIN
+(:CONST (:LABEL |:MAIN|))
+
+EXIT
+(:CONST (:LABEL |:EXIT|))
+
+|:EXIT|
+(:HALT :R1)
+
+|:MAIN|
+(:JUMP (:LABEL |:label0|))
+
+(:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+|:FIBO|
+(:= :R2 0)
+(:CONDITIONAL-JUMP (:LABEL |:label1|))
+(:= :R2 1)
+(:CONDITIONAL-JUMP (:LABEL |:label2|))
+(:- :R2 1 :R9)
+(:JUMP (:LABEL |:label3|))
+
+(:LIVE-REG 0 (1 1 0 0 0 0 0 0 0 0))
+|:sym10|
+(:RECORD-REF :R0 3 :R8)
+(:RECORD-REF :R0 2 :R7)
+(:RECORD-REF :R0 1 :R2)
+(:POP 4)
+(:- :R2 2 :R2)
+(:JUMP (:LABEL |:label4|))
+
+(:LIVE-REG 0 (1 1 0 0 0 0 0 0 0 0))
+|:sym7|
+(:RECORD-REF :R0 2 :R7)
+(:RECORD-REF :R0 1 :R6)
+(:POP 3)
+(:+ :R6 :R1 :R1)
+(:RECORD-REF :R7 0 :R6)
+(:MOVE :R7 :R0)
+(:JUMP :R6)
+
+|:label4|
+(:STACK (:HEAP-LIST (:LABEL |:sym7|) :R1 :R7) :R1)
+(:RECORD-REF :R8 0 :R7)
+(:MOVE :R8 :R0)
+(:JUMP :R7)
+
+|:label3|
+(:STACK (:HEAP-LIST (:LABEL |:sym10|) :R2 :R1 :R0) :R1)
+(:RECORD-REF :R0 0 :R8)
+(:MOVE :R9 :R2)
+(:JUMP :R8)
+
+|:label2|
+(:RECORD-REF :R1 0 :R9)
+(:MOVE :R1 :R0)
+(:MOVEI 1 :R1)
+(:JUMP :R9)
+
+|:label1|
+(:RECORD-REF :R1 0 :R9)
+(:MOVE :R1 :R0)
+(:MOVEI 0 :R1)
+(:JUMP :R9)
+
+|:label0|
+(:HEAP (:HEAP-LIST (:LABEL |:FIBO|)) :R9)
+(:RECORD-REF :R9 0 :R8)
+(:MOVE :R9 :R0)
+(:MOVEI (:ADDRESS EXIT) :R1)
+(:MOVEI 8 :R2)
+(:JUMP :R8)
+
+:
+
+(:INSTRUCTION "jumpi32")
+0x20000000
+(:LABEL |:MAIN|)
+
+MAIN
+(:LABEL |:MAIN|)
+
+EXIT
+(:LABEL |:EXIT|)
+
+|:EXIT|
+(:INSTRUCTION "halt")
+0x00010000
+
+|:MAIN|
+(:INSTRUCTION "jumpi32")
+0x20000000
+(:LABEL |:label0|)
+(:INSTRUCTION "live_reg")
+0x00000000
+0x00000380
+
+|:FIBO|
+(:INSTRUCTION "eqi8")
+0x04020000
+(:INSTRUCTION "conditional_jumpi32")
+0x20000000
+(:LABEL |:label1|)
+(:INSTRUCTION "eqi8")
+0x04020100
+(:INSTRUCTION "conditional_jumpi32")
+0x20000000
+(:LABEL |:label2|)
+(:INSTRUCTION "subi8")
+0x04020109
+(:INSTRUCTION "jumpi32")
+0x20000000
+(:LABEL |:label3|)
+(:INSTRUCTION "live_reg")
+0x00000000
+0x00000300
+
+|:sym10|
+(:INSTRUCTION "record_refi8")
+0x04000308
+(:INSTRUCTION "record_refi8")
+0x04000207
+(:INSTRUCTION "record_refi8")
+0x04000102
+(:INSTRUCTION "popi8")
+0x00000004
+(:INSTRUCTION "subi8")
+0x04020202
+(:INSTRUCTION "jumpi32")
+0x20000000
+(:LABEL |:label4|)
+(:INSTRUCTION "live_reg")
+0x00000000
+0x00000300
+
+|:sym7|
+(:INSTRUCTION "record_refi8")
+0x04000207
+(:INSTRUCTION "record_refi8")
+0x04000106
+(:INSTRUCTION "popi8")
+0x00000003
+(:INSTRUCTION "add")
+0x00060101
+(:INSTRUCTION "record_refi8")
+0x04070006
+(:INSTRUCTION "move")
+0x00070000
+(:INSTRUCTION "jump")
+0x00060000
+
+|:label4|
+(:INSTRUCTION "stack")
+0x04000301
+0x00000002
+(:LABEL |:sym7|)
+0x00000001
+0x00000007
+(:INSTRUCTION "record_refi8")
+0x04080007
+(:INSTRUCTION "move")
+0x00080000
+(:INSTRUCTION "jump")
+0x00070000
+
+|:label3|
+(:INSTRUCTION "stack")
+0x04000401
+0x00000002
+(:LABEL |:sym10|)
+0x00000002
+0x00000001
+0x00000000
+(:INSTRUCTION "record_refi8")
+0x04000008
+(:INSTRUCTION "move")
+0x00090200
+(:INSTRUCTION "jump")
+0x00080000
+
+|:label2|
+(:INSTRUCTION "record_refi8")
+0x04010009
+(:INSTRUCTION "move")
+0x00010000
+(:INSTRUCTION "movei8")
+0x04000101
+(:INSTRUCTION "jump")
+0x00090000
+
+|:label1|
+(:INSTRUCTION "record_refi8")
+0x04010009
+(:INSTRUCTION "move")
+0x00010000
+(:INSTRUCTION "movei8")
+0x04000001
+(:INSTRUCTION "jump")
+0x00090000
+
+|:label0|
+(:INSTRUCTION "heap")
+0x04000109
+0x00000002
+(:LABEL |:FIBO|)
+(:INSTRUCTION "record_refi8")
+0x04090008
+(:INSTRUCTION "move")
+0x00090000
+(:INSTRUCTION "loadi32")
+0x20000001
+(:ADDRESS EXIT)
+(:INSTRUCTION "movei8")
+0x04000802
+(:INSTRUCTION "jump")
+0x00080000
