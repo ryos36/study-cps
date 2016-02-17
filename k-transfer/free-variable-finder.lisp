@@ -99,28 +99,6 @@
 
         `(,fix-op ,new-binds ,new-next-cps)))))
 
-#|
-;----------------------------------------------------------------
-(def-cps-func cps-fixs ((parser free-variable-finder) expr env)
-  (let ((fix-op (car expr))
-        (binds (cadr expr))
-        (next-cps (caddr expr)))
-
-    (if (suppress-cps-fixs? parser)
-      :SUPPRESS-CPS-FIXS
-        
-      (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
-        (mapc #'(lambda(arg) 
-                  (set-variable parser arg t env)) func-names)
-
-        (let ((new-binds (cps-binds parser binds env))
-              (x (print `(:bind ,env)))
-              (new-next-cps (cps-parse parser next-cps env)))
-
-
-          `(,fix-op ,new-binds ,new-next-cps))))))
-|#
-
 ;----------------------------------------------------------------
 (def-cps-func cps-exit ((parser free-variable-finder) expr env)
   (let ((arg0 (caadr expr)))

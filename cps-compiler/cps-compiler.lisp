@@ -101,10 +101,12 @@
     (get-final-codes codegen)))
 
 ;----------------------------------------------------------------
-(defun print-cps (expr env)
-  (print ':==================================)
-  (print (if env env :expr))
-  (format t "~%~%~s~%~%" expr)
+(defparameter *debug-modes* nil)
+(defun debug-print-cps (expr env)
+  (if (find :process *debug-modes*)
+    (print env))
+  (if (find (car env) *debug-modes*)
+    (print `(,(car env) ,expr)))1
   expr)
 
 ;----------------------------------------------------------------
@@ -119,11 +121,15 @@
 ;----------------------------------------------------------------
 (setf func-env-pair `(
                       (,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
-                      ;(,#'print-cps :after-spill)
+                      (,#'debug-print-cps . (:lisp-to-cps :eta-reduction))
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
+                      (,#'debug-print-cps . (:eta-reduction :reorder))
                       ((,#'cps-parser:cps-parse . ,reorder) .  ,(cps-parser:make-new-env reorder '()))
+                      (,#'debug-print-cps . (:reorder :closure-converter))
                       ((,#'cps-parser:cps-parse . ,conveter) .  ,(cps-parser:make-new-env conveter '()))
+                      (,#'debug-print-cps . (:closure-converter :spill))
                       ((,#'cps-spill-parse-one . ,spill) . nil)
+                      (,#'debug-print-cps . (:spill :codegen))
                       (,#'cps-codegen-parse-one . nil)
                       ))
 
@@ -131,8 +137,6 @@
 ;----------------------------------------------------------------
 (defun this-usage () (format *error-output* "~%Usage:clisp cps-compiler.lisp [-d] <scm file>~%"))
 ;----------------------------------------------------------------
-(defparameter *debug-mode* nil)
-
 (let ((av (argv))
       (ext-str ".scm"))
 
@@ -149,7 +153,7 @@
       (setf tiny-scheme-file tiny-scheme-file0)
       (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
       (if (string= (elt av (- av-len 2)) "-d")
-        (setf *debug-mode* t))
+        (setf *debug-modes* '(:process :reorder)))
       (print `(,tiny-scheme-file :-> ,output-file-name)))))
 ;----------------------------------------------------------------
 

@@ -66,8 +66,8 @@
                       (live-declare-vars (intersection vars0 (cdr declare-vars)))
                       (add-live-vars (union to-live-vars live-declare-vars)))
 
+                 ;(print `(:vars ,vars :declare ,declare-vars :=> ,live-declare-vars :to-live-vars ,to-live-vars))
                  (assert (null (intersection to-live-vars live-declare-vars)))
-                 ;(print `(:vars ,vars :declare ,declare-vars :=> ,live-declare-vars))
                  ;(print `(:to-live-vars ,to-live-vars))
                  ;(print `(:add-live-vars ,add-live-vars))
                  (if (or to-live-vars add-live-vars)

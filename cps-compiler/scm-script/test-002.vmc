@@ -1,0 +1,61 @@
+((:JUMP (:LABEL |:MAIN|))
+ MAIN
+ (:CONST (:LABEL |:MAIN|))
+ EXIT
+ (:CONST (:LABEL |:EXIT|))
+ |:EXIT|
+ (:HALT :R1)
+ |:MAIN|
+ (:JUMP (:LABEL |:label0|))
+ (:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+ |:FIBO|
+ (:= :R2 0)
+ (:CONDITIONAL-JUMP (:LABEL |:label1|))
+ (:= :R2 1)
+ (:CONDITIONAL-JUMP (:LABEL |:label2|))
+ (:- :R2 1 :R9)
+ (:JUMP (:LABEL |:label3|))
+ (:LIVE-REG 0 (1 1 0 0 0 0 0 0 0 0))
+ |:sym10|
+ (:RECORD-REF :R0 3 :R8)
+ (:RECORD-REF :R0 2 :R7)
+ (:RECORD-REF :R0 1 :R2)
+ (:POP 4)
+ (:- :R2 2 :R2)
+ (:JUMP (:LABEL |:label4|))
+ (:LIVE-REG 0 (1 1 0 0 0 0 0 0 0 0))
+ |:sym7|
+ (:RECORD-REF :R0 2 :R7)
+ (:RECORD-REF :R0 1 :R6)
+ (:POP 3)
+ (:+ :R6 :R1 :R1)
+ (:RECORD-REF :R7 0 :R6)
+ (:MOVE :R7 :R0)
+ (:JUMP :R6)
+ |:label4|
+ (:STACK (:HEAP-LIST (:LABEL |:sym7|) :R1 :R7) :R1)
+ (:RECORD-REF :R8 0 :R7)
+ (:MOVE :R8 :R0)
+ (:JUMP :R7)
+ |:label3|
+ (:STACK (:HEAP-LIST (:LABEL |:sym10|) :R2 :R1 :R0) :R1)
+ (:RECORD-REF :R0 0 :R8)
+ (:MOVE :R9 :R2)
+ (:JUMP :R8)
+ |:label2|
+ (:RECORD-REF :R1 0 :R9)
+ (:MOVE :R1 :R0)
+ (:MOVEI 1 :R1)
+ (:JUMP :R9)
+ |:label1|
+ (:RECORD-REF :R1 0 :R9)
+ (:MOVE :R1 :R0)
+ (:MOVEI 1 :R1)
+ (:JUMP :R9)
+ |:label0|
+ (:HEAP (:HEAP-LIST (:LABEL |:FIBO|)) :R9)
+ (:RECORD-REF :R9 0 :R8)
+ (:MOVE :R9 :R0)
+ (:MOVEI (:ADDRESS EXIT) :R1)
+ (:MOVEI 8 :R2)
+ (:JUMP :R8))
