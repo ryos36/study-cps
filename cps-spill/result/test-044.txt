@@ -1,0 +1,51 @@
+(:FIXH
+ ((MUL3X3-I (|zym2| J0 I A B)
+   (:FIXS ((|zym3| (|zym4|) (:APP |zym2| (|zym4|))))
+    (:= (I 3) NIL
+     ((:APP |zym3| (:|#T|))
+      (:+ (I 1) (|zym9|)
+       ((:FIXS
+         ((|zym7| (|zym8|)
+           (:FIXS ((|zym5| (|zym6|) (:APP |zym3| (|zym6|))))
+            (:APP MUL3X3-I (|zym5| J0 |zym9|)))))
+         (:APP MUL3X3-J (|zym7| J0 I))))))))))
+ (:+ (A B) (C)
+  ((:* (D E) (F)
+    ((:+ (G H) (I)
+      ((:* (J K) (L)
+        ((:+ (M N) (O)
+          ((:+ (C F) (P)
+            ((:+ (I L) (Q)
+              ((:* (O P) (R)
+                ((:* (R Q) (S)
+                  ((:+ (A S) (T) ((:APP EXIT (T)))))))))))))))))))))))
+:
+(:FIXH
+ ((MUL3X3-I (|zym2| J0 I A B)
+   (:FIXS ((|zym3| (|zym4|) (:APP |zym2| (|zym4|))))
+    (:= (I 3) NIL
+     ((:APP |zym3| (:|#T|))
+      (:+ (I 1) (|zym9|)
+       ((:FIXS
+         ((|zym7| (|zym8|)
+           (:FIXS ((|zym5| (|zym6|) (:APP |zym3| (|zym6|))))
+            (:APP MUL3X3-I (|zym5| J0 |zym9|)))))
+         (:APP MUL3X3-J (|zym7| J0 I))))))))))
+ (:+ (A B) (C)
+  ((:* (D E) (F)
+    ((:+ (G H) (I)
+      ((:* (J K) (L)
+        ((:STACK (L I F C A) (|sym0|)
+          ((:+ (M N) (O)
+            ((:RECORD-REF (|sym0| 2) (|sym1|)
+              ((:+ (C |sym1|) (P)
+                ((:RECORD-REF (|sym0| 1) (|sym2|)
+                  ((:RECORD-REF (|sym0| 0) (|sym3|)
+                    ((:+ (|sym2| |sym3|) (Q)
+                      ((:* (O P) (R)
+                        ((:* (R Q) (S)
+                          ((:RECORD-REF (|sym0| 4) (|sym4|)
+                            ((:+ (|sym4| S) (T)
+                              ((:POP (5) NIL
+                                ((:APP EXIT
+                                  (T)))))))))))))))))))))))))))))))))))
