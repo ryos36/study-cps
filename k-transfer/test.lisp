@@ -44,7 +44,6 @@
 ;(cps-parse-one '(:fixs ((c (r) (:+ (x r) (t) ((:app k (t)))))) (:app g (c x))) *env*)
 
 (set-test-files '((14 . 24) (26 . 42) (50 . 57)))
-(set-test-files '((1 . 12)))
-(set-test-files '(13))
+(set-test-files '((1 . 13) (114 . 115)))
 (do-test)
 

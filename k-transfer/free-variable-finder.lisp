@@ -54,10 +54,11 @@
   (let* ((vars-list '())
          (new-expr-cps '()))
 
+    #|
     (let ((func-names (mapcar #'(lambda (x) (car x)) binds)))
       (mapc #'(lambda(arg) 
                 (set-variable parser arg nil env)) func-names))
-
+    |#
 
     (mapcar #'(lambda (bind) 
                 (let ((new-env (make-new-env parser env)))
