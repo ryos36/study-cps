@@ -1,0 +1,132 @@
+
+:CODE
+(:JUMP (:LABEL |:MAIN|))
+
+MAIN
+(:CONST (:LABEL |:MAIN|))
+
+EXIT
+(:CONST (:LABEL |:EXIT|))
+
+|:EXIT|
+(:HALT :R1)
+
+|:MAIN|
+(:JUMP (:LABEL |:label0|))
+(:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+
+|:EVEN?|
+(:RECORD-OFFS :R0 1 :R0)
+(:= :R2 0)
+(:CONDITIONAL-JUMP (:LABEL |:label1|))
+(:- :R2 1 :R2)
+(:RECORD-REF :R0 0 :R9)
+(:JUMP :R9)
+
+|:label1|
+(:RECORD-REF :R1 0 :R9)
+(:MOVE :R1 :R0)
+(:MOVEI :|#T| :R1)
+(:JUMP :R9)
+(:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+
+|:ODD?|
+(:RECORD-REF :R0 1 :R0)
+(:= :R2 0)
+(:CONDITIONAL-JUMP (:LABEL |:label2|))
+(:- :R2 1 :R2)
+(:RECORD-REF :R0 0 :R9)
+(:JUMP :R9)
+
+|:label2|
+(:RECORD-REF :R1 0 :R9)
+(:MOVE :R1 :R0)
+(:MOVEI :|#F| :R1)
+(:JUMP :R9)
+
+|:label0|
+(:HEAP (:HEAP-LIST (:LABEL |:EVEN?|) (:LABEL |:ODD?|) :|#F|) :R9)
+(:RECORD-SET! :R9 2 :R9)
+(:RECORD-REF :R9 0 :R8)
+(:MOVE :R9 :R0)
+(:MOVEI (:ADDRESS EXIT) :R1)
+(:MOVEI 10 :R2)
+(:JUMP :R8)
+:
+(:INSTRUCTION "jump")
+536870912
+(:LABEL |:MAIN|)
+(:LABEL |:MAIN|)
+(:LABEL |:EXIT|)
+(:INSTRUCTION "halt")
+65536
+(:INSTRUCTION "jump")
+536870912
+(:LABEL |:label0|)
+(:INSTRUCTION "live_reg")
+0
+896
+(:INSTRUCTION "record_offsi8")
+67109120
+(:INSTRUCTION "eqi8")
+67239936
+(:INSTRUCTION "conditional_jump")
+536870912
+(:LABEL |:label1|)
+(:INSTRUCTION "subi8")
+67240194
+(:INSTRUCTION "record_refi8")
+67108873
+(:INSTRUCTION "jump")
+589824
+(:INSTRUCTION "record_refi8")
+67174409
+(:INSTRUCTION "move")
+65536
+(:INSTRUCTION "movei8")
+67109121
+(:INSTRUCTION "jump")
+589824
+(:INSTRUCTION "live_reg")
+0
+896
+(:INSTRUCTION "record_refi8")
+67109120
+(:INSTRUCTION "eqi8")
+67239936
+(:INSTRUCTION "conditional_jump")
+536870912
+(:LABEL |:label2|)
+(:INSTRUCTION "subi8")
+67240194
+(:INSTRUCTION "record_refi8")
+67108873
+(:INSTRUCTION "jump")
+589824
+(:INSTRUCTION "record_refi8")
+67174409
+(:INSTRUCTION "move")
+65536
+(:INSTRUCTION "movei8")
+67108865
+(:INSTRUCTION "jump")
+589824
+(:INSTRUCTION "heap")
+67109641
+42
+(:LABEL |:EVEN?|)
+(:LABEL |:ODD?|)
+0
+(:INSTRUCTION "record_set")
+67699209
+(:INSTRUCTION "record_refi8")
+67698696
+(:INSTRUCTION "move")
+589824
+(:INSTRUCTION "loadi32")
+536870913
+(:ADDRESS EXIT)
+(:INSTRUCTION "movei8")
+67111426
+(:INSTRUCTION "jump")
+524288

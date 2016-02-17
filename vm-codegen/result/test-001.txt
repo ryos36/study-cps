@@ -1,0 +1,61 @@
+(:FIXH
+ ((|:EVEN?| (EVEN? |sym2| X)
+   (:RECORD-OFFS (EVEN? 1) (ODD?)
+    ((:= (X 0) NIL
+      ((:RECORD-REF (|sym2| 0) (|k-sym1|) ((:APP |k-sym1| (|sym2| :|#T|))))
+       (:- (X 1) (|sym7|)
+        ((:RECORD-REF (ODD? 0) (|k-sym2|)
+          ((:APP |k-sym2| (ODD? |sym2| |sym7|)))))))))))
+  (|:ODD?| (ODD? |sym8| X)
+   (:RECORD-REF (ODD? 1) (EVEN?)
+    ((:= (X 0) NIL
+      ((:RECORD-REF (|sym8| 0) (|k-sym3|) ((:APP |k-sym3| (|sym8| :|#T|))))
+       (:- (X 1) (|sym13|)
+        ((:RECORD-REF (EVEN? 0) (|k-sym4|)
+          ((:APP |k-sym4| (EVEN? |sym8| |sym13|))))))))))))
+ (:HEAP ((:LABEL |:EVEN?|) (:LABEL |:ODD?|) :|#F|) (EVEN?)
+  ((:RECORD-SET! (EVEN? 2 EVEN?) NIL
+    ((:RECORD-REF (EVEN? 0) (|k-sym5|) ((:APP |k-sym5| (EVEN? EXIT 997)))))))))
+:
+:CODE
+(:JUMP (:LABEL |:MAIN|))
+(:LABEL MAIN)
+(:CONST (:LABEL |:MAIN|))
+(:LABEL EXIT)
+(:CONST (:LABEL |:EXIT|))
+(:LABEL |:EXIT|)
+(:HALT :R0)
+(:LABEL |:MAIN|)
+(:JUMP |:label0|)
+(:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+|:EVEN?|
+(:RECORD-OFFS (:R0 1) (:R0))
+(:JUMP-COND := (:R2 0) |:label1|)
+(:- (:R2 1) (:R2))
+(:RECORD-REF (:R0 0) (:R9))
+(:JUMP :R9)
+|:label1|
+(:RECORD-REF (:R1 0) (:R9))
+(:MOVE :R1 :R0)
+(:MOVEI :|#T| :R1)
+(:JUMP :R9)
+(:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
+|:ODD?|
+(:RECORD-REF (:R0 1) (:R0))
+(:JUMP-COND := (:R2 0) |:label2|)
+(:- (:R2 1) (:R2))
+(:RECORD-REF (:R0 0) (:R9))
+(:JUMP :R9)
+|:label2|
+(:RECORD-REF (:R1 0) (:R9))
+(:MOVE :R1 :R0)
+(:MOVEI :|#T| :R1)
+(:JUMP :R9)
+|:label0|
+(:HEAP ((:LABEL |:EVEN?|) (:LABEL |:ODD?|) :|#F|) (:R9))
+(:RECORD-SET! (:R9 2 :R9) NIL)
+(:RECORD-REF (:R9 0) (:R8))
+(:MOVE :R9 :R0)
+(:MOVEI (:LABEL |:EXIT|) :R1)
+(:MOVEI 997 :R2)
+(:JUMP :R8)
