@@ -423,7 +423,7 @@
 
         (let* ((all-variables (merge-env r-env-list))
                ;(u (print `(FUNC ,@func-names :env ,env)))
-               ;(x (print `(all-variables ,all-variables)))
+               ;(x (print `(:all-variables ,all-variables)))
                (func-names-is-1? (= (length func-names) 1))
                (free-variables (filter-free-variables all-variables))
                (strict-free-vars
@@ -459,6 +459,7 @@
                ;(x (print `(:uc ,upper-closure-list ,closure-list)))
 
                (heap-list (append (mapcar #'(lambda (func-name) `(:LABEL ,(make-new-func-name func-name))) new-func-names) (make-list (length ref-vars) :initial-element :#f) (set-difference closure-list func-names)))
+               ;(y (print `(:heap-list ,free-variables)))
                (next-all-variables (car next-finder-env))
                (next-free-variables (filter-free-variables next-all-variables))
                (next-free-funcs (intersection next-free-variables func-names))

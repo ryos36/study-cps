@@ -11,6 +11,7 @@ record-ref が自由変数を持つとき
       ((:APP |k-sym3| (FACT0 |sym18| K N 1))))))))
 
 これはさらに最適化可能
+peephole ですべきかな？
 
 (|:FACT| (FACT |sym18| K N)
   ((:RECORD-REF (FACT 1) (|k-sym3|) ;<= 統合可能

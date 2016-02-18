@@ -78,6 +78,7 @@
         (case sym
           (:|#T| 1)
           (:|#F| 0)
+          (:UNSPECIFIED -1)
           (otherwise 
             (let ((pos (position sym registers)))
               (assert pos)
@@ -336,6 +337,7 @@
            (mapcar #'(lambda (apair)
                        `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((vmgen vmgen) vm-code)
+       ;(print `(:vm-code ,vm-code))
        (if (symbolp vm-code)
          (mark-label vmgen vm-code)
 

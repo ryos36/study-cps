@@ -121,8 +121,10 @@
 (defun debug-print-cps (expr env)
   (if (find :process *debug-modes*)
     (print env))
-  (if (find (car env) *debug-modes*)
-    (print `(,(car env) ,expr)))1
+  (when (find (car env) *debug-modes*)
+    (print `(,(car env) ,expr))
+    (if (find :stop *debug-modes*)
+      (exit)))
   expr)
 
 ;----------------------------------------------------------------

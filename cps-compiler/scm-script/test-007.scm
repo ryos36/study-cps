@@ -1,4 +1,4 @@
-(:define (mul3x3 a b c)
+(:fix ((mul3x3 (a b c)
    (:fix ((mul3x3-ji (j0 i0)
            (:let ((j-start (:* i0 3))
                   (i-start j0))
@@ -20,9 +20,5 @@
                  (mul3x3-j j0 i)
                  (mul3x3-i j0 next-i)))))
 
-         (mul3x3-i 0 0)))
-
-
-
-
-
+         (mul3x3-i 0 0))))
+(:* (:+ x 3) 4))

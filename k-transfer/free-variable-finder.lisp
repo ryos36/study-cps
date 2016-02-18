@@ -89,9 +89,11 @@
       (let ((new-binds (cps-binds parser binds binds-env))
             (new-next-cps (cps-parse parser next-cps next-cps-env)))
 
+        #|
         (mapc #'(lambda(arg) 
               (set-variable parser arg nil env))
               (filter-free-variables (car binds-env)))
+        |#
 
         (mapc #'(lambda(arg) 
               (set-variable parser arg nil env))
