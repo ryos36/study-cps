@@ -215,7 +215,42 @@
   (add-code vmgen arg0))
 
 ;----------------------------------------------------------------
-(make-two-args-primitive primitive-record-ref ("record_ref" "record_refi8" :NA))
+(defmethod primitive-record-ref ((vmgen vmgen) a0 a1 a2)
+  (if (atom a0)
+    (primitive-record-ref-pure vmgen a0 a1 a2)
+
+    (let ((address-key (car a0))
+          (name (cadr a0))
+          (registers (registers vmgen)))
+
+      (assert (eq address-key :ADDRESS))
+
+      (multiple-value-bind (x1-value x1-type) (get-value-type a1 registers)
+        (assert (not (eq x1-type :IMM32)))
+        (let* ((pos2 (position a2 registers))
+               (types (types vmgen))
+               (imm32-no (position :IMM32 types))
+               (x1-type-no (position x1-type types))
+
+               (oprand
+                 (logior
+                   (ash 
+                     (logior
+                       (ash imm32-no 4)
+                       (ash x1-type-no 2)) 24)
+                   (ash 0 16)
+                   (ash x1-value 8)
+                   (ash (logand pos2 #xff)  0))))
+
+          (add-code vmgen (copy-list
+                            (if (eq x1-type :IMM8)
+                              '(:INSTRUCTION "record_refi8_address")
+                              '(:INSTRUCTION "record_ref_address"))))
+
+          (add-code vmgen oprand)
+          (add-code vmgen a0))))))
+;----------------------------------------------------------------
+(make-two-args-primitive primitive-record-ref-pure ("record_ref" "record_refi8" :NA))
 (make-two-args-primitive primitive-record-offs ("record_offs" "record_offsi8" :NA))
 
 ;----------------------------------------------------------------

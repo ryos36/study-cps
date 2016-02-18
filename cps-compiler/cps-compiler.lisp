@@ -114,6 +114,10 @@
               (cps-vmgen:convert vmgen expr)) codes)
   (if *bin-file-name*
     (cps-vmgen:write-binary-with-open-file vmgen *bin-file-name* '(unsigned-byte 8)))
+  (if (find :vmgen *debug-modes*)
+    (debug-print-cps
+      (cps-vmgen:get-codes vmgen)
+      '(:vmgen)))
   codes)
 
 ;----------------------------------------------------------------
@@ -214,8 +218,7 @@
 
       (let ((codes (proc-loop func-env-pair tiny-scheme-program)))
         (with-open-file (out output-file-name :if-does-not-exist :create :direction :output)
-          (print-codes codes out))
-        (if *debug-mode* (print-codes codes)))))
+          (print-codes codes out)))))
 
   (progn
     (format *error-output* "~a is not exist.~%" tiny-scheme-program)
