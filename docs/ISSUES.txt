@@ -1,4 +1,96 @@
 ----------------------------------------------------------------
+* isssu -1 
+(+ 4 5)
+の場合を vmgen がサポートしてない。
+最適化を掛けたうえでさらに vmgen でもサポートすべき。
+
+* isuue 0
+define を fixh に変えているため、
+自動的に追加され意味のないコードが生成される。
+define はコードを置くだけにしないといけない。
+
+* isuue 1
+fixh で本体関数を呼ばなかった時関数自体を削除できるがしていない。
+
+* isuue 2
+そして fixh に不要なコードが差し込まれそれが app exit をよぶ
+その fix で最後に app exit がまず closure 変換で
+((:RECORD-REF (EXIT 0) (|k-sym8|)
+   ((:APP |k-sym8| (EXIT |sym26|)))
+
+に変換される。このとき EXIT はグローバル関数である。
+EXIT などのグルーバル以外の場合の 通常はどっかで定義されたシンボルで
+
+(HEAP ((LABEL |:FUNC|) ....) (FUNC)...
+    ....
+    ....
+    ((:RECORD-REF (FUNC 0) (|k-sym8|)
+       ((:APP |k-sym8| (FUNC |sym26|)))
+
+となるがグローバル関数の場合先立つ HEAP はない。
+更に vm-codegen では
+
+(:RECORD-REF (:ADDRESS EXIT) 0 :R7)
+(:MOVEI (:ADDRESS EXIT) :R0)
+(:MOVE :R8 :R1)
+(:JUMP :R7)))
+
+というコードが作成される。
+対応としては record-ref の vm で :address に対応すること
+(hvm 側での対応)
+しかしこの場合は record-ref が address まで解釈してしまい
+あまりかっこよくない。(そもそも RISC じゃないからいいともいえる)
+暫定的に branch に record-ref の :address がきたら
+
+(:MOVEI (:ADDRESS EXIT) :R7)
+(:RECORD-REF :R7 0 :R7)
+
+というコードに置き換えるバージョンを作ってみた。
+生成されるコードは
+
+(:MOVEI (:ADDRESS EXIT) :R7)
+(:RECORD-REF :R7 0 :R7)
+(:MOVEI (:ADDRESS EXIT) :R0)
+(:MOVE :R8 :R1)
+(:JUMP :R7)))
+
+となりあまりにもおバカなのでお蔵入り(local branch に保存)となる。
+つまり、クロージャ変換で app がグローバル関数へのジャンプであれば
+record-ref を使わずに、、、load 命令はないから record-ref を
+使うしかない。 すると vm-codegen のコード生成時に考慮することになるが
+
+((:RECORD-REF (EXIT 0) (|k-sym8|)
+   ((:APP |k-sym8| (EXIT |sym26|)))
+
+record-ref のときは先読みして app があって既定の形をしているなら
+という判断をしなくてならない。これは情報の損失を予測で埋めるという
+あほな仕様になってしまう。
+どちらにしろグローバル関数へのジャンプは特別になるので
+APPG を導入した方がよいだろう（予定）
+つまりクロージャ変換では
+(:APPG :EXIT (EXIT |sym26|)
+を生成し vm-codegen で
+(:MOVEI (:ADDRESS EXIT) :R0)
+(:RECORD-REF :R0 0 :R7)
+(:MOVE :R8 :R1)
+(:JUMP :R7)
+と出力する。なお、EXIT などのグローバル関数は
+(let ((func EXIT))
+ ...
+ ...
+ (another-func func)
+
+と関数の引数になることもあるので疑似クロージャはどこかに
+存在しないといけないことに注意。(単純にグローバル専用にできない)
+
+* isuue 2
+解決できないフリー変数があっても無視ししてしまう。
+(+ x 4)
+で x がどこにも宣言されていないケース。
+最終的に vmgen まで行ってしまい、なぜかバイナリまで出力される。
+<= エラーにもならないのでたちが悪い。
+
+----------------------------------------------------------------
 ISSUES
     SPILL において不要な FIXH で宣言された引数も spill の対象にしている。
     使われていない場合は無視してよいので FIXH の引数は対象にしない方がよい?
