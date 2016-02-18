@@ -367,6 +367,23 @@
     (add-code vmgen (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
+(defun calc-op? (op)
+  (find op '(:+ :- :* :/ :>> :<<)))
+
+;----------------------------------------------------------------
+(defmethod calc ((vmgen vmgen) op args)
+   (multiple-value-bind (a0 a1 a2) (values-list args)
+     (case op
+       (:+ (primitive-movei vmgen (+ a0 a1) a2))
+       (:- (primitive-movei vmgen (- a0 a1) a2))
+       (:* (primitive-movei vmgen (* a0 a1) a2))
+       (:/ (primitive-movei vmgen (floor (/ a0 a1)) a2))
+       (:>> (primitive-movei vmgen (ash a0 (- a1)) a2))
+       (:<< (primitive-movei vmgen (ash a0 a1) a2))
+
+       (otherwise (assert (eq "no operation" op))))))
+
+;----------------------------------------------------------------
 (defmacro make-converter (func-name primitive-func-assoc-list)
   (let* ((case-list
            (mapcar #'(lambda (apair)
@@ -377,13 +394,16 @@
          (mark-label vmgen vm-code)
 
          (let ((op (car vm-code))
-               (args (cadr vm-code)))
-           (case op
-             ,@case-list
-             (otherwise 
-               (format *error-output* "~%unknown code:~s~%" op)
-               (sleep 1))))))))
+               (args (cdr vm-code)))
+           
+           (if (and (calc-op? op) (numberp (car args)) (numberp (cadr args)))
+             (calc vmgen op args)
 
+             (case op
+               ,@case-list
+               (otherwise 
+                 (format *error-output* "~%unknown code:~s~%" op)
+                 (sleep 1)))))))))
 
 ;----------------------------------------------------------------
 (make-converter convert 
@@ -402,7 +422,6 @@
                  (:= . #'primitive-eq)
                  (:/= . #'primitive-neq)
                  (:neq . #'primitive-neq)
-                 (:<= . #'primitive-<)
 
                  (:jump . #'primitive-jump)
                  (:conditional-jump . #'primitive-conditional-jump)

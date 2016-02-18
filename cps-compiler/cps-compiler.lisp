@@ -123,6 +123,14 @@
 ;----------------------------------------------------------------
 (defparameter *debug-modes* nil)
 (defun debug-print-cps (expr env)
+
+  (when (find :list *debug-modes*)
+    (format t "~%")
+    (mapc #'(lambda (x) (if (eq (car x) #'debug-print-cps)
+                         (format t "~s~%" (cadr x)))) func-env-pair)
+    (format t ":VMGEN~%")
+    (exit))
+
   (if (find :process *debug-modes*)
     (print env))
   (when (find (car env) *debug-modes*)

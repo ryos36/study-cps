@@ -74,7 +74,7 @@
                                        (elm (elt pure-codes i)))
                                    (assert (and (consp elm)
                                                 (eq (car elm) key)
-                                                (eq (cadr elm) assoc-key)))
+                                                (equal (cadr elm) assoc-key)))
                                    (setf (elt pure-codes i) replace-n)))
                                (incf n))) x-pos-pair)))
 

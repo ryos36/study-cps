@@ -91,8 +91,9 @@
  (:JUMP :R9)
  |:label0|
  (:HEAP (:HEAP-LIST (:LABEL |:MUL3X3|)) :R9)
- (:+ :R8 3 :R8)
- (:* :R8 4 :R8)
+ (:+ 5 3 :R8)
+ (:- 5 4 :R7)
+ (:* :R8 :R7 :R8)
  (:RECORD-REF (:ADDRESS EXIT) 0 :R7)
  (:MOVEI (:ADDRESS EXIT) :R0)
  (:MOVE :R8 :R1)
