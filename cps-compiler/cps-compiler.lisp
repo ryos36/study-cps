@@ -1,5 +1,6 @@
 ;----------------------------------------------------------------
-;(defgeneric print-codes (instance &optional str))
+(load "../cps-resources/package.lisp")
+(load "../cps-resources/cps-resources.lisp")
 
 ;----------------------------------------------------------------
 (load "../cps-transfer/package.lisp")
@@ -49,6 +50,8 @@
 (load "../vmgen/vmc-to-bin.lisp")
 
 ;----------------------------------------------------------------
+(use-package :cps-resources)
+
 (use-package :cps-transfer)
 ;(use-package :cps-eta-reduction)
 ;(use-package :cps-parser)
@@ -58,6 +61,7 @@
 (use-package :vm-codegen)
 
 ;----------------------------------------------------------------
+(defparameter *cps-resources* (make-instance 'cps-resources))
 (setf use-exit-primitive nil)
 
 ;----------------------------------------------------------------
@@ -114,7 +118,10 @@
               (cps-vmgen:convert vmgen expr)) codes)
   (if *bin-file-name*
     (cps-vmgen:write-binary-with-open-file vmgen *bin-file-name* '(unsigned-byte 8)))
-  (if (find :vmgen *debug-modes*)
+
+  ;(if (find :vmgen *debug-modes*)
+
+  (if (debug-mode? *cps-resources* :vmgen)
     (debug-print-cps
       (cps-vmgen:get-codes vmgen)
       '(:vmgen)))
@@ -179,10 +186,15 @@
         (when (eq c0 #\-)
           (if (= (length str2-) 0)
             (push :process *debug-modes*)
-            (push (intern 
-                    (if (eq (elt str2- 0) #\:) 
-                      (substring str2- 1)
-                      str2-) :keyword) *debug-modes*))
+            (flet ((push-w (key0)
+                     (push key0 *debug-modes*)
+                     (set-debug-mode *cps-resources* key0)))
+              (let ((key (intern 
+                           (if (eq (elt str2- 0) #\:) 
+                             (substring str2- 1)
+                             str2-) :keyword)))
+                (push-w key))))
+
           (check-option (cdr option-list)))))))
 
 ;----------------------------------------------------------------
