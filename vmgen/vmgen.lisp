@@ -319,6 +319,14 @@
     (add-code vmgen oprand)))
 
 ;----------------------------------------------------------------
+(defmethod primitive-set-flag ((vmgen vmgen) bool-symbol r1)
+  (assert (or (eq bool-symbol :#t)
+              (eq bool-symbol :#f)))
+
+  (add-code vmgen (copy-list '(:INSTRUCTION "set_flagi32")))
+  (add-code vmgen (if (eq bool-symbol :#f) 0 1)))
+
+;----------------------------------------------------------------
 (defmethod primitive-movei ((vmgen vmgen) imm-or-label r1)
   (if (listp imm-or-label)
     (let ((label imm-or-label)
@@ -368,7 +376,7 @@
 
 ;----------------------------------------------------------------
 (defun calc-op? (op)
-  (find op '(:+ :- :* :/ :>> :<<)))
+  (find op '(:+ :- :* :/ :>> :<< :=)))
 
 ;----------------------------------------------------------------
 (defmethod calc ((vmgen vmgen) op args)
@@ -381,6 +389,8 @@
        (:>> (primitive-movei vmgen (ash a0 (- a1)) a2))
        (:<< (primitive-movei vmgen (ash a0 a1) a2))
 
+       (:= (primitive-set-flag vmgen (if (= a0 a1) :#t :#f) a2))
+
        (otherwise (assert (eq "no operation" op))))))
 
 ;----------------------------------------------------------------
@@ -389,13 +399,21 @@
            (mapcar #'(lambda (apair)
                        `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((vmgen vmgen) vm-code)
-       ;(print `(:vm-code ,vm-code))
+       (print `(:vm-code ,vm-code))
        (if (symbolp vm-code)
          (mark-label vmgen vm-code)
 
          (let ((op (car vm-code))
-               (args (cdr vm-code)))
+               (args (cdr vm-code))
+               (len (length vm-code)))
            
+           (if (and (calc-op? op) (<= 2 (length args)) (numberp (car args)) (symbolp (cadr args)))
+             (let ((tmp (car args)))
+               (print `(:cargs ,args))
+               (setf (car args) (cadr args))
+               (setf (cadr args) tmp)
+               (print `(:args ,args))))
+
            (if (and (calc-op? op) (numberp (car args)) (numberp (cadr args)))
              (calc vmgen op args)
 
