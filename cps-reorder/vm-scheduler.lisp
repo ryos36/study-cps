@@ -2,10 +2,10 @@
 ; Sinby Corp. 2016
 ;
 
-(in-package :vm-scheduler)
+(in-package :sinby.cps.vm-scheduler)
 
 ;----------------------------------------------------------------
-(defgeneric eval-alloc-cost (vm-instruction instruction args results-syms))
+(defgeneric eval-alloc-cost (vm-scheduler instruction args results-syms))
 
 ;----------------------------------------------------------------
 (defclass vm-scheduler (resource-scheduler)
@@ -23,8 +23,8 @@
                                  ;(others . :acc)
                                  ) :accessor instruction-info)
 
-   (costs :initform '((:heap . #'eval-alloc-cost)
-                      (:stack .#'eval-alloc-cost)
+   (costs :initform '((:heap . :eval-alloc-cost)
+                      (:stack . :eval-alloc-cost)
                       (:record-ref . 3)
                       (:record-set! . 2)) :accessor costs)))
 
@@ -57,12 +57,14 @@
   ; ignore (:label |x|) and number ex. 1
   (let* ((arg-syms (remove-if #'(lambda (x) (not (cps-symbolp x))) args))
          (cost-value-or-func (cdr (assoc instruction (costs scheduler))))
+         ;(x (print `(:cost-value-or-func ,cost-value-or-func ,(functionp cost-value-or-func))))
          (cost-value (if cost-value-or-func 
-                       (if (functionp cost-value-or-func)
-                         (funcall cost-value-or-func
-                                  instruction args results-syms)
+                       (if (symbolp cost-value-or-func)
+                         (eval-alloc-cost scheduler instruction args results-syms)
                          cost-value-or-func)
                        1))
+
+         ;(y (print `(:cost-value ,cost-value)))
          (primtive-instruction 
            (make-instance 'vm-instruction 
              :instruction instruction 
@@ -89,7 +91,6 @@
     (add-node scheduler apply-instruction)))
 
 ;----------------------------------------------------------------
-;----------------------------------------------------------------
-(defmethod eval-alloc-cost ((instruction vm-instruction) instruction args results-syms)
+(defmethod eval-alloc-cost ((scheduler vm-scheduler) instruction args results-syms)
     (+ (length args) 2))
 

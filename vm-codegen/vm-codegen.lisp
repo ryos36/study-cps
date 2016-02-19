@@ -154,10 +154,16 @@
                        ,(elt registers reg-no))))))
 
 ;----------------------------------------------------------------
+(defun reset-register-tagged-list (register-tagged-list)
+  (assert (eq (car register-tagged-list) :REGISTER))
+  (mapl #'(lambda (regsters) (setf (car regsters) nil)) (cadr register-tagged-list)))
+
 ;----------------------------------------------------------------
 (defmethod update-register-usage-for-bind ((codegen vm-codegen) codegen-tagged-list args live-vars)
   (let ((new-registers (mapcar #'(lambda (arg) (if (find arg live-vars) arg nil)) args))
         (register-tagged-list (cadr codegen-tagged-list)))
+
+    (reset-register-tagged-list register-tagged-list)
 
     (assert (eq (car register-tagged-list) :register))
     (mapl #'(lambda (reg-status-list new-reg-list)
@@ -195,6 +201,7 @@
 
 ;----------------------------------------------------------------
 (defmethod update-register-usage ((codegen vm-codegen) codegen-tagged-list args env)
+  ;(print `(:update-register-usage ,codegen-tagged-list ,args))
   (let* ((register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list))
          (app-info-tagged-list (caddr codegen-tagged-list)))
@@ -331,6 +338,7 @@
         (codegen-tagged-list (cadar env)))
 
 #|
+    (print `(:cps-fix ,codegen-tagged-list))
     (let* ((fix-list (cadr live-vars-tagged-list))
            (fix-id (car fix-list))
            (b-list (cadr fix-list))
@@ -602,7 +610,7 @@
          (register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list)))
 
-    (print `(:expr ,expr :env ,(car env)))
+    ;(print `(:expr ,expr :env ,(car env)))
 
     (if (cps-symbolp arg)
       (let ((reg-pos (position arg register-list)))

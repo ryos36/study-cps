@@ -25,8 +25,8 @@
  (:LIVE-REG 0 (1 1 1 0 0 0 0 0 0 0))
  |:FIBO|
  (:RECORD-OFFS :R0 1 :R0)
- (:- :R2 1 :R2)
  (:RECORD-REF :R0 0 :R9)
+ (:- :R2 1 :R2)
  (:MOVEI 1 :R3)
  (:MOVEI 0 :R4)
  (:JUMP :R9)

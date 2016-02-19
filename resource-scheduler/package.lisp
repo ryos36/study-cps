@@ -57,3 +57,18 @@
     :get-all-resources
     :set-status
     :update-accounting))
+
+;----------------------------------------------------------------
+(defpackage :sinby.cps.node
+  (:use :cl)
+  (:nicknames :resource-scheduler-node)
+  (:export
+      :node
+
+      :get-cost
+      :update-cost
+      :get-resource-size
+      :get-all-resources
+      :defmethod add-successor
+      :print-object))
+

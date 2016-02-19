@@ -44,7 +44,7 @@
     (set-variable parser func-name t env)
     ;(print `(:add-func-name ,func-name))
 
-    ;(print `(next-cps ,(car next-cps)))
+    ;(print `(:next-cps ,(car next-cps)))
     (let ((new-next-cps (cps-parse parser next-cps env)))
 
       `(,func-name ,args ,new-next-cps))))
@@ -89,11 +89,9 @@
       (let ((new-binds (cps-binds parser binds binds-env))
             (new-next-cps (cps-parse parser next-cps next-cps-env)))
 
-        #|
         (mapc #'(lambda(arg) 
-              (set-variable parser arg nil env))
+              (set-variable parser arg (find arg func-names) env))
               (filter-free-variables (car binds-env)))
-        |#
 
         (mapc #'(lambda(arg) 
               (set-variable parser arg nil env))

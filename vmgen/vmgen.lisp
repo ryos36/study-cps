@@ -152,8 +152,8 @@
 (make-two-args-primitive primitive-* ("mul" "muli8" "muli32"))
 (make-two-args-primitive primitive-/ ("div" :NA :NA))
 
-(make-two-args-primitive primitive->> ("shift_r" "shift_ri8" "shift_ri32"))
-(make-two-args-primitive primitive-<< ("shift_l" "shift_li8" "shift_li32"))
+(make-two-args-primitive primitive->> ("shift_r" "shift_ri8" ":NA"))
+(make-two-args-primitive primitive-<< ("shift_l" "shift_li8" ":NA"))
 
 (make-two-args-primitive primitive-bitand ("and" "andi8" "andi32"))
 (make-two-args-primitive primitive-bitor ("or" "ori8" "ori32"))
@@ -399,7 +399,7 @@
            (mapcar #'(lambda (apair)
                        `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((vmgen vmgen) vm-code)
-       (print `(:vm-code ,vm-code))
+       ;(print `(:vm-code ,vm-code))
        (if (symbolp vm-code)
          (mark-label vmgen vm-code)
 

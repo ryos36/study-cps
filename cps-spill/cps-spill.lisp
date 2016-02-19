@@ -165,6 +165,7 @@
 ;----------------------------------------------------------------
 (defmethod create-pop-wrapper ((parser cps-spill) spill-list)
   (let* ((spill-vars (cddr (cadddr spill-list)))
+         (x (print `(:spill-vars ,spill-vars)))
          (pop-cps (copy-tree `(:POP (,(length spill-vars)) 
                                         () (CONT))))
          (cont-list (pickup-list pop-cps 'CONT)))
