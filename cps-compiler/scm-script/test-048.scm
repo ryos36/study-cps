@@ -1,4 +1,4 @@
-((:let ((y (:heap 19201738)))
+(:let ((y (:heap 19201738)))
    (:fix ((clear-bit0 (x)
             (:<< (:>> x 1) 1))
   
@@ -33,5 +33,5 @@
          (rand)
          (rand)
          (rand)
-         (:exit (rand)))))
+         (:exit (rand))))
 

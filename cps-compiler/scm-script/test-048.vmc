@@ -1,0 +1,12 @@
+((:JUMP (:LABEL |:MAIN|))
+ MAIN
+ (:CONST (:LABEL |:MAIN|))
+ EXIT
+ (:CONST (:LABEL |:EXIT|))
+ |:EXIT|
+ (:HALT :R1)
+ |:MAIN|
+ (:RECORD-REF :R9 0 :R8)
+ (:MOVE :R9 :R0)
+ (:MOVEI (:ADDRESS EXIT) :R1)
+ (:JUMP :R8))

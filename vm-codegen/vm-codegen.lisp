@@ -207,16 +207,19 @@
                     (if (and pos (null (elt register-list pos))) pos
                       (find-reg-in-app expr (cdr app-list))))))
 
-               (find-empty-reg-no ()
-                  (let* ((len (length register-list))
-                         (n-pos (position nil (reverse register-list)))
-                         (pos (- len n-pos 1)))
-                    pos))
+             (find-empty-reg-no ()
+                (let* ((len (length register-list))
+                       (n-pos (position nil (reverse register-list))))
+                  (when (null n-pos)
+                    (format *error-output* "~%Full House:~a~%" register-list)
+                    (assert nil))
+                  (let ((pos (- len n-pos 1)))
+                    pos)))
 
-               (need-not-find (arg)
-                 (or (listp arg)
-                     (eq :NOT-SYMBOL arg)
-                     (numberp arg))))
+             (need-not-find (arg)
+                (or (listp arg)
+                    (eq :NOT-SYMBOL arg)
+                    (numberp arg))))
 
       (let* ((registers (registers codegen))
              ;(x (print `(:args ,args)))
