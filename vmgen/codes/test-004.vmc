@@ -1,0 +1,20 @@
+((:CODE
+  (:JUMP (:LABEL |:MAIN|))
+  MAIN
+  (:CONST (:LABEL |:MAIN|))
+  EXIT
+  (:CONST (:LABEL |:EXIT|))
+  Y
+  (:CONST 0)
+  X
+  (:CONST 0)
+  |:EXIT|
+  (:HALT :R1)
+  |:MAIN|
+  (:ID (:ATTRIBUTE (:ADDRESS X)) 33 :R9)
+  (:ID (:ATTRIBUTE (:ADDRESS Y)) 40 :R8)
+  (:+ :R9 :R8 :R9)
+  (:RECORD-REF (:ADDRESS EXIT) 0 :R8)
+  (:MOVEI (:ADDRESS EXIT) :R0)
+  (:MOVE :R9 :R1)
+  (:JUMP :R8)))

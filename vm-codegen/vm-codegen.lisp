@@ -60,31 +60,52 @@
 ;----------------------------------------------------------------
 (defmethod create-initialize-codes ((codegen vm-codegen))
   (setf (initialize-codes codegen)
-        (let ((main 'common-lisp-user::main)
-              (exit 'common-lisp-user::exit))
-
-        (list
-          (make-jump-instruction codegen (closure-name-to-label-name main))
-          main
-          (make-const-instruction codegen (make-label main :closure-name))
-          exit
-          (make-const-instruction codegen (make-label exit :closure-name))
-          (closure-name-to-label-name exit)
-          (make-halt-instruction codegen)))))
+        (let* ((main 'common-lisp-user::main)
+               (exit 'common-lisp-user::exit)
+               (gvar (reduce #'append
+                             (mapcar #'(lambda (x) (list x (list :CONST 0)))
+                                     (remove-if #'(lambda (x)
+                                                    (or (eq x main) (eq x exit)))
+                                                (slot-value codegen 'global-variable))))))
+                                             
+          (append
+            (list
+              (make-jump-instruction codegen (closure-name-to-label-name main))
+              main
+              (make-const-instruction codegen (make-label main :closure-name))
+              exit
+              (make-const-instruction codegen (make-label exit :closure-name)))
+            gvar
+            (list
+              (closure-name-to-label-name exit)
+              (make-halt-instruction codegen))))))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-(defmethod make-attribute ((codegen vm-codegen)) (if (use-attribute codegen) (copy-list '((:attribute))) '()))
+(defmethod make-attribute ((codegen vm-codegen) &optional expr)
+  (if expr
+    (let ((op (car expr))
+          (result (caddr expr)))
+      
+      (assert (eq op :ID))
+      (let ((sym (car result)))
+        (add-global-variable codegen sym t)
+        (copy-tree `((:attribute (:address ,sym))))))
+
+    (if (use-attribute codegen) (copy-tree '((:attribute))) '())))
 
 ;----------------------------------------------------------------
-(defmethod make-primitive-instruction ((codegen vm-codegen) op args &optional result)
+(defmethod make-primitive-instruction ((codegen vm-codegen) expr op args &optional result)
   (copy-tree
     (if (or (eq :heap op) (eq :stack op))
-      `(,op ,@(make-attribute codegen) (:heap-list ,@args) ,@result)
+      `(,op ,@(make-attribute codegen) (:HEAP-LIST ,@args) ,@result)
 
-      (if result
-        `(,op ,@(make-attribute codegen) ,@args ,@result)
-        `(,op ,@(make-attribute codegen) ,@args)))))
+      (if (eq :id op)
+        `(,op ,@(make-attribute codegen expr) ,@args ,@result)
+
+        (if result
+          `(,op ,@(make-attribute codegen) ,@args ,@result)
+          `(,op ,@(make-attribute codegen) ,@args))))))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-or-cond-instruction ((codegen vm-codegen) op sym)
@@ -142,7 +163,9 @@
 
 ;----------------------------------------------------------------
 (defmethod global-variable? ((codegen vm-codegen) sym)
-  (find sym (global-variable codegen)))
+  (if (or (eq sym 'common-lisp-user::main)
+          (eq sym 'common-lisp-user::exit)) t nil))
+  ;(find sym (global-variable codegen)))
 
 ;----------------------------------------------------------------
 (defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)
@@ -200,7 +223,7 @@
           pos-list1))))
 
 ;----------------------------------------------------------------
-(defmethod update-register-usage ((codegen vm-codegen) codegen-tagged-list args env)
+(defmethod update-register-usage ((codegen vm-codegen) codegen-tagged-list args env &optional (op nil))
   ;(print `(:update-register-usage ,codegen-tagged-list ,args))
   (let* ((register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list))
@@ -230,10 +253,13 @@
 
       (let* ((registers (registers codegen))
              ;(x (print `(:args ,args)))
-             (arg-list0 (mapcar #'(lambda (arg) (if (global-variable? codegen arg)
+             (arg-list00 
+               (mapcar #'(lambda (arg) (if (global-variable? codegen 'arg)
                                                   (copy-list `(:ADDRESS ,arg))
                                                   (if
                                                     (cps-symbolp arg) arg :NOT-SYMBOL))) args))
+             (ixx (print `(:arg-list00 ,arg-list00)))
+             (arg-list0 (if (and (eq op :RECORD-REF) (global-variable? codegen (car arg-list00))) (cons `(:ADDRESS ,(car arg-list00)) (cdr arg-list00)) arg-list00))
              ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
                                                   (if found found arg))) arg-list0))
@@ -521,13 +547,13 @@
                (live-vars (cdr live-tagged-list))
 
                (not-used-reg (set-difference declare-vars live-vars))
-               (new-args (update-register-usage codegen codegen-tagged-list args env))
+               (new-args (update-register-usage codegen codegen-tagged-list args env op))
                ;(x (print `(:op ,op)))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
           ; primitive-code
           ; You can optimize by using peephole 
-          (add-code codegen (make-primitive-instruction codegen op new-args))
+          (add-code codegen (make-primitive-instruction codegen expr op new-args))
           (add-code codegen (make-conditional-jump-instruction codegen label-sym))
 
           (let* ((else-clause (cadr next-cpss))
@@ -574,7 +600,7 @@
 
                (not-used-reg (set-difference declare-vars live-vars))
                ;(x (print `(:live-vars-list ,live-vars-list)))
-               (new-args (update-register-usage codegen codegen-tagged-list args env))
+               (new-args (update-register-usage codegen codegen-tagged-list args env op))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                (new-result (update-register-usage codegen codegen-tagged-list result env)))
 
@@ -583,7 +609,7 @@
           ;(print `(:register-list ,(cadr (cadr codegen-tagged-list))))
 
           ; primitive-code
-          (add-code codegen (make-primitive-instruction codegen op new-args new-result))
+          (add-code codegen (make-primitive-instruction codegen expr op new-args new-result))
 
           (let* ((op-vars-info (cadr live-vars-tagged-list))
                  (next-live-vars-list (car (cddddr op-vars-info)))

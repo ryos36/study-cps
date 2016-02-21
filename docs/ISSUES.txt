@@ -25,8 +25,37 @@ spill をした場合直後に FIXS のための POP をしてしまうので
 *
 fixh で本体関数を呼ばなかった時関数自体を削除できるがしていない。
 
+*
+(:record-set! <num> 0 (:address x))
+に vm-codegen で対応していない気がする。
+
+
 ----------------------------------------------------------------
 暫定対応済み
+*
+:id というプリミティブの名称がおかしいかも？
+
+*
+:id のコード化
+:id <num> <sym> 
+が来た時に vm-codegen で変更し
+:id (:addtribute (:address <sym>)) <num> <reg>
+さらに vmgen で
+loadi (:address <sym>) <reg>
+record-set! <num> <reg>
+movei <num> <reg>
+に変更している
+
+そのために <sym> を global 変数に追加した。
+そうすると、そのあとの
+(:+ x y)
+などが (:+ (:address x) (:address y))
+に変更されてしまうので、暫定的に
+(:record-ref! x 0 r0)
+といった :record-ref! で 最初の引数が global なものだけを
+(:record-ref! (:address x) 0 r0)
+と変更するように暫定対応した。
+
 * 
 SPILL において不要な FIXH で宣言された引数も spill の対象にしている。
 使われていない場合は無視してよいので FIXH の引数は対象にしない方がよい?

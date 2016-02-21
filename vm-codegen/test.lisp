@@ -2,6 +2,9 @@
 (load "../k-transfer/cps-parser.lisp")
 (load "../k-transfer/utils.lisp")
 
+(load "../csf/package.lisp")
+(load "../csf/csf-resources.lisp")
+
 (load "../cps-live-variables-finder/package.lisp")
 (load "../cps-live-variables-finder/cps-live-variables-finder.lisp")
 
@@ -47,5 +50,5 @@
 (defparameter *test-reset-func* #'cps-gensym-reset)
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("100" "7" (1 . 3)))
+(set-test-files '("8" "100" "7" (1 . 3)))
 (do-test)

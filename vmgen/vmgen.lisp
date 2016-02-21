@@ -108,7 +108,7 @@
     (let ((pos0 (position a0 registers))
           (pos2 (position a2 registers)))
 
-      ;(print `(:02 ,a0 ,a1 ,pos0 a2 ,pos2))
+      (print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
       (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
 
         ;(print `(,x1 ,x1-type))
@@ -276,6 +276,19 @@
 
          (if (eq x0-type :IMM32)
            (add-code vmgen a0)))))))
+
+;----------------------------------------------------------------
+(defmethod primitive-id ((vmgen vmgen) attr a0 a1)
+  (print `(:primitive-id ,(cadr attr)))
+
+  (primitive-movei vmgen (cadr attr) a1)
+  (print `h0)
+  (primitive-record-set! vmgen a0 0 a1)
+  (print (get-codes vmgen))
+
+  (if (numberp a0)
+    (primitive-movei vmgen a0 a1)
+    (primitive-move vmgen a0 a1)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op-str op-stri32 label-or-reg)
@@ -451,6 +464,8 @@
                  (:record-ref . #'primitive-record-ref)
                  (:record-offs . #'primitive-record-offs)
                  (:record-set! . #'primitive-record-set!)
+
+                 (:id . #'primitive-id)
 
                  (:move . #'primitive-move)
                  (:swap . #'primitive-swap)

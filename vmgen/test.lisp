@@ -47,5 +47,5 @@
 |#
 
 ;(set-test-files '("32" "42" "29" "41"))
-(set-test-files '("3" (1 . 2)))
+(set-test-files '("4" "3" (1 . 2)))
 (do-test)
