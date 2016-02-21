@@ -1,5 +1,5 @@
-(load "../cps-resources/package.lisp")
-(load "../cps-resources/cps-resources.lisp")
+(load "../csf/package.lisp")
+(load "../csf/csf-resources.lisp")
 
 (load "package.lisp")
 (load "lisp-to-cps.lisp")

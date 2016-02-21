@@ -1,6 +1,6 @@
 ;----------------------------------------------------------------
-(load "../cps-resources/package.lisp")
-(load "../cps-resources/cps-resources.lisp")
+(load "../csf/package.lisp")
+(load "../csf/csf-resources.lisp")
 
 ;----------------------------------------------------------------
 (load "../cps-transfer/package.lisp")
@@ -50,7 +50,7 @@
 (load "../vmgen/vmc-to-bin.lisp")
 
 ;----------------------------------------------------------------
-(use-package :cps-resources)
+(use-package :csf-resources)
 
 (use-package :cps-transfer)
 ;(use-package :cps-eta-reduction)
@@ -61,7 +61,7 @@
 (use-package :vm-codegen)
 
 ;----------------------------------------------------------------
-(defparameter *cps-resources* (make-instance 'cps-resources))
+(defparameter *csf-resources* (make-instance 'csf-resources))
 (setf use-exit-primitive nil)
 
 ;----------------------------------------------------------------
@@ -121,7 +121,7 @@
 
   ;(if (find :vmgen *debug-modes*)
 
-  (if (debug-mode? *cps-resources* :vmgen)
+  (if (debug-mode? *csf-resources* :vmgen)
     (debug-print-cps
       (cps-vmgen:get-codes vmgen)
       '(:vmgen)))
@@ -188,7 +188,7 @@
             (push :process *debug-modes*)
             (flet ((push-w (key0)
                      (push key0 *debug-modes*)
-                     (set-debug-mode *cps-resources* key0)))
+                     (set-debug-mode *csf-resources* key0)))
               (let ((key (intern 
                            (if (eq (elt str2- 0) #\:) 
                              (substring str2- 1)
@@ -227,7 +227,7 @@
                             (read-all (push read-one rv))))))
                  (read-all nil)))))
 
-    (if (debug-mode? *cps-resources* :read)
+    (if (debug-mode? *csf-resources* :read)
       (debug-print-cps tiny-scheme-program '(:read :lisp-to-cps)))
 
     ;(print-cps tiny-scheme-program :tiny-scheme-file)

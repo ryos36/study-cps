@@ -4,7 +4,7 @@
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.vm-codegen
-  (:use :cl :cps-parser :cps-live-variables-finder)
+  (:use :cl :cps-parser :cps-live-variables-finder :csf-resources)
   (:nicknames :vm-codegen)
 
   (:export 

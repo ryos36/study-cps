@@ -136,7 +136,7 @@
   `(:const ,@(make-attribute codegen) ,const-value))
 
 ;----------------------------------------------------------------
-(defmethod add-global-variable ((codegen vm-codegen) sym)
+(defmethod add-global-variable ((codegen vm-codegen) sym &optional (decl nil))
   (setf (slot-value codegen 'global-variable)
         (cons sym (global-variable codegen))))
 

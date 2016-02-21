@@ -1,14 +1,16 @@
 ;
 ; Sinby Corp. 2016
 ;
+; Sinby Comiler 'Study Framework
+;
 
 (in-package :cl-user)
 
-(defpackage :sinby.cps.resources
+(defpackage :sinby.csf.resources
   (:use :cl)
-  (:nicknames :cps-resources)
+  (:nicknames :csf-resources)
   (:export
-    :cps-resources
+    :csf-resources
 
     :add-global-function 
     :add-global-variable 
@@ -20,3 +22,4 @@
 
     :set-debug-mode
     :debug-mode?))
+

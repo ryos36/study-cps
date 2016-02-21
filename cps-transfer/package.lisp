@@ -4,7 +4,7 @@
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.transfer
-  (:use :cl :cps-resources)
+  (:use :cl :csf-resources)
   (:nicknames :cps-transfer)
 
   (:export 
