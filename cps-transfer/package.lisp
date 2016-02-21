@@ -4,10 +4,12 @@
 
 ;----------------------------------------------------------------
 (defpackage :sinby.cps.transfer
-  (:use :cl )
+  (:use :cl :cps-resources)
   (:nicknames :cps-transfer)
 
   (:export 
+    :do-lisp-list-to-cps 
+
     :do-lisp-to-cps
     :make-transfer-table
     :make-exit-continuous

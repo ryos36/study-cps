@@ -1,3 +1,6 @@
+(load "../cps-resources/package.lisp")
+(load "../cps-resources/cps-resources.lisp")
+
 (load "package.lisp")
 (load "lisp-to-cps.lisp")
 (load "make-cxr-route.lisp")

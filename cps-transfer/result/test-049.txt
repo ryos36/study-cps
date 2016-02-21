@@ -1,5 +1,7 @@
 (:FIX ((FACT (K N) (:IF (:= N 0) 1 (:* N (FACT K (:- N 1)))))) (FACT 10))
+
 :
+
 (:FIXH
  ((FACT (|sym2| K N)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
@@ -14,7 +16,9 @@
  ((FACT0 (K N RV) (:IF (:= N 0) RV (FACT0 K (:- N 1) (:* N RV))))
   (FACT (K N) (FACT0 K N 1)))
  (FACT 10))
+
 :
+
 (:FIXH
  ((FACT0 (|sym11| K N RV)
    (:FIXS ((|sym12| (|sym13|) (:APP |sym11| (|sym13|))))
@@ -33,7 +37,9 @@
    (:FIX ((FACT0 (K N RV) (:IF (:= N 0) RV (FACT0 K (:- N 1) (:* N RV)))))
     (FACT0 K N 1))))
  (FACT 10))
+
 :
+
 (:FIXH
  ((FACT (|sym23| K N)
    (:FIXH

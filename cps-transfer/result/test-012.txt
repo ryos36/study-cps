@@ -1,4 +1,6 @@
 (:IF (:> 3 5) 3 5)
+
 :
+
 (:FIXS ((|sym2| (|sym3|) (:APP EXIT (|sym3|))))
  (:> (3 5) NIL ((:APP |sym2| (3)) (:APP |sym2| (5)))))

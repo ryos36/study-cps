@@ -1,4 +1,6 @@
 (:FIX ((ADD (A0 A1) (:+ A0 A1))) (ADD 2 3))
+
 :
+
 (:FIXH ((ADD (|sym2| A0 A1) (:+ (A0 A1) (|sym3|) ((:APP |sym2| (|sym3|))))))
  (:FIXS ((|sym4| (|sym5|) (:APP EXIT (|sym5|)))) (:APP ADD (|sym4| 2 3))))

@@ -10,6 +10,12 @@
   (:export
     :cps-resources
 
+    :add-global-function 
+    :add-global-variable 
+
+    :global-variables
+    :global-functions
+
     :debug-mode
 
     :set-debug-mode

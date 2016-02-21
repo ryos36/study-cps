@@ -1,5 +1,7 @@
 (:+ (FUNC0 1) (FUNC1 2 3 4))
+
 :
+
 (:FIXS
  ((|sym5| (|sym6|)
    (:FIXS

@@ -1,24 +1,38 @@
 (:DEFINE Y (:HEAP 9 10 11))
+
 :
-(:HEAP (9 10 11) (|sym2|) ((:ID (|sym2|) (Y) (:APP EXIT (:UNSPECIFIED)))))
+
+(:HEAP (9 10 11) (|sym2|) ((:ID (|sym2|) (Y) ((:APP EXIT (:UNSPECIFIED))))))
 (:DEFINE X (:HEAP Y 2 3))
+
 :
-(:HEAP (Y 2 3) (|sym3|) ((:ID (|sym3|) (X) (:APP EXIT (:UNSPECIFIED)))))
+
+(:HEAP (Y 2 3) (|sym3|) ((:ID (|sym3|) (X) ((:APP EXIT (:UNSPECIFIED))))))
 X
+
 :
+
 (:APP EXIT (X))
 (:RECORD-REF X 2)
+
 :
+
 (:RECORD-REF (X 2) (|sym4|) ((:APP EXIT (|sym4|))))
 (:RECORD-SET! X 1 (:HEAP 4 5 6))
+
 :
+
 (:HEAP (4 5 6) (|sym5|)
  ((:RECORD-SET! (X 1 |sym5|) NIL ((:APP EXIT (:UNSPECIFIED))))))
 (:RECORD-REF (:RECORD-REF X 1) 2)
+
 :
+
 (:RECORD-REF (X 1) (|sym7|)
  ((:RECORD-REF (|sym7| 2) (|sym6|) ((:APP EXIT (|sym6|))))))
 (:RECORD-REF (:RECORD-REF X 0) 2)
+
 :
+
 (:RECORD-REF (X 0) (|sym9|)
  ((:RECORD-REF (|sym9| 2) (|sym8|) ((:APP EXIT (|sym8|))))))

@@ -2,7 +2,9 @@
  ((FUNC0 (A B C D) (:* (:+ A B) (:- C D)))
   (FUNC1 (X Y Z) (:- (:* X Y) (:+ Z G))))
  (:+ 3 5))
+
 :
+
 (:FIXH
  ((FUNC0 (|sym2| A B C D)
    (:+ (A B) (|sym5|)

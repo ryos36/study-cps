@@ -14,7 +14,9 @@
     (:IF (:= I 3) :|#T|
      (:LET ((NEXT-I (:+ I 1))) (MUL3X3-J I) (MUL3X3-I NEXT-I)))))
   (MUL3X3-I 0 0)))
+
 :
+
 (:FIXH
  ((MUL3X3 (|sym2| A B C)
    (:FIXH

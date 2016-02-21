@@ -1,5 +1,7 @@
 (:DEFINE (ETA-IF X) (:IF (:= X 0) (F X) (G X)))
+
 :
+
 (:FIXH
  ((ETA-IF (|sym2| X)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))

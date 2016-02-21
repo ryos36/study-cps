@@ -1,5 +1,7 @@
 (:LET ((A EX0) (B 3)) (:FIX ((F0 (A C) (:+ (:* A B) (:- EX0 C)))) (F0 A B)))
+
 :
+
 (:FIXH
  ((F0 (|sym2| A C)
    (:* (A 3) (|sym5|)

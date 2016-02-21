@@ -133,6 +133,7 @@
 
   (when (find :list *debug-modes*)
     (format t "~%")
+    (format t ":READ~%")
     (mapc #'(lambda (x) (if (eq (car x) #'debug-print-cps)
                          (format t "~s~%" (cadr x)))) func-env-pair)
     (format t ":VMGEN~%")
@@ -156,8 +157,7 @@
   (format str ")~%"))
 
 ;----------------------------------------------------------------
-(setf func-env-pair `(
-                      (,#'do-lisp-to-cps . ,(make-exit-continuous use-exit-primitive))
+(setf func-env-pair `((,#'do-lisp-list-to-cps . ,(make-exit-continuous use-exit-primitive))
                       (,#'debug-print-cps . (:lisp-to-cps :eta-reduction))
                       (,#'cps-eta-reduction:walk-cps . ,(cps-eta-reduction:make-env))
                       (,#'debug-print-cps . (:eta-reduction :closure-converter))
@@ -221,7 +221,14 @@
 (if (and tiny-scheme-file (probe-file tiny-scheme-file))
   (let ((tiny-scheme-program
           (with-open-file (in tiny-scheme-file)
-            (read in))))
+            (labels ((read-all (rv)
+                       (let ((read-one (read in nil)))
+                         (if (null read-one) (nreverse rv)
+                            (read-all (push read-one rv))))))
+                 (read-all nil)))))
+
+    (if (debug-mode? *cps-resources* :read)
+      (debug-print-cps tiny-scheme-program '(:read :lisp-to-cps)))
 
     ;(print-cps tiny-scheme-program :tiny-scheme-file)
     (labels ((proc-loop (func-env-pair0 expr)

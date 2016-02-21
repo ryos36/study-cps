@@ -1,12 +1,16 @@
 (:DEFINE V0 5963)
+
 :
-(:ID (5963) (V0) (:APP EXIT (:UNSPECIFIED)))
+
+(:ID (5963) (V0) ((:APP EXIT (:UNSPECIFIED))))
 (:DEFINE F
  (:LET ((V0 129))
   (:DEFINE (F0 A)
    (:IF A (:LET ((TEMP 0)) (:DEFINE (G X) (:+ V0 11)) G) (:+ V0 100)))
   F0))
+
 :
+
 (:FIXH
  ((F0 (|sym2| A)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
@@ -14,14 +18,20 @@
      ((:FIXH ((G (|sym5| X) (:+ (129 11) (|sym6|) ((:APP |sym5| (|sym6|))))))
        (:APP |sym3| (G)))
       (:+ (129 100) (|sym7|) ((:APP |sym3| (|sym7|)))))))))
- (:ID (F0) (F) (:APP EXIT (:UNSPECIFIED))))
+ (:ID (F0) (F) ((:APP EXIT (:UNSPECIFIED)))))
 (F :|#F|)
+
 :
+
 (:FIXS ((|sym8| (|sym9|) (:APP EXIT (|sym9|)))) (:APP F (|sym8| :|#F|)))
 (:DEFINE G (F :|#T|))
+
 :
-(:FIXS ((|sym10| (|sym11|) (:ID (|sym11|) (G) (:APP EXIT (:UNSPECIFIED)))))
+
+(:FIXS ((|sym10| (|sym11|) (:ID (|sym11|) (G) ((:APP EXIT (:UNSPECIFIED))))))
  (:APP F (|sym10| :|#T|)))
 (:LET ((V0 1103)) (G 55))
+
 :
+
 (:FIXS ((|sym12| (|sym13|) (:APP EXIT (|sym13|)))) (:APP G (|sym12| 55)))

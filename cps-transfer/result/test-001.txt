@@ -1,7 +1,11 @@
 (:DEFINE (F A B) (:+ A B))
+
 :
+
 (:FIXH ((F (|sym2| A B) (:+ (A B) (|sym3|) ((:APP |sym2| (|sym3|))))))
  (:APP EXIT (:UNSPECIFIED)))
 (F 3 5)
+
 :
+
 (:FIXS ((|sym4| (|sym5|) (:APP EXIT (|sym5|)))) (:APP F (|sym4| 3 5)))

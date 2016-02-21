@@ -14,7 +14,9 @@
        (:+ RV (:<< (XOR-BIT X0-BIT0 X1-BIT0) N))))))
    (XOR (BIT-N X0 X1) (XOR0 BIT-N 0 X0 X1 0)))
   (:EXIT (XOR 32 3 5))))
+
 :
+
 (:HEAP (19201738) (|sym41|)
  ((:FIXH
    ((XOR0 (|sym2| BIT-N N X0 X1 RV)

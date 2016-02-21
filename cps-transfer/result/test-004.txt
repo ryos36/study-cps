@@ -1,20 +1,30 @@
 (:DEFINE X 3)
+
 :
-(:ID (3) (X) (:APP EXIT (:UNSPECIFIED)))
+
+(:ID (3) (X) ((:APP EXIT (:UNSPECIFIED))))
 X
+
 :
+
 (:APP EXIT (X))
 (:DEFINE (F A B) (:- (:+ A B) X))
+
 :
+
 (:FIXH
  ((F (|sym2| A B)
    (:+ (A B) (|sym4|) ((:- (|sym4| X) (|sym3|) ((:APP |sym2| (|sym3|))))))))
  (:APP EXIT (:UNSPECIFIED)))
 (F 4 5)
+
 :
+
 (:FIXS ((|sym5| (|sym6|) (:APP EXIT (|sym6|)))) (:APP F (|sym5| 4 5)))
 (:DEFINE (G X Y) (:+ X (F X Y)))
+
 :
+
 (:FIXH
  ((G (|sym7| X Y)
    (:FIXS
@@ -22,5 +32,7 @@ X
     (:APP F (|sym9| X Y)))))
  (:APP EXIT (:UNSPECIFIED)))
 (G 7 8)
+
 :
+
 (:FIXS ((|sym11| (|sym12|) (:APP EXIT (|sym12|)))) (:APP G (|sym11| 7 8)))

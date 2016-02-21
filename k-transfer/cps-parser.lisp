@@ -62,6 +62,8 @@
     (:=  t)
     (:/=  t)
 
+    (:id t)
+
     (:heap t)
     (:record-set! t)
     (:record-ref t)

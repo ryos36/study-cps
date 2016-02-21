@@ -53,6 +53,8 @@
                       (:=  . t)
                       (:/=  . t)
 
+                      (:id . t)
+
                       (:heap . t)
                       (:record-set! . t)
                       (:record-ref . t)
@@ -81,7 +83,7 @@
         (args (mapcar #'(lambda (x) (cps-terminal x env)) (cadr expr)))
         (rv (cps-terminal (caddr expr) env))
         (next-expr-list (cadddr expr)))
-    ;(print `(next-expr-list ,op ,(cadr next-expr-list)))
+    ;(print `(:next-expr-list ,op ,next-expr-list))
     (list op args rv
           (mapcar #'(lambda(x) (walk-cps x env)) next-expr-list))))
 

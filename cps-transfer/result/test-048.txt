@@ -14,7 +14,9 @@
       (:LET ((Y2 (XOR 32 Y1 (:>> Y1 17))))
        (:LET ((Y3 (XOR 32 Y2 (:<< Y2 15)))) (:RECORD-SET! Y3 0 Y) Y3))))))
   (RAND) (RAND) (RAND) (:EXIT (RAND))))
+
 :
+
 (:HEAP (19201738) (|sym45|)
  ((:FIXH
    ((CLEAR-BIT0 (|sym2| X)

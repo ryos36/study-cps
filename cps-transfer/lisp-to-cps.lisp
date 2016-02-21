@@ -85,6 +85,7 @@
 
 ;----------------------------------------------------------------
 (defun call-continuation-lambda (cont-lambda arg0)
+  ;(print `(:call-continuation-lambda ,cont-lambda ,arg0))
   (if cont-lambda 
     (if (functionp cont-lambda)
       (funcall cont-lambda arg0)
@@ -93,7 +94,7 @@
 
 ;----------------------------------------------------------------
 (defun terminal-transfer (expr context)
-  ;(print `(terminal-transfer ,expr))
+  ;(print `(:terminal-transfer ,expr))
   ;(if (eq expr 'l-a) (print context))
 
     (let ((arg0 (variable-rename expr context))
@@ -341,14 +342,17 @@
 
 ;----------------------------------------------------------------
 (defun id-declare-transfer (expr context)
+  ;(print `(:id-expr ,expr))
   (let* ((id (cadr expr))
-         (new-cps-expr `(:ID (RESULT) (,id) CONT))
+         (new-cps-expr (copy-tree `(:ID (RESULT) (,id) (CONT))))
+         (cont-list (pickup-list new-cps-expr 'CONT))
+         (result-list (pickup-list new-cps-expr 'RESULT))
 
          (table (make-hash-table))
 
          (expr0 (caddr expr)))
-    (flet ((fill-cont (cont) (setf (cadddr new-cps-expr) cont) new-cps-expr)
-           (fill-result (rv) (setf (caadr new-cps-expr) rv) new-cps-expr))
+    (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
+           (fill-result (rv) (setf (car result-list) rv) new-cps-expr))
 
       (let ((cont-lambda (car context))
             (table-list (cdr context)))
@@ -451,3 +455,19 @@
 
           (otherwise 
             (apply-transfer expr context)))))))
+
+;----------------------------------------------------------------
+(defun do-lisp-list-to-cps (lisp-program context)
+  (labels ((do-lisp-list-to-cps0 (expr-list context)
+              (if (null expr-list) 
+                (let ((cont-lambda (car context)))
+                  (funcall cont-lambda :unspecified))
+
+                (let* ((expr (car expr-list))
+                       (result (do-lisp-to-cps expr context)))
+
+                  (flet ((cont-lambda (arg) result))
+                    (do-lisp-list-to-cps0 (cdr expr-list)
+                           (cons #'cont-lambda nil)))))))
+
+    (do-lisp-list-to-cps0 (reverse lisp-program) context)))

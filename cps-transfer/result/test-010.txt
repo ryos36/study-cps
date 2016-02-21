@@ -2,7 +2,9 @@
  ((EVEN? (X) (:IF (:= X 0) :|#T| (ODD? (:- X 1))))
   (ODD? (X) (:IF (:= X 0) :|#F| (EVEN? (:- X 1)))))
  (EVEN? 10))
+
 :
+
 (:FIXH
  ((EVEN? (|sym2| X)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
@@ -23,7 +25,9 @@
  ((EVEN? (X) (:IF (:= X 0) :|#T| (ODD? (:- X 1))))
   (ODD? (X) (:IF (:= X 0) :|#F| (EVEN? (:- X 1)))))
  (ODD? 10))
+
 :
+
 (:FIXH
  ((EVEN? (|sym16| X)
    (:FIXS ((|sym17| (|sym18|) (:APP |sym16| (|sym18|))))

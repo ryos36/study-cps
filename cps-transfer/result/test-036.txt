@@ -2,7 +2,9 @@
  ((FIBO (N)
    (:IF (:= N 0) 1 (:IF (:= N 1) 1 (:+ (FIBO (:- N 1)) (FIBO (:- N 2)))))))
  (FIBO 8))
+
 :
+
 (:FIXH
  ((FIBO (|sym2| N)
    (:FIXS ((|sym3| (|sym4|) (:APP |sym2| (|sym4|))))
