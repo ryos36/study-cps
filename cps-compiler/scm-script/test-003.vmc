@@ -35,5 +35,5 @@
  (:RECORD-REF :R9 0 :R8)
  (:MOVE :R9 :R0)
  (:MOVEI (:ADDRESS EXIT) :R1)
- (:MOVEI 8 :R2)
+ (:MOVEI 91 :R2)
  (:JUMP :R8))

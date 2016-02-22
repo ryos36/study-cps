@@ -108,7 +108,7 @@
     (let ((pos0 (position a0 registers))
           (pos2 (position a2 registers)))
 
-      (print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
+      ;(print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
       (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
 
         ;(print `(,x1 ,x1-type))

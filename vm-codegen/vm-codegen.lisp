@@ -258,7 +258,7 @@
                                                   (copy-list `(:ADDRESS ,arg))
                                                   (if
                                                     (cps-symbolp arg) arg :NOT-SYMBOL))) args))
-             (ixx (print `(:arg-list00 ,arg-list00)))
+             ;(ixx (print `(:arg-list00 ,arg-list00)))
              (arg-list0 (if (and (eq op :RECORD-REF) (global-variable? codegen (car arg-list00))) (cons `(:ADDRESS ,(car arg-list00)) (cdr arg-list00)) arg-list00))
              ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
