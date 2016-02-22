@@ -1,0 +1,42 @@
+(:FIXH
+ ((|:EVEN?| (EVEN? |sym2| X)
+   (:RECORD-OFFS (EVEN? 1) (ODD?)
+    ((:= (X 0) NIL
+      ((:RECORD-REF (|sym2| 0) (|k-sym1|) ((:APP |k-sym1| (|sym2| :|#T|))))
+       (:- (X 1) (|sym7|)
+        ((:RECORD-REF (ODD? 0) (|k-sym2|)
+          ((:APP |k-sym2| (ODD? |sym2| |sym7|)))))))))))
+  (|:ODD?| (ODD? |sym8| X)
+   (:RECORD-REF (ODD? 1) (EVEN?)
+    ((:= (X 0) NIL
+      ((:RECORD-REF (|sym8| 0) (|k-sym3|) ((:APP |k-sym3| (|sym8| :|#T|))))
+       (:- (X 1) (|sym13|)
+        ((:RECORD-REF (EVEN? 0) (|k-sym4|)
+          ((:APP |k-sym4| (EVEN? |sym8| |sym13|))))))))))))
+ (:HEAP ((:LABEL |:EVEN?|) (:LABEL |:ODD?|) :|#F|) (EVEN?)
+  ((:RECORD-SET! (EVEN? 2 EVEN?) NIL
+    ((:RECORD-REF (EVEN? 0) (|k-sym5|) ((:APP |k-sym5| (EVEN? EXIT 997)))))))))
+
+:
+
+(:FIXH (:ATTRIBUTE)
+ ((|:EVEN?| (:ATTRIBUTE) (EVEN? |sym2| X)
+   (:RECORD-OFFS (:ATTRIBUTE) (EVEN? 1) (ODD?)
+    ((:= (:ATTRIBUTE) (X 0) NIL
+      ((:RECORD-REF (:ATTRIBUTE) (|sym2| 0) (|k-sym1|)
+        ((:APP (:ATTRIBUTE) |k-sym1| (|sym2| :|#T|))))
+       (:- (:ATTRIBUTE) (X 1) (|sym7|)
+        ((:RECORD-REF (:ATTRIBUTE) (ODD? 0) (|k-sym2|)
+          ((:APP (:ATTRIBUTE) |k-sym2| (ODD? |sym2| |sym7|)))))))))))
+  (|:ODD?| (:ATTRIBUTE) (ODD? |sym8| X)
+   (:RECORD-REF (:ATTRIBUTE) (ODD? 1) (EVEN?)
+    ((:= (:ATTRIBUTE) (X 0) NIL
+      ((:RECORD-REF (:ATTRIBUTE) (|sym8| 0) (|k-sym3|)
+        ((:APP (:ATTRIBUTE) |k-sym3| (|sym8| :|#T|))))
+       (:- (:ATTRIBUTE) (X 1) (|sym13|)
+        ((:RECORD-REF (:ATTRIBUTE) (EVEN? 0) (|k-sym4|)
+          ((:APP (:ATTRIBUTE) |k-sym4| (EVEN? |sym8| |sym13|))))))))))))
+ (:HEAP (:ATTRIBUTE) ((:LABEL |:EVEN?|) (:LABEL |:ODD?|) :|#F|) (EVEN?)
+  ((:RECORD-SET! (:ATTRIBUTE) (EVEN? 2 EVEN?) NIL
+    ((:RECORD-REF (:ATTRIBUTE) (EVEN? 0) (|k-sym5|)
+      ((:APP (:ATTRIBUTE) |k-sym5| (EVEN? EXIT 997)))))))))

@@ -279,13 +279,6 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-id ((vmgen vmgen) attr a0 a1)
-  (print `(:primitive-id ,(cadr attr)))
-
-  (primitive-movei vmgen (cadr attr) a1)
-  (print `h0)
-  (primitive-record-set! vmgen a0 0 a1)
-  (print (get-codes vmgen))
-
   (if (numberp a0)
     (primitive-movei vmgen a0 a1)
     (primitive-move vmgen a0 a1)))

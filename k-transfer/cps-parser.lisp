@@ -4,11 +4,16 @@
 ;----------------------------------------------------------------
 (defclass cps-parser () 
   ((sym-no :initform 0 :initarg :sym-no)
-   (sym-name :initform "sym" :initarg :sym-name)))
+   (sym-name :initform "sym" :initarg :sym-name)
+   (add-attribute :initarg :add-attribute :initform nil :reader add-attribute)))
 
 ;----------------------------------------------------------------
 (defgeneric make-new-env (parser env &optional new-env-item )
             (:documentation "Make a new environment."))
+
+;----------------------------------------------------------------
+(defmethod insert-attribute ((parser cps-parser))
+  (if (add-attribute parser) (copy-tree '((:ATTRIBUTE))) '()))
 
 ;----------------------------------------------------------------
 (defmethod cps-gensym ((parser cps-parser) &optional is-label)
@@ -117,7 +122,7 @@
         (next-cps (caddr expr)))
     (let ((new-next-cps (cps-parse parser next-cps env)))
 
-      `(,func-name ,args ,new-next-cps))))
+      `(,func-name ,@(insert-attribute parser) ,args ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-binds ((parser cps-parser) binds env)
@@ -132,7 +137,7 @@
     (let ((new-binds (cps-binds parser binds env))
           (new-next-cps (cps-parse parser next-cps env)))
 
-      `(,fix-op ,new-binds ,new-next-cps))))
+      `(,fix-op ,@(insert-attribute parser) ,new-binds ,new-next-cps))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-fixh ((parser cps-parser) expr env)
@@ -149,12 +154,12 @@
         
     (let ((new-func-name (cps-symbol parser func-name env))
           (new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args)))
-      `(:APP ,new-func-name ,new-args))))
+      `(:APP ,@(insert-attribute parser) ,new-func-name ,new-args))))
 ;----------------------------------------------------------------
 (def-cps-func cps-exit ((parser cps-parser) expr env)
   (let ((arg0 (caadr expr)))
     (let ((new-arg0 (cps-terminal parser arg0 env)))
-      `(:EXIT (,new-arg0) () ()))))
+      `(:EXIT ,@(insert-attribute parser) (,new-arg0) () ()))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-primitive ((parser cps-parser) expr env)
@@ -166,7 +171,7 @@
     (let ((new-args (mapcar #'(lambda (arg) (cps-terminal parser arg env)) args))
           (new-next-cpss (mapcar #'(lambda (cps) (cps-parse parser cps env)) next-cpss)))
 
-      `(,op ,new-args ,result ,new-next-cpss))))
+      `(,op ,@(insert-attribute parser) ,new-args ,result ,new-next-cpss))))
 
 ;----------------------------------------------------------------
 (defmethod cps-error-exit ((parser cps-parser) expr env)

@@ -101,7 +101,7 @@
         (attr (cadr expr))
         (args (caddr expr))
         (next-acps (cadddr expr)))
-    (let ((new-next-acps (acps-parse converter next-acps env)))
+    (let ((new-next-acps (acps->acps converter next-acps env)))
 
       `(,func-name ,attr ,args ,new-next-acps))))
 
@@ -117,7 +117,7 @@
         (next-acps (cadddr expr)))
         
     (let ((new-binds (acps-binds converter binds env))
-          (new-next-acps (acps-parse converter next-acps env)))
+          (new-next-acps (acps->acps converter next-acps env)))
 
       `(,fix-op ,attr ,new-binds ,new-next-acps))))
 
@@ -130,10 +130,20 @@
   (acps-fix converter expr env))
 
 ;----------------------------------------------------------------
-(defmethod acps-appf ((converter acps-to-acps) expr (env acps-environment))
-  (let ((attr (cadr expr)
+(defmethod deprecated-acps-app ((converter acps-to-acps) expr (env acps-environment))
+  (let ((attr (cadr expr))
         (func-name (caddr expr))
-        (args (cadddr expr))))
+        (args (cadddr expr)))
+        
+    (let ((new-func-name (acps-symbol converter func-name env))
+          (new-args (mapcar #'(lambda (arg) (acps-terminal converter arg env)) args)))
+      `(:APP ,attr ,new-func-name ,new-args))))
+
+;----------------------------------------------------------------
+(defmethod acps-appf ((converter acps-to-acps) expr (env acps-environment))
+  (let ((attr (cadr expr))
+        (func-name (caddr expr))
+        (args (cadddr expr)))
         
     (let ((new-func-name (acps-symbol converter func-name env))
           (new-args (mapcar #'(lambda (arg) (acps-terminal converter arg env)) args)))
@@ -141,9 +151,9 @@
 
 ;----------------------------------------------------------------
 (defmethod acps-appb ((converter acps-to-acps) expr (env acps-environment))
-  (let ((attr (cadr expr)
+  (let ((attr (cadr expr))
         (func-name (caddr expr))
-        (args (cadddr expr))))
+        (args (cadddr expr)))
         
     (let ((new-func-name (acps-symbol converter func-name env))
           (new-args (mapcar #'(lambda (arg) (acps-terminal converter arg env)) args)))
@@ -165,7 +175,7 @@
         (next-acpss (car (cddddr expr))))
 
     (let ((new-args (mapcar #'(lambda (arg) (acps-terminal converter arg env)) args))
-          (new-next-acpss (mapcar #'(lambda (acps) (acps-parse converter acps env)) next-acpss)))
+          (new-next-acpss (mapcar #'(lambda (acps) (acps->acps converter acps env)) next-acpss)))
 
       `(,op ,attr ,new-args ,result ,new-next-acpss))))
 
@@ -174,11 +184,13 @@
   (if (terminal-p expr)
     (acps-terminal converter expr env)
     (let ((op (car expr)))
+  (print `(:op ,op))
       (case op
         (:fixh (acps-fixh converter expr env))
         (:fixs (acps-fixs converter expr env))
         (:appf (acps-appf converter expr env))
         (:appb (acps-appb converter expr env))
+        (:app (deprecated-acps-app converter expr env))
 
         ;(:fixg )
         ;(:id )

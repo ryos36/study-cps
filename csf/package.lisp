@@ -35,5 +35,7 @@
   (:use :cl :acps-environment)
   (:nicknames :acps-to-acps)
   (:export
-    :acps-to-acps))
+    :acps-to-acps
+
+    :acps->acps))
       
