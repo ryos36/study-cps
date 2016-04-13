@@ -28,7 +28,8 @@
   (:use :cl)
   (:nicknames :acps-environment)
   (:export
-    :acps-environment))
+    :acps-environment
+    :add-infomation ))
       
 ;----------------------------------------------------------------
 (defpackage :sinby.csf.acps-to-acps
@@ -38,4 +39,10 @@
     :acps-to-acps
 
     :acps->acps))
-      
+
+;----------------------------------------------------------------
+(defpackage :sinby.csf.acps-free-variables
+  (:use :cl :acps-environment :acps-to-acps)
+  (:nicknames :acps-free-variables)
+  (:export
+    :acps-free-variables))

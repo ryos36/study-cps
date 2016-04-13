@@ -2,3 +2,4 @@
 (load "csf-resources.lisp")
 (load "acps-environment.lisp")
 (load "acps-to-acps.lisp")
+(load "acps-free-variables.lisp")
