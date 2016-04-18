@@ -335,3 +335,64 @@ record-ref が自由変数を持つとき
 
          (FIXH ((f1 (a0 a1 v0) (..... v0 ... v1 .....)))
             (..  FIX本体 f1 ...))))
+
+--------------------------------------
+実装に関するコメント
+wrap-cps-bind-fixh-with-record-ref では this-free-vars と top-env がくる
+top-env は free-var-env で env の top
+各 env は
+そこの自由変数の並びを指し示している。
+     (fixh-free-vars `(,@updated-fixh-list
+                       ,@ref-vars
+                       ,@strict-free-vars-without-func-names
+                       ,@upper-free-vars-list))
+で構成される。
+
+upper-fixh-list は その fixh のリストだが、参照をなるべく
+しないような順番に並び替えられている。例えば (fixh ((f ...
+                                                    (g ...
+とあれば (:fixh . f) (:fixh . g) となる。
+これにより１つの closure をシェアして record-offs を求めて、
+各関数が自分の closure を特定することが出来る。
+
+次に参照される変数(ref-vars) は循環しているもの。
+例えば f から g を呼び g から f を呼ぶ場合。
+とあれば (:fixh . f) (:fixh . g) (:fixh . f)
+
+ここの upper-fixh-list とは違う話だが ref-vars は
+２つめの (:fixh . f)は後で ref-vars のレングス分
+プレースホルダーを作り。record-set! を生成するためにもつかわれる。
+マイナスの record-ref を許せばここは必要ないが、、、
+安全のため(セキュリティ)にマイナスは許さない。
+
+strict-free-vars-without-func-names
+その名との通り、ここの free 変数。関数名を含まず、上位で
+共有されているものも含まない。
+
+@upper-free-vars-list
+は free 変数だが、上位で共有されているもの。
+ここはリストになっており例えば
+   (自由変数名 クロージャ クロージャの中身)
+     => (gv (:fixh . f) .... gv ....)
+で
+  ((gv (:fixh . f) ... gv ...)
+   ....
+などとなっている。gv が f のクロージャのなかにありその並びを
+見れば gv の位置がわかる。
+自由変数はもっと上のクロージャ内にあるかもしれない 
+ので、クロージャが引き継がれるように設計したつもり
+
+結果として top-env は
+    fixh の関数名
+    fixh の関数名で循環しているもの再掲(循環していなければ nil)
+    純粋な free 変数
+    上位の free 変数とその並びを記した情報
+が入る。
+
+これにより、ある fixh 内の関数の free 変数を解決する。
+free変数であり得るのは
+    - 他の関数名
+    - 純粋なfree 変数
+    - 上位のクロージャ内の free 変数
+
+

@@ -127,8 +127,8 @@
 
 ;----------------------------------------------------------------
 ; env -> (((:fixh . closure-name) v0 v2 ....) ...)
-;          -> ((v3 . (:fixh . closure-name) ... v3 ...)
-;              (v4 . (:fixh . closure-name) ... v4 ...))
+;          -> ((v3 (:fixh . closure-name) ... v3 ...)
+;              (v4 (:fixh . closure-name) ... v4 ...))
 ;
 ; only search :fixh free variables
 
@@ -143,11 +143,14 @@
                          (if (eq info-id :fixh) free-vars-in-env '()))
                        (fixh-hit-vars (intersection free-variables0 free-vars-in-fixh)))
 
+                  ;(print `(:xxx ,fixh-hit-vars ,top-env (,fixh-hit-vars . ,top-env)))
                   (make-upper-free-vars-list0
                     (set-difference free-variables0 free-vars-in-env)
                     (cdr env0)
                     (append rv 
                             (mapcar #'(lambda (x) `(,x . ,top-env)) fixh-hit-vars)))))))
+
+    ;(print `(:env ,upper-free-vars ,env))
 
     (make-upper-free-vars-list0 upper-free-vars env '())))
 
@@ -168,17 +171,21 @@
 ;                          (v4 . ((:fixh . closure-name) .. v4 ... ))
 ;                          (v5 . ((:fixh . closure-name) .. v5 ... )))
 ;           or :fixs :primitive
+; Note: (v3 . ((:fixh . closure-name) ... v3 ))
+;         => (v3 (:fixh . closure-name) ... v3 ) 
 ;
 (defun wrap-cps-bind-fixh-with-record-ref (parser this-free-vars new-next-cps top-env)
   ;(print `(:top-env ,top-env))
   (let ((closure-name (cdar top-env))
         (new-symbol-pos-pairs '()))
+  ;(print `(:wrap-cps-bind-fixh-with-record-ref ,closure-name))
   ;(print `(:wrap-cps-bind-fixh-with-record-ref ,this-free-vars, new-next-cps))
 
     (labels ((get-pressed-num0 (sym vars n)
+              ;(print `(:pressed ,sym ,vars ,n))
               (if (null vars) :NOT-FOUND
                  (let ((elm (car vars)))
-                   ;(print `(eleelm ,elm ,(cdr elm)))
+                   ;(print `(:eleelm ,elm ,(if (consp elm) (cdr elm))))
                      (if (and (listp elm) (listp (cdr elm)) (eq sym (cdadr elm)))
                        n
                        (get-pressed-num0 sym (cdr vars) (+ n 1))))))
@@ -198,7 +205,8 @@
                ;(print `(:get-off-num ,sym ,vars ,n))
                (assert vars)
                (let ((check-fixh-tagged-list (car vars)))
-                 (if (not (consp check-fixh-tagged-list))
+                 (if (not (and (consp check-fixh-tagged-list)
+                               (eq :fixh (car check-fixh-tagged-list))))
                    (get-num0 sym vars n)
 
                    ;found (fixh . closure-name)
@@ -247,13 +255,13 @@
                     (do-wrap2 
                       `(:RECORD-REF (,closure-name ,new-no) (,ref-sym) (,cps-expr2)) (cdr new-symbol-pos-pairs0))))))
 
-      ;(print `(this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
+      ;(print `(:this-free-vars ,closure-name ,this-free-vars ,(null this-free-vars)))
       (do-wrap2 
         (do-wrap1 this-free-vars new-next-cps) (nreverse new-symbol-pos-pairs)))))
 
 ;----------------------------------------------------------------
 (def-cps-func cps-bind-fixh ((parser closure-converter) expr env)
-  ;(print `(:cps-bind-fixh ,expr :env ,(car env)))
+  ;(print `(:cps-bind-fixh ,expr :env ,env))
   (let ((closure-name (car expr))
         (args (cadr expr))
         (next-cps (caddr expr))
@@ -412,6 +420,7 @@
                   (push (car finder-env) r-env-list))) binds)
 
       (cps-binds finder binds finder-env)
+      ;(print `(:finder-env ,finder-env :env ,env))
       (cps-parse finder next-cps next-finder-env)
 
       (multiple-value-bind (new-func-names ref-vars)
@@ -431,7 +440,7 @@
 
                (upper-free-vars-list
                  (make-upper-free-vars-list (set-difference free-variables strict-free-vars) env))
-               ;(x (print `(:fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
+               ;(x (print `(:fix-hs :F ,(copy-tree free-variables) :S ,(copy-tree strict-free-vars) :D ,(set-difference free-variables strict-free-vars) :U ,(copy-tree upper-free-vars-list) )))
                (fixh-list (mapcar #'(lambda (f) `(:fixh . ,f)) new-func-names))
                ;(x (print `(:fixh-list ,fixh-list)))
                (strict-free-vars-without-func-names
@@ -456,7 +465,7 @@
                (upper-closure-list
                    (filter-upper-closure-list (mapcar #'(lambda (upper-vars) (cdadr upper-vars)) upper-free-vars-list)))
                (closure-list `(,@(copy-list strict-free-vars) ,@upper-closure-list))
-               ;(x (print `(:uc ,upper-closure-list ,closure-list)))
+               ;(x (print `(:uc ,upper-free-vars-list ,upper-closure-list ,closure-list)))
 
                (heap-list (append (mapcar #'(lambda (func-name) `(:LABEL ,(make-new-func-name func-name))) new-func-names) (make-list (length ref-vars) :initial-element :#f) (set-difference closure-list func-names)))
                ;(y (print `(:heap-list ,free-variables)))
