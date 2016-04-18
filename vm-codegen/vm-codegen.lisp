@@ -15,6 +15,17 @@
    (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)))
 
 ;----------------------------------------------------------------
+(defmethod cps-terminal ((codegen vm-codegen) expr env)
+  (cond
+    ((eq :#t expr) :#t)
+    ((eq :#f expr) :#f)
+    ((eq :unspecified expr) :unspecified)
+    ((null expr) nil)
+    ((symbolp expr) (cps-symbol codegen expr env))
+    ((numberp expr) (copy-list `(:INTEGER ,expr)))
+    (t expr)))
+
+;----------------------------------------------------------------
 (defmethod reset-registers ((codegen vm-codegen) registers)
   (setf (max-n codegen) (length registers))
   (setf (registers codegen) registers))
@@ -63,7 +74,10 @@
         (let* ((main 'common-lisp-user::main)
                (exit 'common-lisp-user::exit)
                (gvar (reduce #'append
-                             (mapcar #'(lambda (x) (list x (list :CONST 0)))
+                             (mapcar #'(lambda (x) 
+                                         (if 
+                                           (consp x) x
+                                           (list x (list :CONST 0))))
                                      (remove-if #'(lambda (x)
                                                     (or (eq x main) (eq x exit)))
                                                 (slot-value codegen 'global-variable))))))
@@ -82,17 +96,20 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
+; trick
 (defmethod make-attribute ((codegen vm-codegen) &optional expr)
   (if expr
     (let ((op (car expr))
+          (init-v (cadr expr))
           (result (caddr expr)))
-      
-      (assert (eq op :ID))
+
+      (assert (eq op :DEFINE))
       (let ((sym (car result)))
-        (add-global-variable codegen sym t)
+        (add-global-variable codegen sym init-v)
         (copy-tree `((:attribute (:address ,sym))))))
 
-    (if (use-attribute codegen) (copy-tree '((:attribute))) '())))
+    (if (not (use-attribute codegen)) '()
+      (copy-tree '((:attribute))))))
 
 ;----------------------------------------------------------------
 (defmethod make-primitive-instruction ((codegen vm-codegen) expr op args &optional result)
@@ -100,7 +117,7 @@
     (if (or (eq :heap op) (eq :stack op))
       `(,op ,@(make-attribute codegen) (:HEAP-LIST ,@args) ,@result)
 
-      (if (eq :id op)
+      (if (eq :define op)
         `(,op ,@(make-attribute codegen expr) ,@args ,@result)
 
         (if result
@@ -157,15 +174,18 @@
   `(:const ,@(make-attribute codegen) ,const-value))
 
 ;----------------------------------------------------------------
-(defmethod add-global-variable ((codegen vm-codegen) sym &optional (decl nil))
+(defmethod add-global-variable ((codegen vm-codegen) sym &optional (init-v nil))
   (setf (slot-value codegen 'global-variable)
-        (cons sym (global-variable codegen))))
+        (cons (if init-v (list sym init-v) sym) (global-variable codegen))))
 
 ;----------------------------------------------------------------
 (defmethod global-variable? ((codegen vm-codegen) sym)
   (if (or (eq sym 'common-lisp-user::main)
-          (eq sym 'common-lisp-user::exit)) t nil))
-  ;(find sym (global-variable codegen)))
+          (eq sym 'common-lisp-user::exit)) t 
+    (find
+      sym (global-variable codegen)
+      :test #'(lambda (s v)
+                (eq s (if (consp v) (car v) v))))))
 
 ;----------------------------------------------------------------
 (defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)

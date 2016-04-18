@@ -11,8 +11,8 @@
   |:EXIT|
   (:HALT :R1)
   |:MAIN|
-  (:ID (:ATTRIBUTE (:ADDRESS X)) 33 :R9)
-  (:ID (:ATTRIBUTE (:ADDRESS Y)) 40 :R8)
+  (:ID 33 :R9)
+  (:ID 40 :R8)
   (:+ :R9 :R8 :R9)
   (:RECORD-REF (:ADDRESS EXIT) 0 :R8)
   (:MOVEI (:ADDRESS EXIT) :R0)

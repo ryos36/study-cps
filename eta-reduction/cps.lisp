@@ -53,7 +53,7 @@
                       (:=  . t)
                       (:/=  . t)
 
-                      (:id . t)
+                      (:define . t)
 
                       (:heap . t)
                       (:record-set! . t)

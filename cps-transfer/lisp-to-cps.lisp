@@ -341,10 +341,10 @@
           (fill-cont (do-lisp-to-cps :unspecified context)))))))
 
 ;----------------------------------------------------------------
-(defun id-declare-transfer (expr context)
+(defun variable-declare-transfer (expr context)
   ;(print `(:id-expr ,expr))
   (let* ((id (cadr expr))
-         (new-cps-expr (copy-tree `(:ID (RESULT) (,id) (CONT))))
+         (new-cps-expr (copy-tree `(:DEFINE (RESULT) (,id) (CONT))))
          (cont-list (pickup-list new-cps-expr 'CONT))
          (result-list (pickup-list new-cps-expr 'RESULT))
 
@@ -367,7 +367,7 @@
 (defun define-transfer (expr context)
   (if (listp (cadr expr))
     (func-declare-transfer expr context)
-    (id-declare-transfer expr context)))
+    (variable-declare-transfer expr context)))
 
 ;----------------------------------------------------------------
 (defun let-transfer (expr context)

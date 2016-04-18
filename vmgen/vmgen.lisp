@@ -278,7 +278,7 @@
            (add-code vmgen a0)))))))
 
 ;----------------------------------------------------------------
-(defmethod primitive-id ((vmgen vmgen) attr a0 a1)
+(defmethod primitive-id ((vmgen vmgen) a0 a1)
   (if (numberp a0)
     (primitive-movei vmgen a0 a1)
     (primitive-move vmgen a0 a1)))
