@@ -5,7 +5,7 @@
                     (i-start j0))
                (:let ((a-ji (:record-ref a j-start))
                       (b-ji (:record-ref b i-start)))
-                     (:record-set! (:* a-ji b-ji) (:+ j-start i-start) c))))
+                     (:record-set! c (:+ j-start i-start) (:* a-ji b-ji)))))
 
             (mul3x3-j (j i0)
               (:if (:= j 3) 

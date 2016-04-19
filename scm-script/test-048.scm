@@ -27,7 +27,7 @@
               (:let ((y1 (xor 32 y0 (:<< y0 13))))
                 (:let ((y2 (xor 32 y1 (:>> y1 17))))
                   (:let ((y3 (xor 32 y2 (:<< y2 15))))
-                    (:record-set! y3 0 y)
+                    (:record-set! y 0 y3)
                     y3))))))
 
          (rand)
