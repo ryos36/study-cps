@@ -98,7 +98,7 @@
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
 ; free-vars -> (v0 v1 v2)
-; env -> (((:fixh . closure-name pos) v0 v2 ....) ...)
+; env -> (((:fixh . closure-name) v0 v2 ....) ...)
 ; result -> (v1)
 (defun get-strict-free-variables (free-vars env)
 
@@ -115,7 +115,7 @@
 
                   ;(print `(get-strict-free-variables0 (,strict-free-vars0 ,top-env)))
                   (get-strict-free-variables0
-                    (set-differencE strict-free-vars0 free-vars-in-env)
+                    (set-difference strict-free-vars0 free-vars-in-env)
                     (cdr env0)
                     saved-vars)))))
 
