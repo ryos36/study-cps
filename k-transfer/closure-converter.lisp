@@ -105,11 +105,12 @@
 ; result -> (g0 g1 g2)
 
 (defun get-global-variables (env)
-  (remove-if #'null 
-             (mapcar #'(lambda (x)
-                         (if (and (eq (caar x) :primitive)
-                                  (eq (cdar x) :define))
-                           (cadr x))) env )))
+  (nreverse
+    (remove-if #'null 
+               (mapcar #'(lambda (x)
+                           (if (and (eq (caar x) :primitive)
+                                    (eq (cdar x) :define))
+                             (cadr x))) env ))))
 
 ; (g0 g1 g2) -> ((g0 (:global-closure . :global-variable-pointer) g0 g1 g2)
 ;                (g1 (:global-closure . :global-variable-pointer) g0 g1 g2)
@@ -192,7 +193,9 @@
 ; top-env -> ((:fixh . closure-name) (:fixh . closure-name) ... v0 v1 v2 ....
 ;                          (v3 . ((:fixh . closure-name) .. v3 ... ))
 ;                          (v4 . ((:fixh . closure-name) .. v4 ... ))
-;                          (v5 . ((:fixh . closure-name) .. v5 ... )))
+;                          (v5 . ((:fixh . closure-name) .. v5 ... ))
+;                          (g6 . ((:global-closure :global-closure) ... g6 ...))
+;
 ;           or :fixs :primitive
 ; Note: (v3 . ((:fixh . closure-name) ... v3 ))
 ;         => (v3 (:fixh . closure-name) ... v3 ) 
@@ -247,7 +250,7 @@
 
              (do-wrap0 (sym cps-expr0)
                 (multiple-value-bind (no n-info) (get-off-num sym top-env 0)
-                  (print `(:do-wrap0 ,sym ,no ,n-info :key ,(if (consp n-info) (car n-info))))
+                  ;(print `(:do-wrap0 ,sym ,no ,n-info :key ,(if (consp n-info) (car n-info))))
                   (assert (not (eq no :NOT-FOUND)))
                   ;(print `(,no :+ ,func-pos :=> :new-no))
                   (if (atom n-info)

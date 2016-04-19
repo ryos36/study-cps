@@ -43,6 +43,8 @@
          (eq :#t expr)
          (eq :#f expr)
          (eq :unspecified expr)
+         (keywordp expr)
+
          (null expr)
          (numberp expr)
          (and (listp expr) (eq (car expr) :label)))))

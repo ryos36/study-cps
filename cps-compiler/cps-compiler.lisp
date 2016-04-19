@@ -189,10 +189,11 @@
             (flet ((push-w (key0)
                      (push key0 *debug-modes*)
                      (set-debug-mode *csf-resources* key0)))
-              (let ((key (intern 
-                           (if (eq (elt str2- 0) #\:) 
-                             (substring str2- 1)
-                             str2-) :keyword)))
+              (let ((key (if (string= str2- ":VM-CODEGEN") :codegen
+                           (intern 
+                             (if (eq (elt str2- 0) #\:) 
+                               (substring str2- 1)
+                               str2-) :keyword))))
                 (push-w key))))
 
           (check-option (cdr option-list)))))))

@@ -37,7 +37,7 @@
     :compare-primitivep 
 
     :closure-name-to-label-name 
-    :make-label 
+    :make-label-address 
     :make-registers
 
     :make-cxr-route
