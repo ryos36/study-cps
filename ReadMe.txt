@@ -14,11 +14,15 @@ CPS より A正規化、A正規化より K正規化の方がよいらしい。
 scheme 的には mini-scheme じゃなくて仕様に沿った scheme を目指す。
 ってかこのまま common lisp 上でいいのか？
 
+----------------------------------------------------------------
 あと cps-transfer の record-set!-transfer 
   `(:RECORD-SET! (RECORD-NAME ARG0 ARG1) 
 scm-script で統一されてない気がする。
 (:record-set! record-name offset value) が正しい。
-vmgen が間違いかな？
+あとこれを CPS に直すと
+(:record-set! (record-name offset value) () ((....))
+になる。
+途中で混乱している。
 ----------------------------------------------------------------
 2016年 2月 12日 金曜日 00:55:15 JST
 進捗

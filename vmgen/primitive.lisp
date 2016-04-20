@@ -101,22 +101,22 @@
 
 ;----------------------------------------------------------------
 (defun record-set!-transfer (expr context)
-  (let* ((new-cps-expr (copy-tree `(:RECORD-SET! (RECORD-NAME ARG0 ARG1) () (CONT))))
+  (let* ((new-cps-expr (copy-tree `(:RECORD-SET! (RECORD-NAME OFFSET-ARG0 VALUE-ARG1) () (CONT))))
          (record-name-list (pickup-list new-cps-expr 'RECORD-NAME))
-         (arg0-list (pickup-list new-cps-expr 'ARG0))
-         (arg1-list (pickup-list new-cps-expr 'ARG1))
+         (offset-arg0-list (pickup-list new-cps-expr 'OFFSET-ARG0))
+         (value-arg1-list (pickup-list new-cps-expr 'VALUE-ARG1))
          (cont-list (pickup-list new-cps-expr 'CONT))
-         arg0-result
-         arg1-result cont-result)
+         offset-arg0-result
+         value-arg1-result cont-result)
 
     (flet ((fill-cont (cont) (setf (car cont-list) cont) new-cps-expr)
-           (fill-arg1 (arg1) (setf (car arg1-list) arg1) cont-result)
-           (fill-arg0 (arg0) (setf (car arg0-list) arg0) arg1-result)
-           (fill-record-name (name) (setf (car record-name-list) name) arg0-result))
+           (fill-value-arg1 (arg1) (setf (car value-arg1-list) arg1) cont-result)
+           (fill-offset-arg0 (arg0) (setf (car offset-arg0-list) arg0) value-arg1-result)
+           (fill-record-name (name) (setf (car record-name-list) name) offset-arg0-result))
 
       (let ((record-name (cadr expr))
-            (arg0 (caddr expr))
-            (arg1 (cadddr expr))
+            (offset-arg0 (caddr expr))
+            (value-arg1 (cadddr expr))
 
             (cont-lambda (car context))
             (table-list (cdr context)))
@@ -125,11 +125,11 @@
               (fill-cont (call-continuation-lambda cont-lambda :unspecified)))
 
 
-        (setf arg1-result
-              (do-lisp-to-cps arg1 (cons #'fill-arg1 table-list)))
+        (setf value-arg1-result
+              (do-lisp-to-cps value-arg1 (cons #'fill-value-arg1 table-list)))
 
-        (setf arg0-result 
-              (do-lisp-to-cps arg0 (cons #'fill-arg0 table-list)))
+        (setf offset-arg0-result 
+              (do-lisp-to-cps offset-arg0 (cons #'fill-offset-arg0 table-list)))
 
         (do-lisp-to-cps record-name (cons #'fill-record-name table-list))))))
 ;----------------------------------------------------------------

@@ -35,8 +35,8 @@
 (defun closure-name-to-label-name (closure-name)
   (intern (format nil ":~s" closure-name)))
 
-(defun make-label-address (sym &optional c-to-l)
-  `(:ADDRESS ,(if c-to-l (closure-name-to-label-name sym) sym)))
+(defun make-label (sym &optional c-to-l)
+  `(:LABEL ,(if c-to-l (closure-name-to-label-name sym) sym)))
 
 (defun make-registers (n &optional (prefix :R) &key (format-func #'(lambda(no prefix) (intern (format nil "~a~a" prefix no) "KEYWORD" ))))
   (labels ((make-registers0 (n0 rv)

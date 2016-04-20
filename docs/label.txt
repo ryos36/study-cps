@@ -1,0 +1,6 @@
+:LABEL と :ADDRESS を使い分けている。
+:LABEL はコードの先頭からの offset
+:ADDRESS は実際のメモリのアドレス
+
+JUMP するときは LABEL でジャンプしている。
+heap 領域は :ADDRESS が必要。

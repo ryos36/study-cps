@@ -1,0 +1,6 @@
+(:define x (:heap 0 1 2 3))
+(:fix ((f (b a x) (:let ((aa x)) 
+                        (:record-set! x a b) 
+                        (exit (:* (:+ x a) (:+ a x)))
+                        )))
+      (f 2 5 x))

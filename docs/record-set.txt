@@ -1,0 +1,22 @@
+record-set!
+は
+(record-set! heap-symbol offset value)
+-> CPS としては
+(record-set! (heap-symbol offset value) () ((....)))
+変更されるものはないがすべて使われるから。
+
+value が IMM32 の可能性がある
+offset は常にIMM32 はない。256 以上のアクセスは
+レジスタで間接的にする。
+これは IMM8 あるなしで if 文が vm に必要になり
+スピードを阻害する恐れれがあるから。
+
+if 文が入らないように hvm では
+movei などを
+movei8 movei32 と一意で実行できるように分けている。
+record-set! の両方に imm32 をつくると
+record-set!-offset32
+record-set!-value32
+record-set!-offset32-value32
+と３つになって煩雑になるため(やろうと思えばできる)
+していない。

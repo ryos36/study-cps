@@ -79,21 +79,23 @@
                              (mapcar #'(lambda (x) 
                                          (if 
                                            (consp x) x
-                                           (list x (list :CONST #xffffffff))))
+                                           (list x (list :CONST -1))))
                                      (remove-if #'(lambda (x)
                                                     (or (eq x main) (eq x exit)))
                                                 (slot-value codegen 'global-variable))))))
                                              
           (append
             (list
-              `(:move ,(make-label-address :global-varible-pointer) :gp0)
-              `(:move ,(make-label-address main) :r0)
-              `(:move ,(closure-name-to-label-name main) :r1)
+              (copy-tree
+                '(:movei (:ADDRESS :global-varible-pointer) :gp0))
+              (copy-tree
+                `(:movei (:ADDRESS ,main) :r0))
+              `(:movei ,(make-label main :closure-name) :r1)
               (make-jump-instruction codegen :r1)
               main
-              (make-const-instruction codegen (make-label-address main :closure-name))
+              (make-const-instruction codegen (make-label main :closure-name))
               exit
-              (make-const-instruction codegen (make-label-address exit :closure-name))
+              (make-const-instruction codegen (make-label exit :closure-name))
               :global-varible-pointer)
             gvar
             (list
@@ -123,7 +125,9 @@
   (let ((gvar (caaddr expr)))
     (add-global-variable codegen gvar)
     (add-code codegen 
-              `(:move ,@args ,@result))
+              (if (consp (car args))
+                `(:movei ,@args ,@result)
+                `(:move ,@args ,@result)))
     (add-code codegen
               `(:record-set! :gp0 (:offset :global-varible-pointer ,gvar) ,@result))))
 ;----------------------------------------------------------------
@@ -148,7 +152,7 @@
   (let ((registers (registers codegen)))
     (copy-list
       `(,op ,@(make-attribute codegen) ,
-            (if (find sym registers) sym `(:ADDRESS ,sym))))))
+            (if (find sym registers) sym `(:LABEL ,sym))))))
 
 ;----------------------------------------------------------------
 (defmethod make-jump-instruction ((codegen vm-codegen) sym)

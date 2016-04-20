@@ -443,6 +443,7 @@
     (terminal-transfer expr context)
     (let* ((op (car expr))
            (transfer (gethash op *transfer-table*)))
+      ;(print `(:t ,op ,transfer))
       (if transfer
         (funcall transfer expr context)
 

@@ -4,7 +4,7 @@
 ;----------------------------------------------------------------
 (defclass vmgen ()
   ((registers :accessor registers :initform '
-              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
+              (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9 :gp0))
    (code-pos :initform 0 :accessor code-pos)
    (codes :accessor codes :initform nil)
    (types :initform '(:REG :IMM8 :IMM32) :reader types)
@@ -12,6 +12,10 @@
    (insn-pos-pair :initform nil :accessor insn-pos-pair)
    (label-offset-pos-pair :initform nil :accessor label-offset-pos-pair)
    (address-pos-pair :initform nil :accessor address-pos-pair)
+   (global-value-offset-pos-pair :initform nil :accessor global-value-offset-pos-pair)
+
+   (tag-n :initform 2 :accessor tag-n)
+   (integer-tag-value :initform 1 :accessor integer-tag-value)
    ))
 
 ;----------------------------------------------------------------
@@ -33,6 +37,7 @@
 (create-mark-func mark-address address-pos-pair)
 (create-mark-func mark-instruction insn-pos-pair
                   (assert (stringp value)))
+(create-mark-func mark-global-value-offset global-value-offset-pos-pair)
 
 ;----------------------------------------------------------------
 (defmethod mark-label ((vmgen vmgen) label)
@@ -40,30 +45,50 @@
   (push (cons label (code-pos vmgen)) (label-pos-pair vmgen)))
 
 ;----------------------------------------------------------------
+(defmethod integer->cell ((vmgen vmgen) value)
+  (let ((nagative-bit (if (< value 0) #x80000000 0)) 
+        (abs-value (logand (ash value (tag-n vmgen)) #xEFFFFFFF)))
+    (assert (= 0 (logand value #x60000000)))
+    (logior nagative-bit abs-value (integer-tag-value vmgen))))
+
+;----------------------------------------------------------------
+(defmethod tagged-integer->cell ((vmgen vmgen) tagged-integer)
+  (let ((rv
+          (if (consp tagged-integer)
+            (let ((key (car tagged-integer))
+                  (value (cadr tagged-integer)))
+              (if (eq key :INTEGER)
+                (integer->cell vmgen value))))))
+    (if rv rv tagged-integer)))
+
+;----------------------------------------------------------------
 (defmethod add-code ((vmgen vmgen) code)
-  (push code (codes vmgen))
+  (push (tagged-integer->cell vmgen code) (codes vmgen))
 
-  (if (consp code)
-    (let ((key (car code))
-          (value (cadr code)))
-      (case key
-        (:INSTRUCTION (mark-instruction vmgen value))
-        (:LABEL (mark-label-offset vmgen value))
-        (:ADDRESS (mark-address vmgen value))
-        (otherwise (assert (eq "not supported list" code))))))
+    (if (consp code)
+      (let ((key (car code))
+            (value (cadr code)))
+        (case key
+          (:INSTRUCTION (mark-instruction vmgen value))
+          (:LABEL (mark-label-offset vmgen value))
+          (:ADDRESS (mark-address vmgen value))
+          (:OFFSET (mark-global-value-offset vmgen (cdr code)))
+          (:INTEGER t)
+          (otherwise (assert (eq "not supported list" code))))))
 
-  (incf (code-pos vmgen))
-  code)
+    (incf (code-pos vmgen))
+
+    t)
 
 ;----------------------------------------------------------------
 (defmethod get-codes ((vmgen vmgen))
   (reverse (codes vmgen)))
 
 ;----------------------------------------------------------------
-(defmacro deprecatd-format-incf (&rest body)
-  `(prog1
-     (format ,@body)
-     (incf (code-pos vmgen))))
+;(defmacro deprecatd-format-incf (&rest body)
+;  `(prog1
+;     (format ,@body)
+;     (incf (code-pos vmgen))))
 
 ;----------------------------------------------------------------
 (defun symbol-to-c-label (sym)
@@ -76,8 +101,8 @@
       (let ((sym num-or-sym))
         (assert (symbolp sym))
         (case sym
-          (:|#T| 1)
-          (:|#F| 0)
+          (:|#T| 1) ; integer 0 !! tricky
+          (:|#F| 0) ; zero pointer
           (:UNSPECIFIED -1)
           (otherwise 
             (let ((pos (position sym registers)))
@@ -87,14 +112,23 @@
 ;----------------------------------------------------------------
 (defun get-value-type (ax registers)
   (if (numberp ax)
+    #|
+    ; deprecated
     (if (<= 0 ax 255)
       (values (logand ax #b11111111) :IMM8)
       (values 0 :IMM32))
+    |#
+    (values 0 :IMM32)
 
     (if (listp ax)
-      (let ((key (car ax)))
-        (assert (or (eq key :ADDRESS) (eq key :LABEL)))
-        (values ax :IMM32))
+      (let ((key (car ax))
+            (v (cadr ax)))
+        (print `(:gvt ,key ,v))
+        (assert (or (eq key :ADDRESS) (eq key :LABEL) (eq key :INTEGER) (eq key :OFFSET)))
+        (if (or (eq key :OFFSET)
+                 (and (eq key :INTEGER) (<= 0 v 255)))
+          (values v :IMM8)
+          (values ax :IMM32)))
 
       (case ax
         (:|#T| (values 1 :IMM8))
@@ -108,10 +142,10 @@
     (let ((pos0 (position a0 registers))
           (pos2 (position a2 registers)))
 
-      ;(print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
+      (print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
       (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
 
-        ;(print `(,x1 ,x1-type))
+        (print `(,x1 ,x1-type))
         (let ((x1-type-no (position x1-type (types vmgen))))
           (values
             (logior
@@ -121,7 +155,6 @@
               (ash (logand pos2 #xff)  0))
 
             x1-type))))))
-
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
@@ -141,10 +174,11 @@
 
            (add-code vmgen `(:INSTRUCTION ,inst-str)))
 
-          (add-code vmgen oprand)
+         (print `(:oprand ,oprand ,a1))
+         (add-code vmgen oprand)
 
-          (when (eq x1-type :IMM32)
-            (add-code vmgen a1))))))
+         (when (eq x1-type :IMM32)
+           (add-code vmgen a1))))))
 
 ;----------------------------------------------------------------
 (make-two-args-primitive primitive-+ ("add" "addi8" "addi32"))
@@ -254,34 +288,39 @@
 (make-two-args-primitive primitive-record-offs ("record_offs" "record_offsi8" :NA))
 
 ;----------------------------------------------------------------
+;(record-set! heap-symbol offset value)
+;
 (defmethod primitive-record-set! ((vmgen vmgen) a0 a1 a2)
   (let ((registers (registers vmgen))
         (types (types vmgen)))
-    (multiple-value-bind (x0 x0-type) (get-value-type a0 registers)
+    (multiple-value-bind (x2 x2-type) (get-value-type a2 registers)
       (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
         (assert (not (eq x1-type :IMM32)))
-        (let ((x0-type-no (position x0-type types))
+
+        (let ((x2-type-no (position x2-type types))
               (x1-type-no (position x1-type types))
-              (pos2 (position a2 registers)))
+              (pos0 (position a0 registers)))
 
           (add-code vmgen (copy-list '(:INSTRUCTION "record_set")))
+          (print `(:x12 ,x1 ,x1-type))
           (let ((oprand
                   (logior
-                    (ash (logior (ash x0-type-no 4)
-                                 (ash x1-type-no 2)) 24)
-                    (ash x0 16)
+                    (ash (logior (ash x1-type-no 2)
+                                 (ash x2-type-no 0)) 24)
+                    (ash (logand pos0 #xff)  0)
                     (ash x1 8)
-                    (ash (logand pos2 #xff)  0))))
+                    (ash x2 16))))
             (add-code vmgen oprand))
 
-         (if (eq x0-type :IMM32)
-           (add-code vmgen a0)))))))
+         (if (eq x2-type :IMM32)
+           (add-code vmgen (tagged-integer->cell a2))))))))
 
 ;----------------------------------------------------------------
-(defmethod primitive-id ((vmgen vmgen) a0 a1)
-  (if (numberp a0)
-    (primitive-movei vmgen a0 a1)
-    (primitive-move vmgen a0 a1)))
+; deprecated
+;(defmethod primitive-id ((vmgen vmgen) a0 a1)
+;  (if (numberp a0)
+;    (primitive-movei vmgen a0 a1)
+;    (primitive-move vmgen a0 a1)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-jump-or-conditional-jump ((vmgen vmgen) op-str op-stri32 label-or-reg)
@@ -333,9 +372,11 @@
   (add-code vmgen (if (eq bool-symbol :#f) 0 1)))
 
 ;----------------------------------------------------------------
-(defmethod primitive-movei ((vmgen vmgen) imm-or-label r1)
-  (if (listp imm-or-label)
-    (let ((label imm-or-label)
+; imm/(:label v)/(:address v)/(:integer v)
+(defmethod primitive-movei ((vmgen vmgen) imm-or-tagged-value r1)
+  (print `(:primitive-movei ,imm-or-tagged-value))
+  (if (listp imm-or-tagged-value)
+    (let ((tagged-value imm-or-tagged-value)
           (registers (registers vmgen)))
 
       (add-code vmgen (copy-list '(:INSTRUCTION "loadi32")))
@@ -343,7 +384,7 @@
         (logior
           (ash (ash (position :IMM32 (types vmgen)) 4) 24)
           (ash (logand (position r1 registers) #xff) 0)))
-      (add-code vmgen (copy-list label)))
+      (add-code vmgen (copy-list tagged-value)))
 
     (let ((imm (number-or-bool->number imm-or-label)))
       (assert (numberp imm))
@@ -405,7 +446,7 @@
            (mapcar #'(lambda (apair)
                        `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((vmgen vmgen) vm-code)
-       ;(print `(:vm-code ,vm-code))
+       (print `(:vm-code ,vm-code))
        (if (symbolp vm-code)
          (mark-label vmgen vm-code)
 
@@ -457,8 +498,6 @@
                  (:record-ref . #'primitive-record-ref)
                  (:record-offs . #'primitive-record-offs)
                  (:record-set! . #'primitive-record-set!)
-
-                 (:id . #'primitive-id)
 
                  (:move . #'primitive-move)
                  (:swap . #'primitive-swap)
