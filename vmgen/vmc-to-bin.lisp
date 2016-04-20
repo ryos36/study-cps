@@ -3,6 +3,8 @@
 
 ;----------------------------------------------------------------
 (defmethod to-binary-list ((vmgen vmgen))
+  (assert (null (global-value-offset-pos-pair vmgen))) ; not implement yet
+
   (let ((pure-codes (remove-if #'symbolp (get-codes vmgen)))
         (insn-pos-pair (reverse (insn-pos-pair vmgen)))
         (address-pos-pair (reverse (address-pos-pair vmgen)))

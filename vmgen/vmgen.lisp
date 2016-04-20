@@ -45,6 +45,14 @@
   (push (cons label (code-pos vmgen)) (label-pos-pair vmgen)))
 
 ;----------------------------------------------------------------
+(defmethod eval-offset ((vmgen vmgen) sym0 sym1)
+  (let* ((label-pos-pair (label-pos-pair vmgen))
+         (pos0 (assoc sym0 label-pos-pair))
+         (pos1 (assoc sym1 label-pos-pair)))
+    (if (and pos0 pos1)
+      (- (cdr pos1) (cdr pos0)))))
+
+;----------------------------------------------------------------
 (defmethod integer->cell ((vmgen vmgen) value)
   (let ((nagative-bit (if (< value 0) #x80000000 0)) 
         (abs-value (logand (ash value (tag-n vmgen)) #xEFFFFFFF)))
@@ -110,25 +118,27 @@
               pos)))))))
 
 ;----------------------------------------------------------------
-(defun get-value-type (ax registers)
+(defmethod get-value-type ((vmgen vmgen) ax registers)
   (if (numberp ax)
-    #|
-    ; deprecated
     (if (<= 0 ax 255)
       (values (logand ax #b11111111) :IMM8)
       (values 0 :IMM32))
-    |#
-    (values 0 :IMM32)
 
     (if (listp ax)
       (let ((key (car ax))
             (v (cadr ax)))
-        (print `(:gvt ,key ,v))
         (assert (or (eq key :ADDRESS) (eq key :LABEL) (eq key :INTEGER) (eq key :OFFSET)))
-        (if (or (eq key :OFFSET)
-                 (and (eq key :INTEGER) (<= 0 v 255)))
-          (values v :IMM8)
-          (values ax :IMM32)))
+        (if (eq key :OFFSET)
+          (let ((offset-n (eval-offset vmgen v (caddr ax))))
+            (if offset-n
+              (if (<= 0 offset-n 255)
+                (values offset-n :IMM8)
+                (values (integer->cell vmgen offset-n) :IMM32))
+              (values ax :IMM32)))
+
+          (if (and (eq key :INTEGER) (<= 0 v 255))
+            (values v :IMM8)
+            (values ax :IMM32))))
 
       (case ax
         (:|#T| (values 1 :IMM8))
@@ -142,10 +152,10 @@
     (let ((pos0 (position a0 registers))
           (pos2 (position a2 registers)))
 
-      (print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
-      (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
+      ;(print `(:o2 ,a0 ,a1 ,pos0 :a2 ,pos2))
+      (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
 
-        (print `(,x1 ,x1-type))
+        ;(print `(,x1 ,x1-type))
         (let ((x1-type-no (position x1-type (types vmgen))))
           (values
             (logior
@@ -174,7 +184,6 @@
 
            (add-code vmgen `(:INSTRUCTION ,inst-str)))
 
-         (print `(:oprand ,oprand ,a1))
          (add-code vmgen oprand)
 
          (when (eq x1-type :IMM32)
@@ -221,7 +230,7 @@
                            (reduce #'(lambda (i0 i1)
                                        (+ (ash i0 2) i1))
                                    (mapcar #'(lambda (x)
-                                               (multiple-value-bind (v type) (get-value-type x registers)
+                                               (multiple-value-bind (v type) (get-value-type vmgen x registers)
                                                  (if (eq type :REG) 0 2)))
                                            (reverse top16))
                                    :initial-value 0)))
@@ -259,7 +268,7 @@
 
       (assert (eq address-key :ADDRESS))
 
-      (multiple-value-bind (x1-value x1-type) (get-value-type a1 registers)
+      (multiple-value-bind (x1-value x1-type) (get-value-type vmgen a1 registers)
         (assert (not (eq x1-type :IMM32)))
         (let* ((pos2 (position a2 registers))
                (types (types vmgen))
@@ -293,27 +302,30 @@
 (defmethod primitive-record-set! ((vmgen vmgen) a0 a1 a2)
   (let ((registers (registers vmgen))
         (types (types vmgen)))
-    (multiple-value-bind (x2 x2-type) (get-value-type a2 registers)
-      (multiple-value-bind (x1 x1-type) (get-value-type a1 registers)
-        (assert (not (eq x1-type :IMM32)))
-
+    (multiple-value-bind (x2 x2-type) (get-value-type vmgen a2 registers)
+      (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
         (let ((x2-type-no (position x2-type types))
               (x1-type-no (position x1-type types))
               (pos0 (position a0 registers)))
 
+          ;(print `(:a1 ,x1 ,x1-type ,a1))
+          (assert pos0)
+
           (add-code vmgen (copy-list '(:INSTRUCTION "record_set")))
-          (print `(:x12 ,x1 ,x1-type))
           (let ((oprand
                   (logior
                     (ash (logior (ash x1-type-no 2)
                                  (ash x2-type-no 0)) 24)
                     (ash (logand pos0 #xff)  0)
-                    (ash x1 8)
+                    (ash (if (eq x1-type :IMM8) x1 0) 8)
                     (ash x2 16))))
             (add-code vmgen oprand))
 
+         (if (eq x1-type :IMM32)
+           (add-code vmgen (tagged-integer->cell vmgen a1)))
+
          (if (eq x2-type :IMM32)
-           (add-code vmgen (tagged-integer->cell a2))))))))
+           (add-code vmgen (tagged-integer->cell vmgen a2))))))))
 
 ;----------------------------------------------------------------
 ; deprecated
@@ -374,7 +386,7 @@
 ;----------------------------------------------------------------
 ; imm/(:label v)/(:address v)/(:integer v)
 (defmethod primitive-movei ((vmgen vmgen) imm-or-tagged-value r1)
-  (print `(:primitive-movei ,imm-or-tagged-value))
+  ;(print `(:primitive-movei ,imm-or-tagged-value))
   (if (listp imm-or-tagged-value)
     (let ((tagged-value imm-or-tagged-value)
           (registers (registers vmgen)))
@@ -386,7 +398,7 @@
           (ash (logand (position r1 registers) #xff) 0)))
       (add-code vmgen (copy-list tagged-value)))
 
-    (let ((imm (number-or-bool->number imm-or-label)))
+    (let ((imm (number-or-bool->number imm-or-tagged-value)))
       (assert (numberp imm))
       (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
         (assert (not (eq x1-type :REG)))
@@ -446,7 +458,7 @@
            (mapcar #'(lambda (apair)
                        `(,(car apair) (apply ,(cdr apair) `(,vmgen ,@(cdr vm-code))))) primitive-func-assoc-list )))
     `(defmethod ,func-name ((vmgen vmgen) vm-code)
-       (print `(:vm-code ,vm-code))
+       ;(print `(:vm-code ,vm-code))
        (if (symbolp vm-code)
          (mark-label vmgen vm-code)
 
@@ -456,10 +468,8 @@
            
            (if (and (calc-op? op) (<= 2 (length args)) (numberp (car args)) (symbolp (cadr args)))
              (let ((tmp (car args)))
-               (print `(:cargs ,args))
                (setf (car args) (cadr args))
-               (setf (cadr args) tmp)
-               (print `(:args ,args))))
+               (setf (cadr args) tmp)))
 
            (if (and (calc-op? op) (numberp (car args)) (numberp (cadr args)))
              (calc vmgen op args)

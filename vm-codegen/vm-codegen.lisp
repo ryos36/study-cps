@@ -21,7 +21,7 @@
     ((eq :#t expr) :#t)
     ((eq :#f expr) :#f)
     ((eq :unspecified expr) :unspecified)
-    ((eq :global-varible-pointer expr) `(:ADDRESS :global-varible-pointer))
+    ((eq :global-variable-pointer expr) `(:ADDRESS :global-variable-pointer))
     ((null expr) nil)
     ((symbolp expr) (cps-symbol codegen expr env))
     ((numberp expr) (copy-list `(:INTEGER ,expr)))
@@ -87,7 +87,7 @@
           (append
             (list
               (copy-tree
-                '(:movei (:ADDRESS :global-varible-pointer) :gp0))
+                '(:movei (:ADDRESS :global-variable-pointer) :gp0))
               (copy-tree
                 `(:movei (:ADDRESS ,main) :r0))
               `(:movei ,(make-label main :closure-name) :r1)
@@ -96,7 +96,7 @@
               (make-const-instruction codegen (make-label main :closure-name))
               exit
               (make-const-instruction codegen (make-label exit :closure-name))
-              :global-varible-pointer)
+              :global-variable-pointer)
             gvar
             (list
               (closure-name-to-label-name exit)
@@ -129,7 +129,7 @@
                 `(:movei ,@args ,@result)
                 `(:move ,@args ,@result)))
     (add-code codegen
-              `(:record-set! :gp0 (:offset :global-varible-pointer ,gvar) ,@result))))
+              `(:record-set! :gp0 (:offset :global-variable-pointer ,gvar) ,@result))))
 ;----------------------------------------------------------------
 (defmethod make-primitive-instruction ((codegen vm-codegen) expr op args &optional result)
   (copy-tree
