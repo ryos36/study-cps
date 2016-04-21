@@ -256,7 +256,7 @@
                   (if (atom n-info)
                     `(:RECORD-REF (,closure-name ,no) (,sym) (,cps-expr0))
 
-                    (case (caar n-info)
+                    (case (car n-info)
                       (:global-closure
                       `(:RECORD-REF (:GLOBAL-VARIABLE-POINTER ,no) (,sym) (,cps-expr0)))
                       (:fixh 
