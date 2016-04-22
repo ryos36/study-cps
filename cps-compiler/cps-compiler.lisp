@@ -11,7 +11,7 @@
 ;----------------------------------------------------------------
 (load "../eta-reduction/package.lisp")
 (load "../eta-reduction/cps.lisp")
-(load "../eta-reduction/optimize.lisp")
+;(load "../eta-reduction/optimize.lisp")
 
 ;----------------------------------------------------------------
 (load "../k-transfer/package.lisp")
@@ -111,6 +111,7 @@
 
 ;----------------------------------------------------------------
 (defparameter vmgen (make-instance 'cps-vmgen:vmgen))
+
 (defparameter *bin-file-name* nil)
 
 (defun vmgen-one (codes env)

@@ -184,7 +184,7 @@
         (args 
           (mapcar #'(lambda (x) (cps-terminal x env))
                       (caddr expr))))
-    ;(print `(cps-app ,call-func-name ,(caddr expr) ,args ,(cps-terminal (car args) env)))
+    ;(print `(:cps-app ,call-func-name ,(caddr expr) ,args ,(cps-terminal (car args) env)))
     (copy-tree `(:app ,call-func-name ,args))))
 
 

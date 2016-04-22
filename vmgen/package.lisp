@@ -9,6 +9,10 @@
 
   (:export 
     :vmgen
+    :make-integer->cell
+
+    :my-macro
+    :tag-n
 
     :convert
 
