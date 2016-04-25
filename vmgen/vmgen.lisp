@@ -145,7 +145,13 @@
 
 ;----------------------------------------------------------------
 (defun number-or-bool->number (num-or-sym &optional registers)
-  (if (listp num-or-sym) num-or-sym
+  ;(print `(:num-or-sym ,num-or-sym))
+  (if (listp num-or-sym) 
+    (let ((key (car num-or-sym))
+          (v (cadr num-or-sym)))
+      (if (eq key :INTEGER) v
+        num-or-sym))
+
     (if (numberp num-or-sym) num-or-sym
       (let ((sym num-or-sym))
         (assert (symbolp sym))
@@ -255,11 +261,11 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-heap-or-stack ((vmgen vmgen) op-str tagged-heap-list a2)
-  ;(print `(:phor ,op-str ,args ,a2))
   (let* ((registers (registers vmgen))
          (types (types vmgen))
          (args (cdr tagged-heap-list))
          (len (length args)))
+    ;(print `(:phor ,op-str ,args ,a2 ,len))
     (assert (<= len 256))
     (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
       (add-code vmgen `(:INSTRUCTION ,op-str))
@@ -295,7 +301,7 @@
 
 ;----------------------------------------------------------------
 (defmethod primitive-pop ((vmgen vmgen) arg0)
-  (assert (numberp arg0))
+  (assert (or (numberp arg0) (and (consp arg0) (eq (car arg0) :INTEGER))))
   (add-code vmgen (copy-list '(:INSTRUCTION "popi8")))
   (add-code vmgen arg0))
 
@@ -428,8 +434,7 @@
 ;----------------------------------------------------------------
 ; imm/(:label v)/(:address v)/(:integer v)
 (defmethod primitive-movei ((vmgen vmgen) imm-or-tagged-value r1)
-  ;(print `(:primitive-movei ,imm-or-tagged-value))
-  (if (listp imm-or-tagged-value)
+  (if (and (listp imm-or-tagged-value) (not (eq :INTEGER (car imm-or-tagged-value))))
     (let ((tagged-value imm-or-tagged-value)
           (registers (registers vmgen)))
 

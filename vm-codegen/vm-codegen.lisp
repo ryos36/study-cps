@@ -186,7 +186,8 @@
 ;----------------------------------------------------------------
 (defmethod make-movei-instruction ((codegen vm-codegen) imm reg-no)
   (let ((registers (registers codegen)))
-  `(:movei ,@(make-attribute codegen) ,imm ,(elt registers reg-no))))
+    (copy-tree
+      `(:movei ,@(make-attribute codegen) (:INTEGER ,imm) ,(elt registers reg-no)))))
 
 ;----------------------------------------------------------------
 (defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r1))
