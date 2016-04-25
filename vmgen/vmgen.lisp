@@ -146,11 +146,7 @@
 ;----------------------------------------------------------------
 (defun number-or-bool->number (num-or-sym &optional registers)
   ;(print `(:num-or-sym ,num-or-sym))
-  (if (listp num-or-sym) 
-    (let ((key (car num-or-sym))
-          (v (cadr num-or-sym)))
-      (if (eq key :INTEGER) v
-        num-or-sym))
+  (if (listp num-or-sym) num-or-sym
 
     (if (numberp num-or-sym) num-or-sym
       (let ((sym num-or-sym))
@@ -446,7 +442,6 @@
       (add-code vmgen (copy-list tagged-value)))
 
     (let ((imm (number-or-bool->number imm-or-tagged-value)))
-      (assert (numberp imm))
       (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
         (assert (not (eq x1-type :REG)))
 

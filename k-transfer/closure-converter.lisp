@@ -227,7 +227,7 @@
                            (let ((gvars (cddr elm)))
                              (values
                                (position sym gvars)
-                               (cdr elm)))
+                               (cadr elm)))
                            (values 
                                (get-pressed-num0 closure-name top-env 0)
                                (cdr elm))))
