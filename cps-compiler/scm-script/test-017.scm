@@ -1,4 +1,4 @@
-(:define gv00 32)
+(:define gv00 12)
 (:define gv0 gv00)
 (:define gv (:+ gv0 32))
 (:fix ((e (z) (:* (:+ gv gv0)

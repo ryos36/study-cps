@@ -59,47 +59,6 @@
     (assert (= 0 (logand (abs value) #x60000000)))
     (logior nagative-bit abs-value (integer-tag-value vmgen))))
 
-#|
-(defmethod integer->cell ((vmgen vmgen) value)
-  (let ((nagative-bit (if (< value 0) #x8000000000000000 0))
-        (abs-value (logand (ash value (tag-n vmgen)) #x7FFFFFFFFFFFFFFF)))
-    (assert (= 0 (logand value #x6000000000000000)))
-    (logior nagative-bit abs-value (integer-tag-value vmgen))))
-
-(defmacro make-integer->cell (vmgen int-is-64bit? tag-n integer-tag-value)
-  (print `(,vmgen ,(cps-vmgen:tag-n vmgen) ,integer-tag-value))
-  (let ((nagative-bit-value (ash 1 (if int-is-64bit? 63 31)))
-        (abs-mask-value (if int-is-64bit?
-                          #x7FFFFFFFFFFFFFFF
-                          #x7FFFFFFF))
-        (assert-mask-value (if int-is-64bit?
-                             #x6000000000000000
-                             #x60000000)))
-    `(defmethod integer->cell ((vmgen vmgen) value)
-       (let ((nagative-bit (if (< value 0) ,nagative-bit-value 0)) 
-             (abs-value (logand (ash value ,tag-n) ,abs-mask-value)))
-
-         (assert (= 0 (logand value ,assert-mask-value)))
-         (logior nagative-bit abs-value ,integer-tag-value)))))
-
-(defmethod integer->cell ((vmgen vmgen) value)
-  (let ((int-is-64bit? (int-is-64bit? vmgen)))
-    (let ((nagative-bit-value (ash 1 (if int-is-64bit? 63 31)))
-          (abs-mask-value (if int-is-64bit?
-                           #x7FFFFFFFFFFFFFFF
-                           #x7FFFFFFF))
-          (assert-mask-value (if int-is-64bit?
-                           #x6000000000000000
-                           #x60000000))
-          (tag-n (tag-n vmgen))
-          (integer-tag-value (integer-tag-value vmgen)))
-
-         (let ((nagative-bit (if (< value 0) nagative-bit-value 0)) 
-               (abs-value (logand (ash value tag-n) abs-mask-value)))
-           (assert (= 0 (logand (abs value) assert-mask-value)))
-           (logior nagative-bit abs-value integer-tag-value)))))
-|#
-
 ;----------------------------------------------------------------
 (defmethod tagged-integer->cell ((vmgen vmgen) tagged-integer)
   (let ((rv

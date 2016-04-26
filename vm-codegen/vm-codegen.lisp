@@ -642,6 +642,9 @@
             `(,op ,new-args ,new-result (,new-next-then-cps ,new-next-else-cps))))))
 
 ;----------------------------------------------------------------
+(defun can-change-op (op)
+        (or (eq op :+) (eq op :*)))
+
 (def-cps-func cps-primitive ((codegen vm-codegen) expr env)
   (let ((op (car expr)))
     (if (compare-primitivep op)
@@ -652,6 +655,12 @@
 
             (live-vars-tagged-list (caar env))
             (codegen-tagged-list (cadar env)))
+
+        ; adhoc!!
+        (when (and
+                (can-change-op op)
+                (numberp (car args)))
+          (setf args (reverse args)))
 
         (assert codegen-tagged-list)
         (assert (= 1 (length next-cpss)))
