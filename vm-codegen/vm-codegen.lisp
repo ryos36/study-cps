@@ -361,7 +361,7 @@ deprecated
     (mapc #'(lambda (del-pos)
               (setf (elt register-list del-pos) nil))
           (mapcar #'(lambda (arg) (let ((pos (position arg register-list)))
-                                    (print `(:pos ,pos :arg ,arg :not-used-reg ,not-used-reg))
+                                    ;(print `(:pos ,pos :arg ,arg :not-used-reg ,not-used-reg))
                                     (assert pos)
                                     pos)) not-used-reg))
 
@@ -542,7 +542,7 @@ deprecated
                    (let ((arg (car arg-list0))
                          (sym (car reg-list0)))
 
-                    (print `(:register-list ,reg-list0 :arg ,arg :sym ,sym))
+                    ;(print `(:register-list ,reg-list0 :arg ,arg :sym ,sym))
 
                     (let ((op
                             (if (eq arg sym) 'nil
@@ -588,7 +588,7 @@ deprecated
 
         (fill-args args (copy-list register-list) 0))
 
-      (print `(:func-name ,func-name ,register-list))
+      ;(print `(:func-name ,func-name ,register-list))
       (let* ((pos (position func-name register-list))
              (reg (elt registers pos)))
         (add-code codegen (make-jump-instruction codegen reg))

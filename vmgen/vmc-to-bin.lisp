@@ -82,6 +82,7 @@
 
                (search-label-pos (key n)
                  (let ((label-pos (assoc key label-pos-pair)))
+                   ;(print `(:label-pos-pair ,key ,label-pos-pair))
                    (assert label-pos)
                    (cdr label-pos)))
 
