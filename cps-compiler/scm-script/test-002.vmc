@@ -49,17 +49,17 @@
  |:label2|
  (:RECORD-REF :R1 (:INTEGER 0) :R9)
  (:MOVE :R1 :R0)
- (:MOVEI 1 :R1)
+ (:MOVEI (:INTEGER 1) :R1)
  (:JUMP :R9)
  |:label1|
  (:RECORD-REF :R1 (:INTEGER 0) :R9)
  (:MOVE :R1 :R0)
- (:MOVEI 0 :R1)
+ (:MOVEI (:INTEGER 0) :R1)
  (:JUMP :R9)
  |:label0|
  (:HEAP (:HEAP-LIST (:LABEL |:FIBO|)) :R9)
  (:RECORD-REF :R9 (:INTEGER 0) :R8)
  (:MOVE :R9 :R0)
  (:MOVEI (:ADDRESS EXIT) :R1)
- (:MOVEI 8 :R2)
+ (:MOVEI (:INTEGER 8) :R2)
  (:JUMP :R8))

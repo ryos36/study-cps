@@ -184,16 +184,23 @@
   `(:swap ,@(make-attribute codegen) ,(elt registers reg-no0) ,(elt registers reg-no1))))
 
 ;----------------------------------------------------------------
-(defmethod make-movei-instruction ((codegen vm-codegen) imm reg-no)
-  (let ((registers (registers codegen)))
+(defmethod make-movei-instruction ((codegen vm-codegen) arg reg-no)
+  (let ((registers (registers codegen))
+        (arg0
+          (if (keywordp arg) arg
+            (if (numberp arg) `(:INTEGER ,arg)
+              `(:ADDRESS ,arg)))))
     (copy-tree
-      `(:movei ,@(make-attribute codegen) (:INTEGER ,imm) ,(elt registers reg-no)))))
+      `(:movei ,@(make-attribute codegen) ,arg0 ,(elt registers reg-no)))))
 
 ;----------------------------------------------------------------
+#|
+deprecated
 (defmethod make-movei-global-function-instruction ((codegen vm-codegen) sym reg-no)
   (let ((registers (registers codegen)))
     (copy-tree
       `(:movei ,@(make-attribute codegen) (:ADDRESS ,sym) ,(elt registers reg-no)))))
+|#
 
 ;----------------------------------------------------------------
 (defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r1))
