@@ -565,25 +565,24 @@ deprecated
                                                           (find-free-pos (cdr reg-list1) (+ check-pos 1))))))
                                             `(:move ,cur-pos ,(find-free-pos (cdr reg-list0) (+ cur-pos 1)) :set)))))))))))
                       (if op
-                      (let ((new-pos (caddr op)))
-                        (case (car op)
-                          (:move 
-                            (add-code codegen (make-move-instruction codegen (cadr op) new-pos))
-                            (setf (elt reg-list0 (- new-pos cur-pos)) sym))
-                          (:swap 
-                            (add-code codegen (make-swap-instruction codegen (cadr op) new-pos))
-                            (setf (elt reg-list0 (- new-pos cur-pos)) sym))
-                          (otherwise 
-                            :only-set))
+                        (let ((new-pos (caddr op)))
+                          (case (car op)
+                            (:move 
+                              (add-code codegen (make-move-instruction codegen (cadr op) new-pos))
+                              (setf (elt reg-list0 (- new-pos cur-pos)) sym))
+                            (:swap 
+                              (add-code codegen (make-swap-instruction codegen (cadr op) new-pos))
+                              (setf (elt reg-list0 (- new-pos cur-pos)) sym))
+                            (otherwise 
+                              :only-set))
 
-                        (print `(:movei ,arg ,cur-pos ,register-list))
-                        (if (numberp arg)
-                          (add-code codegen (make-movei-instruction codegen arg cur-pos))
-                          (let ((pos (position arg register-list)))
-                            (if pos
-                              (add-code codegen (make-move-instruction codegen pos cur-pos))
-                              (add-code codegen
-                                        (make-movei-global-function-instruction codegen arg cur-pos))))))))
+                          ;(print `(:movei ,arg ,cur-pos ,register-list))
+                          (if (numberp arg)
+                            (add-code codegen (make-movei-instruction codegen arg cur-pos))
+                            (let ((pos (position arg register-list)))
+                              (if pos
+                                (add-code codegen (make-move-instruction codegen pos cur-pos))
+                                (add-code codegen (make-movei-instruction codegen arg cur-pos))))))))
 
                     (fill-args (cdr arg-list0) (cdr reg-list0) (+ cur-pos 1))))))
 
