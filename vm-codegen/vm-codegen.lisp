@@ -190,6 +190,12 @@
       `(:movei ,@(make-attribute codegen) (:INTEGER ,imm) ,(elt registers reg-no)))))
 
 ;----------------------------------------------------------------
+(defmethod make-movei-global-function-instruction ((codegen vm-codegen) sym reg-no)
+  (let ((registers (registers codegen)))
+    (copy-tree
+      `(:movei ,@(make-attribute codegen) (:ADDRESS ,sym) ,(elt registers reg-no)))))
+
+;----------------------------------------------------------------
 (defmethod make-halt-instruction ((codegen vm-codegen) &optional (arg :r1))
   `(:halt ,@(make-attribute codegen) ,arg))
 
@@ -213,14 +219,6 @@
       :test #'(lambda (s v)
                 (eq s (if (consp v) (car v) v))))))
 
-;----------------------------------------------------------------
-(defmethod set-global-variable-address-to-reg ((codegen vm-codegen) sym reg-no)
-  ;(assert nil)
-  (add-code codegen
-            (let ((registers (registers codegen)))
-              (copy-list
-              `(:movei ,@(make-attribute codegen) (:ADDRESS ,sym)
-                       ,(elt registers reg-no))))))
 
 ;----------------------------------------------------------------
 (defun reset-register-tagged-list (register-tagged-list)
@@ -269,7 +267,7 @@
           pos-list1))))
 
 ;----------------------------------------------------------------
-(defmethod update-register-usage ((codegen vm-codegen) codegen-tagged-list args env &optional (op nil))
+(defmethod update-register-usage ((codegen vm-codegen) codegen-tagged-list args env &optional (for-use t) (op nil))
   ;(print `(:update-register-usage ,codegen-tagged-list ,args))
   (let* ((register-tagged-list (cadr codegen-tagged-list))
          (register-list (cadr register-tagged-list))
@@ -299,21 +297,24 @@
 
       (let* ((registers (registers codegen))
              ;(x (print `(:args ,args)))
-             (arg-list00 
-               (mapcar #'(lambda (arg) (if (global-variable? codegen arg)
-                                                  (copy-list `(:ADDRESS ,arg))
-                                                  (if
-                                                    (cps-symbolp arg) arg :NOT-SYMBOL))) args))
-             ;(ixx (print `(:arg-list00 ,args ,arg-list00)))
-             (arg-list0 (if (and (eq op :RECORD-REF) (global-variable? codegen (car arg-list00))) (cons `(:ADDRESS ,(car arg-list00)) (cdr arg-list00)) arg-list00))
+             (arg-list0 
+               (mapcar #'(lambda (arg) (if (cps-symbolp arg) arg :NOT-SYMBOL)) args))
              ;(x (print `(:arg-list0 ,arg-list0 ,register-list)))
              (arg-list1 (mapcar #'(lambda (arg) (let ((found (position arg register-list)))
                                                   (if found found arg))) arg-list0))
              ;(x (print `(:arg-list1 ,arg-list1)))
              (pos-list0 (mapcar #'(lambda (arg) (if (need-not-find arg) arg (find-reg-in-app arg (cdr app-info-tagged-list)))) arg-list1))
              ;(x (print `(:pos-list0 ,pos-list0)))
-             (pos-list1 (mapcar #'(lambda (pos0) 
-                                    (if pos0 pos0 (find-empty-reg-no))) pos-list0)))
+             (pos-list1 (mapcar #'(lambda (pos0 arg0) 
+                                    (if pos0 pos0 
+                                      (if for-use
+                                        `(:ADDRESS ,arg0)
+                                        (find-empty-reg-no)))) pos-list0 args)))
+        #|
+        (if for-use
+          (mapcar #'(lambda (pos0 arg0) 
+                      (if (not pos0) (print `(:detect-gv ,arg0)))) pos-list0 arg-list1))
+        |#
 
         ;(print `(:pos-list1 ,pos-list1))
 
@@ -512,7 +513,7 @@
       `(,func-name ,new-args ,new-next-cps)))))
 
 ;----------------------------------------------------------------
-(def-cps-func cps-app ((codegen vm-codegen) expr env)
+(defmethod cps-app ((codegen vm-codegen) expr env)
   ;(print `(:cps-app ,expr ,env))
   (let ((func-name (cadr expr))
         (args (caddr expr))
@@ -526,42 +527,62 @@
 
       ;(print `(:register-list ,register-list :args ,args))
 
-      (let ((cur-pos 0))
-        (mapl #'(lambda (arg-list reg-list) 
-                  (let ((arg (car arg-list))
-                        (sym (car reg-list)))
+      ; need global-variable? <= ToDo
+      (labels ((fill-args (arg-list0 reg-list0 cur-pos)
+                 (if (null arg-list0) :done
+                   (let ((arg (car arg-list0))
+                         (sym (car reg-list0)))
 
-                    ;(print `(:0register-list ,register-list :args ,args))
-                    (if (global-variable? codegen arg)
-                      (set-global-variable-address-to-reg codegen arg cur-pos)
+                    ;(print `(:register-list ,reg-list0 :arg ,arg :sym ,sym))
 
-                      (if (eq arg sym) :already-set 
-                        (if (cps-symbolp arg)
+                    (let ((op
+                            (if (eq arg sym) 'nil
+                              (if (or (null sym) (numberp sym)) '(:set)
+                                (let ((sym-pos-in-arg-list0 (position sym arg-list0)))
+                                  (if (null sym-pos-in-arg-list0) '(:set)
+                                    (let* ((swap-sym (elt reg-list0 sym-pos-in-arg-list0))
+                                           (swap-sym-pos-in-arg-list0 (position swap-sym (cdr arg-list0))))
+                                      ;(print `(:swap-sym ,swap-sym ,swap-sym-pos-in-arg-list0))
+                                      (if (null swap-sym-pos-in-arg-list0)
+                                        `(:move ,cur-pos ,(+ cur-pos sym-pos-in-arg-list0) :set)
+                                        (if (symbolp arg)
+                                          `(:swap ,cur-pos ,(+ cur-pos (position arg reg-list0)) :set)
+                                          (labels ((find-free-pos (reg-list1 check-pos)
+                                                      (assert reg-list1)
+                                                      (let ((sym1 (car reg-list1)))
+                                                        (if (or (numberp sym1)
+                                                                (null (find sym1 arg-list0)))
+                                                          check-pos
+                                                          (find-free-pos (cdr reg-list1) (+ check-pos 1))))))
+                                            `(:move ,cur-pos ,(find-free-pos (cdr reg-list0) (+ cur-pos 1)) :set)))))))))))
+                      (when op
+                        (case (car op)
+                          (:move 
+                            (let ((move-pos (caddr op)))
+                              (add-code codegen (make-move-instruction codegen (cadr op) move-pos))
+                              (setf (elt reg-list0 (- move-pos cur-pos)) sym)
+                              )
+                                 )
+                          (:swap 
+                            (let ((swap-pos (caddr op)))
+                              ;(print `(:swap ,op ,reg-list0 ,arg-list0))
+                              (add-code codegen (make-swap-instruction codegen (cadr op) swap-pos))
+                              (setf (elt reg-list0 (- swap-pos cur-pos)) sym)))
+                          (otherwise 
+                            :only-set))
+
+                        ;(print `(:movei ,arg ,cur-pos ,register-list))
+                        (if (numberp arg)
+                          (add-code codegen (make-movei-instruction codegen arg cur-pos))
                           (let ((pos (position arg register-list)))
-                            (assert pos)
-                            (let ((new-pos (position sym (cdr arg-list))))
-                              ;(print `(:new-pos ,arg ,new-pos))
-                              (if new-pos
-                                (let* ((abs-new-pos (+ cur-pos new-pos))
-                                       (disappeared-sym (elt register-list abs-new-pos)))
-                                  ;(print `(:elt ,cur-pos ,new-pos ,abs-new-pos ,disappeared-sym))
-                                  (if (find disappeared-sym (cdr arg-list))
-                                    (progn
-                                      ;(print `(:elt ,register-list ,(elt register-list pos)))
+                            (if pos
+                              (add-code codegen (make-move-instruction codegen pos cur-pos))
+                              (add-code codegen
+                                        (make-movei-global-function-instruction codegen arg cur-pos)))))))
 
-                                      (add-code codegen (make-swap-instruction codegen pos cur-pos))
-                                      (setf (elt register-list cur-pos) arg)
-                                      (setf (elt register-list pos) disappeared-sym))
-                                    (progn 
-                                      (add-code codegen (make-move-instruction codegen cur-pos abs-new-pos))
-                                      (add-code codegen (make-move-instruction codegen pos cur-pos)))))
-                                (add-code codegen (make-move-instruction codegen pos cur-pos)))))
-                          
-                          (add-code codegen (make-movei-instruction codegen arg cur-pos)))))
+                    (fill-args (cdr arg-list0) (cdr reg-list0) (+ cur-pos 1))))))
 
-                  (incf cur-pos)))
-
-                          args (copy-list register-list)))
+        (fill-args args (copy-list register-list) 0))
 
       ;(print `(:func-name ,func-name ,register-list))
       (let* ((pos (position func-name register-list))
@@ -593,10 +614,10 @@
                (live-vars (cdr live-tagged-list))
 
                (not-used-reg (set-difference declare-vars live-vars))
-               (new-args (update-register-usage codegen codegen-tagged-list args env op))
+               (new-args (update-register-usage codegen codegen-tagged-list args env t op))
                ;(x (print `(:op ,op)))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
-               (new-result (update-register-usage codegen codegen-tagged-list result env)))
+               (new-result (update-register-usage codegen codegen-tagged-list result env nil)))
           ; primitive-code
           ; You can optimize by using peephole 
           (add-code codegen (make-primitive-instruction codegen expr op new-args))
@@ -646,11 +667,11 @@
 
                (not-used-reg (set-difference declare-vars live-vars))
                ;(x (print `(:live-vars-list ,live-vars-list)))
-               (new-args (update-register-usage codegen codegen-tagged-list args env op))
+               (new-args (update-register-usage codegen codegen-tagged-list args env t op))
                ;(x (print `(:new-args ,new-args)))
                (not-used-reg (update-register-not-used codegen codegen-tagged-list live-vars-tagged-list))
                ;(x (print `(:not-used-reg ,not-used-reg)))
-               (new-result (update-register-usage codegen codegen-tagged-list result env)))
+               (new-result (update-register-usage codegen codegen-tagged-list result env nil)))
 
           ;(print `(:op ,op (,(copy-tree args) :=> ,(copy-tree new-args) (,(copy-tree result) :=> ,(copy-tree new-result)))))
           ;(print `(:live-vars ,(copy-tree (cadr live-vars-tagged-list)) :not-used ,not-used-reg))

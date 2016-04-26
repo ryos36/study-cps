@@ -299,7 +299,7 @@
 (defmethod primitive-pop ((vmgen vmgen) arg0)
   (assert (or (numberp arg0) (and (consp arg0) (eq (car arg0) :INTEGER))))
   (add-code vmgen (copy-list '(:INSTRUCTION "popi8")))
-  (add-code vmgen arg0))
+  (add-code vmgen (cadr arg0))) ; always (:INTEGER <val>)
 
 ;----------------------------------------------------------------
 (defmethod primitive-record-ref ((vmgen vmgen) a0 a1 a2)

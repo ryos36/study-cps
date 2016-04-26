@@ -1,4 +1,4 @@
-(:define gv0 32)
+(:define gv0 30)
 (:define gv 32)
 (:fix ((e (c) (:* (:+ c 3))))
       (:exit 
