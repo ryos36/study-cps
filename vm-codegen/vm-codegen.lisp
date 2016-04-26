@@ -555,19 +555,14 @@
                                                           check-pos
                                                           (find-free-pos (cdr reg-list1) (+ check-pos 1))))))
                                             `(:move ,cur-pos ,(find-free-pos (cdr reg-list0) (+ cur-pos 1)) :set)))))))))))
-                      (when op
+                      (let ((new-pos (caddr op)))
                         (case (car op)
                           (:move 
-                            (let ((move-pos (caddr op)))
-                              (add-code codegen (make-move-instruction codegen (cadr op) move-pos))
-                              (setf (elt reg-list0 (- move-pos cur-pos)) sym)
-                              )
-                                 )
+                            (add-code codegen (make-move-instruction codegen (cadr op) new-pos))
+                            (setf (elt reg-list0 (- new-pos cur-pos)) sym))
                           (:swap 
-                            (let ((swap-pos (caddr op)))
-                              ;(print `(:swap ,op ,reg-list0 ,arg-list0))
-                              (add-code codegen (make-swap-instruction codegen (cadr op) swap-pos))
-                              (setf (elt reg-list0 (- swap-pos cur-pos)) sym)))
+                            (add-code codegen (make-swap-instruction codegen (cadr op) new-pos))
+                            (setf (elt reg-list0 (- new-pos cur-pos)) sym))
                           (otherwise 
                             :only-set))
 

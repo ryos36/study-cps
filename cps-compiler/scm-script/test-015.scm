@@ -1,6 +1,6 @@
 (:define gv0 30)
 (:define gv 32)
-(:fix ((e (c) (:* (:+ c 3))))
+(:fix ((e (c) (:* (:+ c 3) 4)))
       (:exit 
         (:fix ((f (a) (:* (:+ a gv)
                           (:fix ((g (b) (:* gv (:+ a gv))))
