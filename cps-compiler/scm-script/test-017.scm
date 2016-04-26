@@ -1,12 +1,6 @@
-(:define gv00 12)
-(:define gv0 gv00)
-(:define gv (:+ gv0 32))
-(:fix ((e (z) (:* (:+ gv gv0)
-                  (:fix ((f (a) (:* (:+ a z)
-                                    (:fix ((g (b) (:* z
-                                                      (:fix ((h (c) (:+ c gv)))
-                                                            (h 5)))))
-                                          (g 6)))))
-                        (f 7)))))
-      (:exit (e gv00)))
-
+(:define k 10)
+(:fix ((g0 (x)
+           (:fix ((f0 (a b) (:+ (f1 a) (:- k b)))
+                  (f1 (c) (:+ (:* c k) (:* c x))))
+                 (:exit (f0 2 3)))))
+      (g0 123))

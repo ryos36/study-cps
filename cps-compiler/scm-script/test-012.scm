@@ -1,6 +1,9 @@
-(:define k 10)
-(:fix ((g0 (x)
-           (:fix ((f0 (a b) (:+ (f1 a) (:- k b)))
-                  (f1 (c) (:+ (:* c k) (:* c x))))
-                 (:exit (f0 2 3)))))
-      (g0 123))
+(:fix ((fact0 (n rv)
+          (:if (:= n 0)
+               rv
+               (fact0 (:- n 1) (:* n rv))))
+
+       (fact (n)
+             (fact0 n 1)))
+
+      (fact 10))

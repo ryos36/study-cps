@@ -35,3 +35,4 @@
          (rand)
          (:exit (rand))))
 
+spill でレジスタが足りない。

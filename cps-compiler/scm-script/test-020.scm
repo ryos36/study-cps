@@ -1,0 +1,10 @@
+(:define gv0 30)
+(:define gv 32)
+(:fix ((e (c) (:* (:+ c 3) 4)))
+      (:exit 
+        (:fix ((f (a) (:* (:+ a gv)
+                          (:fix ((g (b) (:* gv (:+ a gv))))
+                                (g 4)))))
+              (f 35))))
+(:fix ((f3 (a) (:* 3 a)))
+      (f3 2))

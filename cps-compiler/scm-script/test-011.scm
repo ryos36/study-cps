@@ -1,4 +1,5 @@
-(:define x 33)
-(:define y 40)
-(:define z (:+ x 3))
-(:+ x z)
+(:fix ((fact (n)
+           (:if (:= n 0)
+                1
+                (:* n (fact (:- n 1))))))
+        (fact 10))

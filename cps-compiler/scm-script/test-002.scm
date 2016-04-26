@@ -1,6 +1,3 @@
-(:fix ((fibo (n)
-             (:if (:= n 0) 0
-                  (:if (:= n 1) 1
-                       (:+ (fibo (:- n 1)) (fibo (:- n 2)))))))
-      (fibo 8))
-
+(:define a 3)
+(:define b 4)
+(:exit (:- (:- (:- (:- a b) 8) 256) -15))
