@@ -333,7 +333,7 @@
       (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
         (multiple-value-bind (x2 x2-type) (get-value-type vmgen a2 registers)
 
-          (print `(:a0 ,a0 :a1 ,x1 ,x1-type ,a1, :a2 ,a2))
+          ;(print `(:a0 ,a0 :a1 ,x1 ,x1-type ,a1, :a2 ,a2))
           (assert pos0)
 
           (add-code vmgen (copy-list '(:INSTRUCTION "record_seti8")))

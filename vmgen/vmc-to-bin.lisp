@@ -107,6 +107,7 @@
                  pure-codes))
 
         (normalize-codes)
+        ;(print `(:label-offset-pos-list ,label-offset-pos-list ,label-offset-pos-pair))
         (let* ((insn-name-byte-list (make-insn-name-byte-list))
                (insn-name-byte-list-len (round4 0 (length insn-name-byte-list)))
                (inbl-len/4 (/ insn-name-byte-list-len 4))
