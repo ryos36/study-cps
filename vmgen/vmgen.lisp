@@ -296,7 +296,7 @@
         (assert (eq x1-type :IMM8))
         (let* ((r2 (position a2 registers))
 
-               (operand (make-operand :IMM32 :IMM8 :REG 0 x1-value r2)))
+               (operand (make-operand vmgen :IMM32 :IMM8 :REG 0 x1-value r2)))
 
           (add-code vmgen (copy-list '(:INSTRUCTION "record_refi8_address")))
           (add-code vmgen operand)
@@ -439,18 +439,20 @@
 
 ;----------------------------------------------------------------
 (defmethod calc ((vmgen vmgen) op args)
-   (multiple-value-bind (a0 a1 a2) (values-list args)
-     (case op
-       (:+ (primitive-movei vmgen (+ a0 a1) a2))
-       (:- (primitive-movei vmgen (- a0 a1) a2))
-       (:* (primitive-movei vmgen (* a0 a1) a2))
-       (:/ (primitive-movei vmgen (floor (/ a0 a1)) a2))
-       (:>> (primitive-movei vmgen (ash a0 (- a1)) a2))
-       (:<< (primitive-movei vmgen (ash a0 a1) a2))
+  (multiple-value-bind (a0 a1 a2) (values-list args)
+     (let ((n0 (cadr a0))
+           (n1 (cadr a1)))
+       (case op
+         (:+ (primitive-movei vmgen `(:INTEGER ,(+ n0 n1)) a2))
+         (:- (primitive-movei vmgen `(:INTEGER ,(- n0 n1)) a2))
+         (:* (primitive-movei vmgen `(:INTEGER ,(* n0 n1)) a2))
+         (:/ (primitive-movei vmgen `(:INTEGER ,(floor (/ n0 n1))) a2))
+         (:>> (primitive-movei vmgen `(:INTEGER ,(ash n0 (- n1))) a2))
+         (:<< (primitive-movei vmgen `(:INTEGER ,(ash n0 n1)) a2))
 
-       (:= (primitive-set-flag vmgen (if (= a0 a1) :#t :#f) a2))
+         (:= (primitive-set-flag vmgen (if (= n0 n1) :#t :#f) a2))
 
-       (otherwise (assert (eq "no operation" op))))))
+         (otherwise (assert (eq "no operation" op)))))))
 
 ;----------------------------------------------------------------
 (defmacro make-converter (func-name primitive-func-assoc-list)
@@ -466,12 +468,19 @@
                (args (cdr vm-code))
                (len (length vm-code)))
            
-           (if (and (calc-op? op) (<= 2 (length args)) (numberp (car args)) (symbolp (cadr args)))
+           (if (and (calc-op? op) (<= 2 (length args)) 
+                    (consp (car args)) (eq :INTEGER (caar args))
+                    (symbolp (cadr args)))
              (let ((tmp (car args)))
+               ;swap
                (setf (car args) (cadr args))
                (setf (cadr args) tmp)))
 
-           (if (and (calc-op? op) (numberp (car args)) (numberp (cadr args)))
+           ;(print `(:calc-op ,op ,(calc-op? op) ,(and (calc-op? op) (consp (car args)) (eq :INTEGER (caar args)) (consp (cadr args)) (eq :INTEGER (caadr args)))))
+
+           (if (and (calc-op? op) 
+                    (consp (car args)) (eq :INTEGER (caar args))
+                    (consp (cadr args)) (eq :INTEGER (caadr args)))
              (calc vmgen op args)
 
              (case op
