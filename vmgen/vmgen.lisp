@@ -71,6 +71,7 @@
 
 ;----------------------------------------------------------------
 (defmethod make-operand ((vmgen vmgen) x0-type x1-type x2-type r0-value r1-value r2-value)
+  ;(print `(:make-operand ,r0-value ,r1-value ,r2-value))
   (let ((types (types vmgen)))
     (let ((x0-type-n (position x0-type (types vmgen)))
           (x1-type-n (position x1-type (types vmgen)))
@@ -182,15 +183,9 @@
       (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
 
         ;(print `(,a1 ,x1 ,x1-type))
-        (let ((x1-type-no (position x1-type (types vmgen))))
-          (values
-            (logior
-              (ash (ash x1-type-no 2) 24)
-              (ash (logand pos0 #xff) 16)
-              (ash x1 8)
-              (ash (logand pos2 #xff)  0))
-
-            x1-type))))))
+        (values
+          (make-operand vmgen :REG x1-type :REG pos0 x1 pos2)
+          x1-type)))))
 
 ;----------------------------------------------------------------
 (defmacro make-two-args-primitive (func-name code-list)
@@ -286,40 +281,28 @@
 ;----------------------------------------------------------------
 (defmethod primitive-record-ref ((vmgen vmgen) a0 a1 a2)
   (if (atom a0)
-    (primitive-record-ref-pure vmgen a0 a1 a2)
+    (primitive-record-ref-using-reg vmgen a0 a1 a2)
 
+    ;here covers only (:ADDRESS imm32)
     (let ((address-key (car a0))
           (name (cadr a0))
           (registers (registers vmgen)))
 
+      ;(print `(:primitive-record-ref ,a0 ,a1 ,a2))
+
       (assert (eq address-key :ADDRESS))
 
       (multiple-value-bind (x1-value x1-type) (get-value-type vmgen a1 registers)
-        (assert (not (eq x1-type :IMM32)))
-        (let* ((pos2 (position a2 registers))
-               (types (types vmgen))
-               (imm32-no (position :IMM32 types))
-               (x1-type-no (position x1-type types))
+        (assert (eq x1-type :IMM8))
+        (let* ((r2 (position a2 registers))
 
-               (operand
-                 (logior
-                   (ash 
-                     (logior
-                       (ash imm32-no 4)
-                       (ash x1-type-no 2)) 24)
-                   (ash 0 16)
-                   (ash x1-value 8)
-                   (ash (logand pos2 #xff)  0))))
+               (operand (make-operand :IMM32 :IMM8 :REG 0 x1-value r2)))
 
-          (add-code vmgen (copy-list
-                            (if (eq x1-type :IMM8)
-                              '(:INSTRUCTION "record_refi8_address")
-                              '(:INSTRUCTION "record_ref_address"))))
-
+          (add-code vmgen (copy-list '(:INSTRUCTION "record_refi8_address")))
           (add-code vmgen operand)
           (add-code vmgen a0))))))
 ;----------------------------------------------------------------
-(make-two-args-primitive primitive-record-ref-pure ("record_ref" "record_refi8" :NA))
+(make-two-args-primitive primitive-record-ref-using-reg ("record_ref" "record_refi8" :NA))
 (make-two-args-primitive primitive-record-offs ("record_offs" "record_offsi8" :NA))
 
 ;----------------------------------------------------------------
@@ -411,9 +394,8 @@
 
       (add-code vmgen (copy-list '(:INSTRUCTION "loadi32")))
       (add-code vmgen
-        (logior
-          (ash (ash (position :IMM32 (types vmgen)) 4) 24)
-          (ash (logand (position r1 registers) #xff) 0)))
+                (make-operand vmgen :REG :IMM32 :REG 0 0 (position r1 registers)))
+
       (add-code vmgen (copy-list tagged-value)))
 
     (let ((imm (number-or-bool->number imm-or-tagged-value)))
@@ -451,6 +433,7 @@
     (add-code vmgen (bit->hex usage-of-registers 0))))
 
 ;----------------------------------------------------------------
+; adhoc
 (defun calc-op? (op)
   (find op '(:+ :- :* :/ :>> :<< :=)))
 
