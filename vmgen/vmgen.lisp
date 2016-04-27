@@ -70,6 +70,29 @@
     (if rv rv tagged-integer)))
 
 ;----------------------------------------------------------------
+(defmethod make-operand ((vmgen vmgen) x0-type x1-type x2-type r0-value r1-value r2-value)
+  (let ((types (types vmgen)))
+    (let ((x0-type-n (position x0-type (types vmgen)))
+          (x1-type-n (position x1-type (types vmgen)))
+          (x2-type-n (position x2-type (types vmgen)))
+          (r0-value8 (logand r0-value #xff))
+          (r1-value8 (logand r1-value #xff))
+          (r2-value8 (logand r2-value #xff)))
+      (assert (and x0-type-n x1-type-n x2-type-n
+                   (= r0-value r0-value8)
+                   (= r1-value r1-value8)
+                   (= r2-value r2-value8)))
+
+      (logior
+        (ash x0-type-n (+ 4 24))
+        (ash x1-type-n (+ 2 24))
+        (ash x2-type-n (+ 0 24))
+
+        (ash r0-value8 16)
+        (ash r1-value8  8)
+        (ash r2-value8  0)))))
+
+;----------------------------------------------------------------
 (defmethod add-code ((vmgen vmgen) code)
   (push (tagged-integer->cell vmgen code) (codes vmgen))
 
@@ -174,7 +197,7 @@
   `(defmethod ,func-name ((vmgen vmgen) a0 a1 &optional (a2 :r0))
      ;(print `(:args ,a0 ,a1 ,a2))
      (let ((types (types vmgen)))
-       (multiple-value-bind (oprand x1-type) (reg-pos vmgen a0 a1 a2)
+       (multiple-value-bind (operand x1-type) (reg-pos vmgen a0 a1 a2)
          ,(if (eq (car code-list) :NA) `(assert (not (eq x1-type :REG))))
          ,(if (eq (cadr code-list) :NA) `(assert (not (eq x1-type :IMM8))))
          ,(if (eq (caddr code-list) :NA) `(assert (not (eq x1-type :IMM32))))
@@ -187,7 +210,7 @@
 
            (add-code vmgen `(:INSTRUCTION ,inst-str)))
 
-         (add-code vmgen oprand)
+         (add-code vmgen operand)
 
          (when (eq x1-type :IMM32)
            (add-code vmgen a1))))))
@@ -222,9 +245,9 @@
          (len (length args)))
     ;(print `(:phor ,op-str ,args ,a2 ,len))
     (assert (<= len 256))
-    (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 len a2)
+    (multiple-value-bind (operand x1-type) (reg-pos vmgen :r0 len a2)
       (add-code vmgen `(:INSTRUCTION ,op-str))
-      (add-code vmgen oprand)
+      (add-code vmgen operand)
       
       (labels ((format-heap-list (hlist)
                 (if (not (null hlist))
@@ -278,7 +301,7 @@
                (imm32-no (position :IMM32 types))
                (x1-type-no (position x1-type types))
 
-               (oprand
+               (operand
                  (logior
                    (ash 
                      (logior
@@ -293,7 +316,7 @@
                               '(:INSTRUCTION "record_refi8_address")
                               '(:INSTRUCTION "record_ref_address"))))
 
-          (add-code vmgen oprand)
+          (add-code vmgen operand)
           (add-code vmgen a0))))))
 ;----------------------------------------------------------------
 (make-two-args-primitive primitive-record-ref-pure ("record_ref" "record_refi8" :NA))
@@ -305,30 +328,23 @@
 (defmethod primitive-record-set! ((vmgen vmgen) a0 a1 a2)
   (let ((registers (registers vmgen))
         (types (types vmgen)))
-    (multiple-value-bind (x2 x2-type) (get-value-type vmgen a2 registers)
-      (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
-        (let ((x2-type-no (position x2-type types))
-              (x1-type-no (position x1-type types))
-              (pos0 (position a0 registers)))
 
-          ;(print `(:a1 ,x1 ,x1-type ,a1))
+    (let ((pos0 (position a0 registers)))
+      (multiple-value-bind (x1 x1-type) (get-value-type vmgen a1 registers)
+        (multiple-value-bind (x2 x2-type) (get-value-type vmgen a2 registers)
+
+          (print `(:a0 ,a0 :a1 ,x1 ,x1-type ,a1, :a2 ,a2))
           (assert pos0)
 
-          (add-code vmgen (copy-list '(:INSTRUCTION "record_set")))
-          (let ((oprand
-                  (logior
-                    (ash (logior (ash x1-type-no 2)
-                                 (ash x2-type-no 0)) 24)
-                    (ash (logand pos0 #xff)  0)
-                    (ash (if (eq x1-type :IMM8) x1 0) 8)
-                    (ash x2 16))))
-            (add-code vmgen oprand))
+          (add-code vmgen (copy-list '(:INSTRUCTION "record_seti8")))
+          (add-code vmgen 
+                    (make-operand vmgen :REG x1-type x2-type pos0 x1 x2))
 
-         (if (eq x1-type :IMM32)
-           (add-code vmgen (tagged-integer->cell vmgen a1)))
+          (if (eq x1-type :IMM32)
+            (add-code vmgen (tagged-integer->cell vmgen a1)))
 
-         (if (eq x2-type :IMM32)
-           (add-code vmgen (tagged-integer->cell vmgen a2))))))))
+          (if (eq x2-type :IMM32)
+            (add-code vmgen (tagged-integer->cell vmgen a2))))))))
 
 ;----------------------------------------------------------------
 ; deprecated
@@ -367,16 +383,16 @@
 ;----------------------------------------------------------------
 (defmethod primitive-move ((vmgen vmgen) r0 r1)
   (add-code vmgen (copy-list `(:INSTRUCTION "move")))
-  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
+  (multiple-value-bind (operand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
-    (add-code vmgen oprand)))
+    (add-code vmgen operand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-swap ((vmgen vmgen) r0 r1)
   (add-code vmgen (copy-list `(:INSTRUCTION "swap")))
-  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 r1)
+  (multiple-value-bind (operand x1-type) (reg-pos vmgen r0 r1)
     (assert (eq x1-type :REG))
-    (add-code vmgen oprand)))
+    (add-code vmgen operand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-set-flag ((vmgen vmgen) bool-symbol r1)
@@ -401,19 +417,19 @@
       (add-code vmgen (copy-list tagged-value)))
 
     (let ((imm (number-or-bool->number imm-or-tagged-value)))
-      (multiple-value-bind (oprand x1-type) (reg-pos vmgen :r0 imm r1)
+      (multiple-value-bind (operand x1-type) (reg-pos vmgen :r0 imm r1)
         (assert (not (eq x1-type :REG)))
 
         (add-code vmgen `(:INSTRUCTION ,(if (eq x1-type :IMM32) "movei32" "movei8")))
-        (add-code vmgen oprand)
+        (add-code vmgen operand)
         (if (eq x1-type :IMM32)
           (add-code vmgen imm))))))
 
 ;----------------------------------------------------------------
 (defmethod primitive-halt ((vmgen vmgen) r0)
   (add-code vmgen (copy-list '(:INSTRUCTION "halt")))
-  (multiple-value-bind (oprand x1-type) (reg-pos vmgen r0 :r0)
-    (add-code vmgen oprand)))
+  (multiple-value-bind (operand x1-type) (reg-pos vmgen r0 :r0)
+    (add-code vmgen operand)))
 
 ;----------------------------------------------------------------
 (defmethod primitive-const ((vmgen vmgen) v)
