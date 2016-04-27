@@ -666,7 +666,11 @@ deprecated
         (when (and
                 (can-change-op op)
                 (numberp (car args)))
-          (setf args (reverse args)))
+          (if (numberp (cadr args))
+            (let ((v (if (eq op :+) (apply #'+ args) (apply #'* args))))
+              (setf args (list v)
+                    op :movei))
+            (setf args (reverse args))))
 
         (assert codegen-tagged-list)
         (assert (= 1 (length next-cpss)))
