@@ -312,7 +312,7 @@
          (kont-sym (cps-gensym))
          (return-app (copy-tree `(:APP ,kont-sym (RESULT))))
          (new-cps-expr (copy-tree 
-                         `(:FIXH ((,func-name (,kont-sym ,@args) FUNC-BODY)) CONT)))
+                         `(:DEFINE () (,func-name) ((:FIXH ((,func-name (,kont-sym ,@args) FUNC-BODY)) CONT)))))
          (cont-list (pickup-list new-cps-expr 'CONT))
          (func-body-list (pickup-list new-cps-expr 'FUNC-BODY))
          (result-list (pickup-list return-app 'RESULT)))

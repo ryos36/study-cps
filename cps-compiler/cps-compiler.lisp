@@ -95,7 +95,7 @@
 
 (defun cps-codegen-parse-one (cps-expr env)
   (let* ((finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
-         (codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label"))
+         (codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label" :generate-main (not *compile-library-mode*)))
          (finder-env (cps-parser:make-new-env finder '() '()))
          (result (cps-parser:cps-parse finder cps-expr finder-env))
          (codegen-env (cps-parser:make-new-env codegen '()
@@ -129,6 +129,7 @@
   codes)
 
 ;----------------------------------------------------------------
+(defparameter *compile-library-mode* nil)
 (defparameter *debug-modes* nil)
 (defun debug-print-cps (expr env)
 
@@ -175,7 +176,7 @@
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
-(defun this-usage () (format *error-output* "~%Usage:clisp cps-compiler.lisp [-d] <scm file>~%"))
+(defun this-usage () (format *error-output* "~%Usage:clisp cps-compiler.lisp [-c][-d] <scm file>~%"))
 
 ;----------------------------------------------------------------
 (defun check-option (option-list) 
@@ -185,19 +186,23 @@
             (c1 (elt o 1))
             (str2- (string-upcase (substring o 2))))
         (when (eq c0 #\-)
-          (if (= (length str2-) 0)
-            (push :process *debug-modes*)
-            (flet ((push-w (key0)
-                     (push key0 *debug-modes*)
-                     (set-debug-mode *csf-resources* key0)))
-              (let ((key (if (string= str2- ":VM-CODEGEN") :codegen
-                           (intern 
-                             (if (eq (elt str2- 0) #\:) 
-                               (substring str2- 1)
-                               str2-) :keyword))))
-                (push-w key))))
+          (case c1
+            (#\d
+              (if (= (length str2-) 0)
+                (push :process *debug-modes*)
+                (flet ((push-w (key0)
+                         (push key0 *debug-modes*)
+                         (set-debug-mode *csf-resources* key0)))
+                  (let ((key (if (string= str2- ":VM-CODEGEN") :codegen
+                               (intern 
+                                 (if (eq (elt str2- 0) #\:) 
+                                   (substring str2- 1)
+                                   str2-) :keyword))))
+                    (push-w key)))))
+            (#\c
+             (setf *compile-library-mode* t)))
 
-          (check-option (cdr option-list)))))))
+            (check-option (cdr option-list)))))))
 
 ;----------------------------------------------------------------
 (let ((av (argv))
