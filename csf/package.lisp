@@ -1,7 +1,7 @@
 ;
 ; Sinby Corp. 2016
 ;
-; Sinby Comiler 'Study Framework
+; Sinby Compiler Study Framework
 ;
 
 (in-package :cl-user)
