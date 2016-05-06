@@ -24,5 +24,6 @@
 
     :to-binary-list
     :write-binary-with-open-file 
-    ))
+
+    :symbol-to-c-label))
 

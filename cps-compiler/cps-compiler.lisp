@@ -95,7 +95,8 @@
 
 (defun cps-codegen-parse-one (cps-expr env)
   (let* ((finder (make-instance 'cps-live-variables-finder:cps-live-variables-finder))
-         (codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label" :generate-main (not *compile-library-mode*)))
+         (init-name *file-name*)
+         (codegen (make-instance 'vm-codegen:vm-codegen :live-variables-finder finder :sym-name "label" :generate-main (not *compile-library-mode*) :init-name init-name))
          (finder-env (cps-parser:make-new-env finder '() '()))
          (result (cps-parser:cps-parse finder cps-expr finder-env))
          (codegen-env (cps-parser:make-new-env codegen '()
@@ -131,6 +132,7 @@
 ;----------------------------------------------------------------
 (defparameter *compile-library-mode* nil)
 (defparameter *debug-modes* nil)
+(defparameter *init-name* nil)
 (defun debug-print-cps (expr env)
 
   (when (find :list *debug-modes*)
@@ -171,8 +173,7 @@
                       (,#'debug-print-cps . (:spill :codegen))
                       (,#'cps-codegen-parse-one . nil)
                       (,#'debug-print-cps . (:codegen :vmgen))
-                      (,#'vmgen-one . nil)
-                      ))
+                      (,#'vmgen-one . nil)))
 
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -218,11 +219,16 @@
              last-arg
              (concatenate 'string last-arg ".scm"))))
     (when tiny-scheme-file0
-      (setf tiny-scheme-file tiny-scheme-file0)
-      (setf output-file-name (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmc"))
-      (setf *bin-file-name* (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmb"))
       (check-option (cdr (reverse (map 'list #'(lambda (x) x) av))))
+      (setf tiny-scheme-file tiny-scheme-file0)
+      (setf file-name (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)))
+      (setf output-file-name (concatenate 'string file-name (if *compile-library-mode* ".vml" ".vmc")))
+      (setf *file-name* (intern (cps-vmgen:symbol-to-c-label (string-upcase (concatenate 'string "__" (let ((pos (position #\/ file-name))) (if pos (subseq file-name (+ pos 1)) file-name)) "__INIT__" )))))
+      (setf *bin-file-name* (concatenate 'string (subseq tiny-scheme-file0 0 (- (length tiny-scheme-file0) ext-str-len)) ".vmb"))
       (print `(,tiny-scheme-file :-> ,output-file-name)))))
+;----------------------------------------------------------------
+(when *compile-library-mode*
+  (setf (cdr (last func-env-pair 3)) nil))
 ;----------------------------------------------------------------
 
 (if (and tiny-scheme-file (probe-file tiny-scheme-file))

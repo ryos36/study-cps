@@ -3,7 +3,8 @@
 
 ;----------------------------------------------------------------
 (defclass vm-codegen (cps-parser)
-  ((generate-main :initarg :generate-main :initform t :reader generate-main)
+  ((init-name :initarg :init-name :initform nil :reader init-name)
+   (generate-main :initarg :generate-main :initform t :reader generate-main)
    (max-n :initarg :max-n :initform 10 :reader max-n)
    (registers :accessor registers :initform '
               (:r0 :r1 :r2 :r3 :r4 :r5 :r6 :r7 :r8 :r9))
@@ -13,8 +14,8 @@
    (use-jump-for-fix :initform t :initarg :use-jump-for-fix :reader use-jump-for-fix)
    (use-attribute :initarg :use-attribute :initform nil :reader use-attribute)
    (initialize-codes :accessor initialize-codes)
-   (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)))
-; (global-function :initform nil :reader global-function)))
+   (global-variable :initform '(common-lisp-user::main common-lisp-user::exit) :reader global-variable)
+   (global-function :initform nil :reader global-function)))
 
 ;----------------------------------------------------------------
 (defmethod cps-terminal ((codegen vm-codegen) expr env)
@@ -119,12 +120,12 @@
                (gvar (remove-if #'(lambda (x)
                                     (or (eq x main) (eq x exit)))
                                 (global-variable codegen)))
-               gfunc
-               (initialize-func-name  'common-lisp-user::init))
-          (copy-tree `((:meta (:global-variable ,gvar)
-                              (:global-function ,gfunc)
-                              (:initialize-func-name ,initialize-func-name))
-                       (closure-name-to-label-name initialize-func-name))))))
+               (gfunc (global-function codegen))
+               (initialize-func-name (init-name codegen)))
+          (copy-tree `((:meta (:global-variable  . ,gvar)
+                              (:global-function . ,gfunc)
+                              (:initialize-func-name . ,initialize-func-name))
+                       ,(closure-name-to-label-name initialize-func-name))))))
                              
 ;----------------------------------------------------------------
 ;----------------------------------------------------------------
@@ -153,6 +154,13 @@
                   `(:move ,@args ,@result)))
       (add-code codegen
                 `(:record-set! :gp0 (:offset :global-variable-pointer ,gvar) ,@result))))
+
+;----------------------------------------------------------------
+(defmethod add-define-function ((codegen vm-codegen) expr op args result)
+  (print `(:add-define-function :func-name ,op ,(car result)))
+  (let ((func-name (car result)))
+    (add-global-function codegen func-name)))
+
 ;----------------------------------------------------------------
 (defmethod make-primitive-instruction ((codegen vm-codegen) expr op args &optional result)
   (copy-tree
@@ -240,11 +248,8 @@ deprecated
 
 ;----------------------------------------------------------------
 (defmethod add-global-function ((codegen vm-codegen) func-name)
-  (print `(:add-global-function :func-name ,op ,(car result))))
-#|
   (setf (slot-value codegen 'global-function)
         (append (global-function codegen) `(,func-name))))
-|#
 
 ;----------------------------------------------------------------
 (defmethod global-variable? ((codegen vm-codegen) sym)
@@ -729,7 +734,7 @@ deprecated
           (if (eq op :define)
             (if new-args
               (add-define-instruction codegen expr op new-args new-result)
-              (add-global-function codegen expr op args result))
+              (add-define-function codegen expr op args result))
             (add-code codegen (make-primitive-instruction codegen expr op new-args new-result)))
 
           (let* ((op-vars-info (cadr live-vars-tagged-list))
